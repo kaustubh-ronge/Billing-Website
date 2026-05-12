@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- STRICT ENUMS ---
+enum Role {
+  OWNER
+  MANAGER
+  CASHIER
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum InvoiceStatus {
+  PAID
+  PARTIAL
+  PENDING
+  DRAFT
+}
+
+// --- CORE MODELS ---
+model Shop {
+  id               String   @id @default(cuid())
+  businessName     String
+  taxId            String?
+  logoBase64       String?  @db.Text 
+  subscriptionPlan Plan     @default(FREE)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Tenant Relationships
+  users            User[]
+  customers        Customer[]
+  products         Product[]
+  invoices         Invoice[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  name      String
+  email     String   @unique
+  role      Role     @default(OWNER)
+  
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  
+  createdAt DateTime @default(now())
+}
+
+model Customer {
+  id        String    @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  address   String?
+  
+  shopId    String
+  shop      Shop      @relation(fields: [shopId], references: [id])
+  
+  invoices  Invoice[]
+
+  @@unique([phone, shopId]) // Unique phone per shop
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  name           String
+  price          Float
+  taxRate        Float    @default(0) 
+  
+  trackInventory Boolean  @default(false)
+  stockCount     Int?     
+  lowStockAlert  Int?
+  imageBase64    String?  @db.Text
+  
+  shopId         String
+  shop           Shop     @relation(fields: [shopId], references: [id])
+  
+  invoiceItems   InvoiceItem[]
+}
+
+model Invoice {
+  id                 String         @id @default(cuid())
+  invoiceNum         String
+  
+  discountPercentage Float          @default(0)
+  totalTax           Float
+  grandTotal         Float
+  amountPaid         Float          @default(0)
+  status             InvoiceStatus  @default(PAID)
+  
+  issuedAt           DateTime       @default(now()) 
+  createdAt          DateTime       @default(now())
+  
+  shopId             String
+  shop               Shop           @relation(fields: [shopId], references: [id])
+  
+  customerId         String
+  customer           Customer       @relation(fields: [customerId], references: [id])
+  
+  items              InvoiceItem[] 
+}
+
+model InvoiceItem {
+  id        String  @id @default(cuid())
+  quantity  Int
+  unitPrice Float   
+  
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
