@@ -40,12 +40,14 @@ export default function HeaderClient({ user }) {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-6">
           {user ? (
             <>
               <Link href="/dashboard" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Dashboard</Link>
               <Link href="/invoices" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Invoices</Link>
               <Link href="/customers" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Customers</Link>
+              <Link href="/products" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Products</Link>
+              <Link href="/settings" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Settings</Link>
             </>
           ) : (
             <>

@@ -1,6 +1,8 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
+// Protect dashboard, customers, products, settings, invoices, and api routes, while allowing public access to the landing page and auth
 const isPublicRoute = createRouteMatcher([
+    '/',
     '/sign-in(.*)',
     '/sign-up(.*)'
 ])

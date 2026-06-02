@@ -35,6 +35,25 @@ model Shop {
   logoBase64       String?  @db.Text 
   subscriptionPlan Plan     @default(FREE)
   
+  // Profile details
+  ownerName        String?
+  phone            String?
+  email            String?
+  address          String?
+  
+  // Banking details
+  bankName         String?
+  accountNum       String?
+  ifscCode         String?
+  upiId            String?
+  
+  // Custom Settings
+  invoicePrefix    String   @default("INV")
+  invoiceFormat    String   @default("INV-{YEAR}-{NUMBER}")
+  currency         String   @default("INR")
+  footerMessage    String   @default("Thank you for your business!")
+  taxRate          Float    @default(18)
+  
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   
@@ -64,6 +83,9 @@ model Customer {
   phone     String
   email     String?
   address   String?
+  gstNumber String?
+  notes     String?
+  isDeleted Boolean   @default(false)
   
   shopId    String
   shop      Shop      @relation(fields: [shopId], references: [id])
@@ -83,6 +105,11 @@ model Product {
   stockCount     Int?     
   lowStockAlert  Int?
   imageBase64    String?  @db.Text
+  
+  category       String?
+  unit           String?
+  isService      Boolean  @default(false)
+  description    String?
   
   shopId         String
   shop           Shop     @relation(fields: [shopId], references: [id])
@@ -110,6 +137,7 @@ model Invoice {
   customer           Customer       @relation(fields: [customerId], references: [id])
   
   items              InvoiceItem[] 
+  payments           Payment[]
 }
 
 model InvoiceItem {
@@ -122,4 +150,15 @@ model InvoiceItem {
   
   productId String
   product   Product @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  amount        Float
+  paymentDate   DateTime @default(now())
+  paymentMethod String   // CASH, UPI, BANK_TRANSFER, CARD, etc.
+  notes         String?
+  
+  invoiceId     String
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
