@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,12 +10,25 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { 
   FileText, Search, Plus, Printer, DollarSign, MessageSquare, Bell, 
-  RefreshCw, CheckCircle, AlertCircle, HelpCircle, Calendar 
+  RefreshCw, CheckCircle, AlertCircle, HelpCircle, Calendar, Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 export default function InvoicesPage() {
+  return (
+    <Suspense fallback={
+      <div className="mx-auto max-w-6xl px-4 py-28 sm:px-6 lg:px-8 text-center text-gray-500">
+        <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-gray-400" />
+        <p className="mt-2 text-sm text-gray-500">Loading invoices...</p>
+      </div>
+    }>
+      <InvoicesList />
+    </Suspense>
+  );
+}
+
+function InvoicesList() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
 

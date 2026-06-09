@@ -6,7 +6,7 @@ import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Cart
 import { toast } from 'sonner';
 import { 
   TrendingUp, Users, DollarSign, AlertTriangle, FileText, 
-  ArrowRight, ShieldAlert, BadgeCheck, Lightbulb, RefreshCw, ShoppingCart
+  ArrowRight, ShieldAlert, BadgeCheck, Lightbulb, RefreshCw, ShoppingCart, Plus
 } from 'lucide-react';
 import Link from 'next/link';
 
