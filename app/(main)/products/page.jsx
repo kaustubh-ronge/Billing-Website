@@ -13,7 +13,65 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Plus, Search, Edit2, Trash2, Package, Tag, Layers, Settings, FileText, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 
-const CATEGORIES = ['Grocery', 'Hardware', 'Electronics', 'Medical', 'Clothing', 'Services', 'Other'];
+const CATEGORIES = [
+  // General
+  'Grocery',
+  'Hardware',
+  'Electronics',
+  'Medical / Pharma',
+  'Clothing & Apparel',
+  'Stationery',
+  'Furniture',
+  'Food & Beverages',
+  // Agriculture & Farming
+  'Seeds & Planting',
+  'Fertilizers',
+  'Pesticides & Insecticides',
+  'Herbicides & Weedicides',
+  'Fungicides',
+  'Crop Protection',
+  'Irrigation Equipment',
+  'Farm Tools & Equipment',
+  'Animal Feed & Fodder',
+  'Veterinary Medicines',
+  'Organic Products',
+  'Soil Amendments',
+  // Services
+  'Services',
+  'Repair & Maintenance',
+  'Transport & Delivery',
+  'Consulting',
+  // Other
+  'Other',
+];
+
+const CATEGORY_COLORS = {
+  'Seeds & Planting': 'bg-lime-50 text-lime-700',
+  'Fertilizers': 'bg-emerald-50 text-emerald-700',
+  'Pesticides & Insecticides': 'bg-orange-50 text-orange-700',
+  'Herbicides & Weedicides': 'bg-yellow-50 text-yellow-700',
+  'Fungicides': 'bg-amber-50 text-amber-700',
+  'Crop Protection': 'bg-green-50 text-green-700',
+  'Irrigation Equipment': 'bg-sky-50 text-sky-700',
+  'Farm Tools & Equipment': 'bg-stone-50 text-stone-700',
+  'Animal Feed & Fodder': 'bg-teal-50 text-teal-700',
+  'Veterinary Medicines': 'bg-cyan-50 text-cyan-700',
+  'Organic Products': 'bg-green-100 text-green-800',
+  'Soil Amendments': 'bg-brown-50 text-yellow-800',
+  'Grocery': 'bg-blue-50 text-blue-700',
+  'Hardware': 'bg-gray-100 text-gray-700',
+  'Electronics': 'bg-violet-50 text-violet-700',
+  'Medical / Pharma': 'bg-rose-50 text-rose-700',
+  'Clothing & Apparel': 'bg-pink-50 text-pink-700',
+  'Stationery': 'bg-indigo-50 text-indigo-700',
+  'Furniture': 'bg-orange-100 text-orange-800',
+  'Food & Beverages': 'bg-red-50 text-red-700',
+  'Services': 'bg-indigo-50 text-indigo-700',
+  'Repair & Maintenance': 'bg-purple-50 text-purple-700',
+  'Transport & Delivery': 'bg-blue-100 text-blue-800',
+  'Consulting': 'bg-slate-50 text-slate-700',
+  'Other': 'bg-gray-50 text-gray-600',
+};
 
 export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
@@ -205,14 +263,25 @@ export default function ProductsPage() {
               Category:
             </div>
             <Select value={categoryFilter} onValueChange={(val) => setCategoryFilter(val)}>
-              <SelectTrigger className="w-[180px] rounded-full bg-white border-gray-200">
+              <SelectTrigger className="w-[200px] rounded-full bg-white border-gray-200">
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-80">
                 <SelectItem value="ALL">All Categories</SelectItem>
-                {CATEGORIES.map(cat => (
+                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">— General —</div>
+                {['Grocery', 'Hardware', 'Electronics', 'Medical / Pharma', 'Clothing & Apparel', 'Stationery', 'Furniture', 'Food & Beverages'].map(cat => (
                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                 ))}
+                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-600 mt-1">— Agriculture & Farming —</div>
+                {['Seeds & Planting', 'Fertilizers', 'Pesticides & Insecticides', 'Herbicides & Weedicides', 'Fungicides', 'Crop Protection', 'Irrigation Equipment', 'Farm Tools & Equipment', 'Animal Feed & Fodder', 'Veterinary Medicines', 'Organic Products', 'Soil Amendments'].map(cat => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-500 mt-1">— Services —</div>
+                {['Services', 'Repair & Maintenance', 'Transport & Delivery', 'Consulting'].map(cat => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">— Other —</div>
+                <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" size="icon" onClick={fetchProducts} className="rounded-full bg-white border-gray-200">
@@ -278,7 +347,7 @@ export default function ProductsPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${CATEGORY_COLORS[item.category] || 'bg-gray-100 text-gray-800'}`}>
                               {item.category || 'Grocery'}
                             </span>
                           </TableCell>
@@ -363,7 +432,7 @@ export default function ProductsPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${CATEGORY_COLORS[item.category] || 'bg-indigo-50 text-indigo-700'}`}>
                             {item.category || 'Services'}
                           </span>
                         </TableCell>
@@ -455,10 +524,21 @@ export default function ProductsPage() {
                     <SelectTrigger className="rounded-xl border-gray-200">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES.map(cat => (
+                    <SelectContent className="max-h-72">
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400">— General —</div>
+                      {['Grocery', 'Hardware', 'Electronics', 'Medical / Pharma', 'Clothing & Apparel', 'Stationery', 'Furniture', 'Food & Beverages'].map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-600 mt-1">— Agriculture & Farming —</div>
+                      {['Seeds & Planting', 'Fertilizers', 'Pesticides & Insecticides', 'Herbicides & Weedicides', 'Fungicides', 'Crop Protection', 'Irrigation Equipment', 'Farm Tools & Equipment', 'Animal Feed & Fodder', 'Veterinary Medicines', 'Organic Products', 'Soil Amendments'].map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-500 mt-1">— Services —</div>
+                      {['Services', 'Repair & Maintenance', 'Transport & Delivery', 'Consulting'].map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">— Other —</div>
+                      <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

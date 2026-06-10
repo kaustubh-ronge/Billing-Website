@@ -163,11 +163,18 @@ function InvoicesList() {
     if (!inv.customer || !vendorShop) return '#';
     const balance = inv.grandTotal - inv.amountPaid;
     
+    const publicInvoiceUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/public/invoices/${inv.id}`
+      : '';
+
     const message = `Dear ${inv.customer.name},
 
 Your invoice ${inv.invoiceNum} for ₹${balance.toFixed(2)} is pending.
 
-Please make the payment at your earliest convenience. Thank you.
+Please make the payment at your earliest convenience. You can view and download the PDF here:
+${publicInvoiceUrl}
+
+Thank you.
 
 Regards,
 ${vendorShop.businessName}`;
@@ -181,6 +188,10 @@ ${vendorShop.businessName}`;
   const getWhatsAppShareLink = (inv) => {
     if (!inv.customer || !vendorShop) return '#';
     
+    const publicInvoiceUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/public/invoices/${inv.id}`
+      : '';
+
     const message = `Hello ${inv.customer.name},
 
 Thank you for your purchase.
@@ -188,6 +199,9 @@ Thank you for your purchase.
 Invoice Number: ${inv.invoiceNum}
 Amount: ₹${inv.grandTotal.toFixed(2)}
 Payment Status: ${inv.status}
+
+View and Download PDF Invoice:
+${publicInvoiceUrl}
 
 Regards,
 ${vendorShop.businessName}`;
@@ -458,7 +472,7 @@ ${vendorShop.businessName}`;
 
       {/* Hidden print layouts for quick printing single invoice */}
       {selectedInvoice && selectedInvoice.customer && vendorShop && (
-        <div className="hidden print:block p-8 bg-white text-black font-sans leading-normal">
+        <div className="hidden print:block print-area p-8 bg-white text-black font-sans leading-normal">
           <div className="flex justify-between items-start border-b border-gray-300 pb-6 mb-6">
             <div>
               {vendorShop.logoBase64 && (
@@ -535,10 +549,16 @@ ${vendorShop.businessName}`;
             <div className="w-64 space-y-1.5 border-t border-gray-200 pt-3">
               <div className="flex justify-between text-gray-500">
                 <span>Subtotal:</span>
-                <span>₹{(selectedInvoice.grandTotal / (1 + (vendorShop.taxRate / 100))).toFixed(2)}</span>
+                <span>₹{(selectedInvoice.items?.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) || 0).toFixed(2)}</span>
               </div>
+              {selectedInvoice.discountPercentage > 0 && (
+                <div className="flex justify-between text-rose-600 font-medium text-xs">
+                  <span>Discount ({selectedInvoice.discountPercentage}%):</span>
+                  <span>-₹{((selectedInvoice.items?.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) || 0) * (selectedInvoice.discountPercentage / 100)).toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-gray-500">
-                <span>GST Tax ({vendorShop.taxRate}%):</span>
+                <span>GST Tax:</span>
                 <span>₹{selectedInvoice.totalTax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-black text-gray-900 border-t border-gray-900 pt-1.5 text-sm">

@@ -254,6 +254,10 @@ export default function NewInvoicePage() {
   const getWhatsAppLink = () => {
     if (!savedInvoice || !selectedCustomer || !vendorShop) return '#';
     
+    const publicInvoiceUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/public/invoices/${savedInvoice.id}`
+      : '';
+
     const message = `Hello ${selectedCustomer.name},
 
 Thank you for your purchase.
@@ -261,6 +265,9 @@ Thank you for your purchase.
 Invoice Number: ${savedInvoice.invoiceNum}
 Amount: ₹${savedInvoice.grandTotal.toFixed(2)}
 Payment Status: ${savedInvoice.status}
+
+View and Download PDF Invoice:
+${publicInvoiceUrl}
 
 Regards,
 ${vendorShop.businessName}`;
@@ -727,7 +734,7 @@ ${vendorShop.businessName}`;
 
           {/* Print Layout (Only visible when printing) */}
           {savedInvoice && selectedCustomer && vendorShop && (
-            <div className="hidden print:block p-8 bg-white text-black font-sans leading-normal">
+            <div className="hidden print:block print-area p-8 bg-white text-black font-sans leading-normal">
               <div className="flex justify-between items-start border-b border-gray-300 pb-6 mb-6">
                 <div>
                   {vendorShop.logoBase64 && (

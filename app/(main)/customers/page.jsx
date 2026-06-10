@@ -8,13 +8,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Search, Edit2, Trash2, User, Phone, Mail, MapPin, Receipt, ArrowRight, Download, Printer, RefreshCw, ChevronRight } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, User, Phone, Mail, MapPin, Receipt, ArrowRight, Download, Printer, RefreshCw, ChevronRight, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CustomersPage() {
   const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
+  const [vendorShop, setVendorShop] = useState(null);
   
   // Active Customer profile drill-down
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -39,7 +40,20 @@ export default function CustomersPage() {
 
   useEffect(() => {
     fetchCustomers();
+    fetchVendorProfile();
   }, []);
+
+  const fetchVendorProfile = async () => {
+    try {
+      const res = await fetch('/api/profile');
+      if (res.ok) {
+        const data = await res.json();
+        setVendorShop(data.shop);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchCustomers = async () => {
     try {
@@ -178,6 +192,44 @@ export default function CustomersPage() {
     window.print();
   };
 
+  const getWhatsAppLedgerLink = () => {
+    if (!selectedCustomer || !vendorShop) return '#';
+
+    const totalPending = customerInvoices.reduce((sum, inv) => sum + Math.max(0, inv.grandTotal - inv.amountPaid), 0);
+    const pendingInvoices = customerInvoices.filter(inv => inv.status !== 'PAID');
+
+    const publicLedgerUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/public/customers/${selectedCustomer.id}`
+      : '';
+
+    const lines = pendingInvoices.slice(0, 5).map(inv => {
+      const bal = inv.grandTotal - inv.amountPaid;
+      return `  • ${inv.invoiceNum} | ${new Date(inv.issuedAt).toLocaleDateString()} | Due: ₹${bal.toFixed(2)}`;
+    }).join('\n');
+
+    const message = `Dear ${selectedCustomer.name},
+
+This is a payment reminder from ${vendorShop.businessName}.
+
+You have ${pendingInvoices.length} unpaid invoice(s) totaling ₹${totalPending.toFixed(2)}.
+
+Pending Bills:
+${lines || '  (no pending invoices)'}
+
+View your full statement here:
+${publicLedgerUrl}
+
+Please clear the dues at your earliest convenience. Thank you!
+
+Regards,
+${vendorShop.businessName}`;
+
+    const formattedPhone = selectedCustomer.phone.replace(/\D/g, '');
+    const phoneWithCode = formattedPhone.length === 10 ? `91${formattedPhone}` : formattedPhone;
+
+    return `https://wa.me/${phoneWithCode}?text=${encodeURIComponent(message)}`;
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-28 sm:px-6 lg:px-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -287,8 +339,19 @@ export default function CustomersPage() {
                   <div className="flex gap-2 print:hidden">
                     <Button variant="outline" size="sm" onClick={handlePrintLedger} className="rounded-full border-gray-200 font-bold flex items-center gap-1 text-xs px-3">
                       <Printer className="h-3.5 w-3.5" />
-                      Print
+                      Print / PDF
                     </Button>
+                    {selectedCustomer.totalPending > 0 && (
+                      <a
+                        href={getWhatsAppLedgerLink()}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold bg-green-600 hover:bg-green-700 text-white transition-colors"
+                      >
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        Send Reminder
+                      </a>
+                    )}
                   </div>
                 </CardHeader>
 
@@ -387,7 +450,7 @@ export default function CustomersPage() {
               </Card>
 
               {/* Printable Ledger Representation (Visible only in print mode) */}
-              <div ref={printRef} className="hidden print:block p-8 space-y-6 text-black bg-white">
+              <div ref={printRef} className="hidden print:block print-area p-8 space-y-6 text-black bg-white">
                 <div className="flex justify-between items-start border-b-2 border-gray-900 pb-4">
                   <div>
                     <h1 className="text-2xl font-black uppercase tracking-tight">{selectedCustomer.name} - Ledger Report</h1>
