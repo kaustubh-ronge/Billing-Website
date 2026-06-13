@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Plus, Search, Edit2, Trash2, Package, Tag, Layers, Settings, FileText, AlertTriangle, CheckCircle, RefreshCw, Download } from 'lucide-react';
 import { downloadCSV } from '@/lib/csv';
+import { useCan } from '@/lib/permissions/PermissionContext';
 
 const CATEGORIES = [
   // General
@@ -75,6 +76,7 @@ const CATEGORY_COLORS = {
 };
 
 export default function ProductsPage() {
+  const can = useCan();
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
@@ -264,10 +266,12 @@ export default function ProductsPage() {
           >
             <Download className="h-4 w-4" /> Export CSV
           </Button>
+          {can('products:create') && (
           <Button onClick={openAddDialog} className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6 flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add Item
           </Button>
+          )}
         </div>
       </div>
 
@@ -402,12 +406,16 @@ export default function ProductsPage() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
+                              {can('products:edit') && (
                               <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)} className="h-8 w-8 text-gray-600 hover:text-black hover:bg-gray-100 rounded-full">
                                 <Edit2 className="h-4 w-4" />
                               </Button>
+                              )}
+                              {can('products:delete') && (
                               <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="h-8 w-8 text-gray-600 hover:text-rose-600 hover:bg-rose-50 rounded-full">
                                 <Trash2 className="h-4 w-4" />
                               </Button>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -467,12 +475,16 @@ export default function ProductsPage() {
                         <TableCell className="text-center text-gray-600 font-medium">{item.taxRate}%</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
+                            {can('products:edit') && (
                             <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)} className="h-8 w-8 text-gray-600 hover:text-black hover:bg-gray-100 rounded-full">
                               <Edit2 className="h-4 w-4" />
                             </Button>
+                            )}
+                            {can('products:delete') && (
                             <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="h-8 w-8 text-gray-600 hover:text-rose-600 hover:bg-rose-50 rounded-full">
                               <Trash2 className="h-4 w-4" />
                             </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>

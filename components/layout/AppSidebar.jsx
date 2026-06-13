@@ -1,27 +1,15 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  Package,
-  Settings,
-  ChevronRight,
-  Zap,
-} from "lucide-react";
+import { ChevronRight, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const NAV_ITEMS = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Invoices", href: "/invoices", icon: FileText },
-  { label: "Customers", href: "/customers", icon: Users },
-  { label: "Products", href: "/products", icon: Package },
-  { label: "Settings", href: "/settings", icon: Settings },
-];
+import { useCan } from "@/lib/permissions/PermissionContext";
+import { NAV_ITEMS } from "./navItems";
 
 export default function AppSidebar() {
   const pathname = usePathname();
+  const can = useCan();
+  const items = NAV_ITEMS.filter((item) => can(item.perm));
 
   return (
     <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-border bg-sidebar h-screen sticky top-0 overflow-y-auto">
@@ -37,7 +25,7 @@ export default function AppSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
+        {items.map(({ label, href, icon: Icon }) => {
           const isActive =
             href === "/dashboard"
               ? pathname === "/dashboard"

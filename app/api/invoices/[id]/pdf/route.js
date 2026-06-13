@@ -1,16 +1,15 @@
 import { NextResponse } from 'next/server';
 import { renderToStream } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/lib/pdf/InvoicePDF';
-import { getSessionUser } from '@/lib/authHelper';
+import { requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req, { params }) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('invoices:view');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const { id } = await params;

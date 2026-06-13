@@ -1,14 +1,13 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { getSessionUser } from '@/lib/authHelper';
+import { requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
 import { startOfDay, endOfDay, startOfMonth, subMonths, subDays, format, eachDayOfInterval } from 'date-fns';
 
 export async function GET() {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('dashboard:view');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const now = new Date();

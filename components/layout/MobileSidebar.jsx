@@ -2,27 +2,15 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  Package,
-  Settings,
-  X,
-  Zap,
-} from "lucide-react";
+import { X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const NAV_ITEMS = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Invoices", href: "/invoices", icon: FileText },
-  { label: "Customers", href: "/customers", icon: Users },
-  { label: "Products", href: "/products", icon: Package },
-  { label: "Settings", href: "/settings", icon: Settings },
-];
+import { useCan } from "@/lib/permissions/PermissionContext";
+import { NAV_ITEMS } from "./navItems";
 
 export default function MobileSidebar({ open, onClose }) {
   const pathname = usePathname();
+  const can = useCan();
+  const items = NAV_ITEMS.filter((item) => can(item.perm));
 
   // Close on route change
   useEffect(() => {
@@ -70,7 +58,7 @@ export default function MobileSidebar({ open, onClose }) {
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
+          {items.map(({ label, href, icon: Icon }) => {
             const isActive =
               href === "/dashboard"
                 ? pathname === "/dashboard"

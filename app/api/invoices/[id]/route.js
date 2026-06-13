@@ -1,13 +1,13 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { getSessionUser } from '@/lib/authHelper';
+import { requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
+import { logActivity } from '@/lib/activity';
 
 export async function GET(req, { params }) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('invoices:view');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const { id } = await params;
@@ -40,10 +40,9 @@ export async function GET(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('invoices:delete');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const { id } = await params;
@@ -84,6 +83,12 @@ export async function DELETE(req, { params }) {
 
       // 3. Delete invoice (cascades to payments and invoice items)
       await tx.invoice.delete({ where: { id } });
+    });
+
+    await logActivity({
+      shopId: user.shopId, userId: user.id,
+      action: 'invoice.delete', entityType: 'Invoice', entityId: id,
+      description: `Deleted invoice ${invoice.invoiceNum}`,
     });
 
     return NextResponse.json({ success: true, message: 'Invoice deleted and inventory refunded' });

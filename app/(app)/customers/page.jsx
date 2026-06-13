@@ -11,8 +11,10 @@ import { toast } from 'sonner';
 import { Plus, Search, Edit2, Trash2, User, Phone, Mail, MapPin, Receipt, ArrowRight, Download, Printer, RefreshCw, ChevronRight, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { downloadCSV } from '@/lib/csv';
+import { useCan } from '@/lib/permissions/PermissionContext';
 
 export default function CustomersPage() {
+  const can = useCan();
   const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
@@ -259,10 +261,12 @@ ${vendorShop.businessName}`;
           >
             <Download className="h-4 w-4" /> Export CSV
           </Button>
+          {can('customers:create') && (
           <Button onClick={openAddDialog} className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6 flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add Customer
           </Button>
+          )}
         </div>
       </div>
 
@@ -323,12 +327,16 @@ ${vendorShop.businessName}`;
                         </span>
                       </div>
                       <div className="flex gap-1">
+                        {can('customers:edit') && (
                         <Button variant="ghost" size="icon" onClick={(e) => openEditDialog(e, c)} className="h-7 w-7 hover:bg-gray-100 rounded-full text-gray-400 hover:text-black">
                           <Edit2 className="h-3 w-3" />
                         </Button>
+                        )}
+                        {can('customers:delete') && (
                         <Button variant="ghost" size="icon" onClick={(e) => handleDelete(e, c.id)} className="h-7 w-7 hover:bg-rose-50 rounded-full text-gray-400 hover:text-rose-600">
                           <Trash2 className="h-3 w-3" />
                         </Button>
+                        )}
                       </div>
                     </div>
                   </div>

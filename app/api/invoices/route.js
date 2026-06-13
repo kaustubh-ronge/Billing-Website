@@ -1,13 +1,13 @@
 ﻿export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server';
-import { getSessionUser } from '@/lib/authHelper';
+import { requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
+import { logActivity } from '@/lib/activity';
 
 export async function GET(req) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('invoices:view');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const { searchParams } = new URL(req.url);
@@ -52,10 +52,9 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('invoices:create');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const body = await req.json();
@@ -250,6 +249,12 @@ export async function POST(req) {
       }
 
       return { invoice: newInvoice, payment };
+    });
+
+    await logActivity({
+      shopId: user.shopId, userId: user.id,
+      action: 'invoice.create', entityType: 'Invoice', entityId: result.invoice.id,
+      description: `Created invoice ${result.invoice.invoiceNum} (₹${grandTotal.toFixed(2)})`,
     });
 
     return NextResponse.json({

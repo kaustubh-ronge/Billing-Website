@@ -16,6 +16,7 @@ import {
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { downloadCSV } from '@/lib/csv';
+import { useCan } from '@/lib/permissions/PermissionContext';
 
 export default function InvoicesPage() {
   return (
@@ -31,6 +32,7 @@ export default function InvoicesPage() {
 }
 
 function InvoicesList() {
+  const can = useCan();
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
 
@@ -267,9 +269,11 @@ ${vendorShop.businessName}`;
           >
             <Download className="h-4 w-4" /> Export CSV
           </Button>
-          <Link href="/invoices/new" className="font-bold bg-black text-white hover:bg-gray-900 rounded-full px-6 py-2.5 text-sm flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Create Bill
-          </Link>
+          {can('invoices:create') && (
+            <Link href="/invoices/new" className="font-bold bg-black text-white hover:bg-gray-900 rounded-full px-6 py-2.5 text-sm flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Create Bill
+            </Link>
+          )}
         </div>
       </div>
 
@@ -357,6 +361,7 @@ ${vendorShop.businessName}`;
                         <div className="flex justify-end gap-1.5 flex-wrap md:flex-nowrap">
                           {bal > 0 && (
                             <>
+                              {can('payments:record') && (
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -365,6 +370,8 @@ ${vendorShop.businessName}`;
                               >
                                 <DollarSign className="h-3 w-3" /> Record
                               </Button>
+                              )}
+                              {can('reminders:send') && (
                               <a
                                 href={getReminderLink(inv)}
                                 target="_blank"
@@ -373,6 +380,7 @@ ${vendorShop.businessName}`;
                               >
                                 <Bell className="h-3 w-3" /> Alert
                               </a>
+                              )}
                             </>
                           )}
                           <a
@@ -393,6 +401,7 @@ ${vendorShop.businessName}`;
                           >
                             <FileDown className="h-4 w-4" />
                           </a>
+                          {can('invoices:delete') && (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -401,6 +410,7 @@ ${vendorShop.businessName}`;
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

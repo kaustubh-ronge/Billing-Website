@@ -1,13 +1,13 @@
 ﻿export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server';
-import { getSessionUser } from '@/lib/authHelper';
+import { requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
+import { logActivity } from '@/lib/activity';
 
 export async function GET(req) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('customers:view');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const { searchParams } = new URL(req.url);
@@ -72,10 +72,9 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('customers:create');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const body = await req.json();
@@ -122,6 +121,12 @@ export async function POST(req) {
         notes: notes || null,
         shopId: user.shopId,
       },
+    });
+
+    await logActivity({
+      shopId: user.shopId, userId: user.id,
+      action: 'customer.create', entityType: 'Customer', entityId: customer.id,
+      description: `Added customer ${customer.name}`,
     });
 
     return NextResponse.json({ success: true, customer });

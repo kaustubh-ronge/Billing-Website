@@ -9,12 +9,6 @@ datasource db {
 
 // --- ENUMS ---
 
-enum Role {
-  OWNER
-  MANAGER
-  CASHIER
-}
-
 enum Plan {
   FREE
   PRO
@@ -37,7 +31,21 @@ enum PaymentTerms {
   CUSTOM
 }
 
-// --- CORE MODELS ---
+// Employee lifecycle status (Invited / Pending live on Invitation, not here)
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+// --- CORE TENANT (Organization) ---
 
 model Shop {
   id               String  @id @default(cuid())
@@ -59,40 +67,214 @@ model Shop {
   upiId      String?
 
   // Invoice settings
-  invoicePrefix       String @default("INV")
-  invoiceFormat       String @default("INV-{YEAR}-{NUMBER}")
-  currency            String @default("INR")
-  footerMessage       String @default("Thank you for your business!")
-  taxRate             Float  @default(18)
-  // Atomic counter — prevents duplicate invoice numbers under concurrent requests
-  nextInvoiceNumber   Int    @default(1)
-
-  // Employee invite — owner shares this code for team members to join
-  inviteCode String? @unique
+  invoicePrefix     String @default("INV")
+  invoiceFormat     String @default("INV-{YEAR}-{NUMBER}")
+  currency          String @default("INR")
+  footerMessage     String @default("Thank you for your business!")
+  taxRate           Float  @default(18)
+  nextInvoiceNumber Int    @default(1)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Tenant relationships
-  users     User[]
-  customers Customer[]
-  products  Product[]
-  invoices  Invoice[]
+  users        User[]
+  customers    Customer[]
+  products     Product[]
+  invoices     Invoice[]
+  branches     Branch[]
+  departments  Department[]
+  teams        Team[]
+  roles        Role[]
+  invitations  Invitation[]
+  activityLogs ActivityLog[]
+}
+
+// --- ORGANIZATION HIERARCHY ---
+
+model Branch {
+  id             String  @id @default(cuid())
+  name           String
+  address        String?
+  phone          String?
+  isHeadquarters Boolean @default(false)
+
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  users       User[]
+  departments Department[]
+
+  createdAt DateTime @default(now())
+
+  @@index([shopId])
+}
+
+model Department {
+  id   String @id @default(cuid())
+  name String
+
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  users User[]
+  teams Team[]
+
+  createdAt DateTime @default(now())
+
+  @@index([shopId])
+}
+
+model Team {
+  id   String @id @default(cuid())
+  name String
+
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
+  users User[]
+
+  createdAt DateTime @default(now())
+
+  @@index([shopId])
+}
+
+// --- ROLES & PERMISSIONS ---
+// A Role is a reusable, named permission template. Permissions are the
+// primary access primitive; roles merely bundle them for convenience.
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  permissions String[] // array of permission keys (see lib/permissions/registry.js)
+  isSystem    Boolean  @default(false) // seeded templates — cannot be deleted
+  isArchived  Boolean  @default(false)
+
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  users User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([shopId])
+}
+
+// Per-user permission override. granted=true adds a permission on top of the
+// role; granted=false revokes a permission the role would otherwise grant.
+model UserPermission {
+  id         String  @id @default(cuid())
+  permission String
+  granted    Boolean
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permission])
 }
 
 model User {
-  id       String  @id @default(cuid())
-  clerkId  String  @unique
-  name     String
-  email    String  @unique
-  role     Role    @default(OWNER)
-  isActive Boolean @default(true)
+  id      String  @id @default(cuid())
+  clerkId String  @unique
+  name    String
+  email   String  @unique
+  phone   String?
+
+  // Access control
+  isOwner Boolean    @default(false) // org administrator — full access
+  status  UserStatus @default(ACTIVE)
 
   shopId String
-  shop   Shop   @relation(fields: [shopId], references: [id])
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  // Optional org placement
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  // Optional role template
+  roleId String?
+  role   Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  // Per-user permission overrides
+  permissionOverrides UserPermission[]
+
+  activityLogs ActivityLog[]
 
   createdAt DateTime @default(now())
+
+  @@index([shopId])
 }
+
+// --- INVITATIONS (email-linked, pre-provisioned) ---
+
+model Invitation {
+  id    String @id @default(cuid())
+  email String
+  name  String?
+  phone String?
+  token String @unique
+
+  status InvitationStatus @default(PENDING)
+
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  // Pre-assigned org placement
+  branchId     String?
+  departmentId String?
+  teamId       String?
+
+  // Pre-assigned access
+  isOwner     Boolean  @default(false)
+  roleId      String?
+  permissions String[] // explicit grants attached to the invite
+
+  invitedById String?
+  expiresAt   DateTime?
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([email])
+  @@index([shopId])
+}
+
+// --- ACTIVITY LOG ---
+
+model ActivityLog {
+  id          String  @id @default(cuid())
+  action      String // e.g. "invoice.create"
+  entityType  String? // "Invoice"
+  entityId    String?
+  description String?
+  metadata    Json?
+
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([shopId, createdAt])
+  @@index([entityType, entityId])
+}
+
+// --- BUSINESS DATA ---
 
 model Customer {
   id        String  @id @default(cuid())
@@ -109,7 +291,7 @@ model Customer {
   creditUsed  Float @default(0)
 
   shopId String
-  shop   Shop   @relation(fields: [shopId], references: [id])
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   invoices Invoice[]
 
@@ -138,7 +320,7 @@ model Product {
   costPrice Float?
 
   shopId String
-  shop   Shop   @relation(fields: [shopId], references: [id])
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   invoiceItems InvoiceItem[]
 }
@@ -154,9 +336,9 @@ model Invoice {
   status             InvoiceStatus @default(PAID)
 
   // Credit sales fields
-  paymentTerms    PaymentTerms @default(IMMEDIATE)
-  dueDate         DateTime?
-  customDueDays   Int?
+  paymentTerms  PaymentTerms @default(IMMEDIATE)
+  dueDate       DateTime?
+  customDueDays Int?
 
   notes String?
 
@@ -164,7 +346,7 @@ model Invoice {
   createdAt DateTime @default(now())
 
   shopId String
-  shop   Shop   @relation(fields: [shopId], references: [id])
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id])
@@ -189,11 +371,11 @@ model InvoiceItem {
 }
 
 model Payment {
-  id            String   @id @default(cuid())
-  amount        Float
-  paymentDate   DateTime @default(now())
-  paymentMethod String
-  notes         String?
+  id              String   @id @default(cuid())
+  amount          Float
+  paymentDate     DateTime @default(now())
+  paymentMethod   String
+  notes           String?
   referenceNumber String?
 
   invoiceId String

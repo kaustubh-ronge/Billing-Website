@@ -1,13 +1,12 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { getSessionUser } from '@/lib/authHelper';
+import { requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
 
 export async function PUT(req, { params }) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('products:edit');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const { id } = await params;
@@ -52,10 +51,9 @@ export async function PUT(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('products:delete');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const { id } = await params;

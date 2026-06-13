@@ -1,12 +1,13 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { getSessionUser } from '@/lib/authHelper';
+import { requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
+import { logActivity } from '@/lib/activity';
 
 export async function POST(req, { params }) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('payments:record');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const { id } = await params;
@@ -92,6 +93,12 @@ export async function POST(req, { params }) {
       });
 
       return { payment, invoice: finalInvoice };
+    });
+
+    await logActivity({
+      shopId: user.shopId, userId: user.id,
+      action: 'payment.record', entityType: 'Invoice', entityId: id,
+      description: `Recorded ₹${parsedAmount.toFixed(2)} payment on ${invoice.invoiceNum}`,
     });
 
     return NextResponse.json({

@@ -1,21 +1,20 @@
 ﻿export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server';
-import { getSessionUser } from '@/lib/authHelper';
+import { requireAuth, requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
+import { logActivity } from '@/lib/activity';
 
 export async function GET() {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  return NextResponse.json({ shop: user.shop });
+  // Any active member can read the shop profile (used across invoice/customer pages).
+  const ctx = await requireAuth();
+  if (ctx instanceof NextResponse) return ctx;
+  return NextResponse.json({ shop: ctx.user.shop });
 }
 
 export async function PUT(req) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const ctx = await requirePermission('settings:manage');
+  if (ctx instanceof NextResponse) return ctx;
+  const { user } = ctx;
 
   try {
     const body = await req.json();
@@ -41,6 +40,12 @@ export async function PUT(req) {
         footerMessage: body.footerMessage !== undefined ? body.footerMessage : user.shop.footerMessage,
         taxRate: body.taxRate !== undefined ? parseFloat(body.taxRate) : user.shop.taxRate,
       },
+    });
+
+    await logActivity({
+      shopId: user.shopId, userId: user.id,
+      action: 'settings.update', entityType: 'Shop', entityId: user.shopId,
+      description: 'Updated business settings',
     });
 
     return NextResponse.json({ success: true, shop: updatedShop });

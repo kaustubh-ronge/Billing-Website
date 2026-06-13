@@ -15,8 +15,10 @@ import {
   CircleDollarSign, Activity, BarChart2
 } from 'lucide-react';
 import Link from 'next/link';
+import { useCan } from '@/lib/permissions/PermissionContext';
 
 export default function DashboardPage() {
+  const can = useCan();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
 
@@ -75,6 +77,7 @@ export default function DashboardPage() {
       gradient: "from-blue-500 via-blue-600 to-indigo-600",
       iconBg: "bg-white/20",
       link: "/invoices",
+      perm: "revenue:view",
     },
     {
       label: "Monthly Sales",
@@ -84,6 +87,7 @@ export default function DashboardPage() {
       gradient: "from-violet-500 via-purple-600 to-purple-700",
       iconBg: "bg-white/20",
       link: "/invoices",
+      perm: "revenue:view",
     },
     {
       label: "Outstanding Due",
@@ -94,6 +98,7 @@ export default function DashboardPage() {
       iconBg: "bg-white/20",
       link: "/customers",
       urgent: metrics.pendingPayments > 0,
+      perm: "outstanding:view",
     },
     {
       label: "Total Clients",
@@ -103,8 +108,13 @@ export default function DashboardPage() {
       gradient: "from-emerald-500 via-green-600 to-teal-600",
       iconBg: "bg-white/20",
       link: "/customers",
+      perm: "customers:view",
     },
-  ];
+  ].filter((c) => can(c.perm));
+
+  const showRevenue = can('revenue:view');
+  const showOutstanding = can('outstanding:view');
+  const showProducts = can('products:view');
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -115,12 +125,14 @@ export default function DashboardPage() {
           <p className="text-sm text-muted-foreground mt-0.5">Real-time sales analytics and collection status</p>
         </div>
         <div className="flex gap-2">
+          {can('invoices:create') && (
           <Link
             href="/invoices/new"
             className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background font-bold px-5 py-2 text-sm hover:opacity-90 transition-opacity"
           >
             <Plus className="h-3.5 w-3.5" /> New Bill
           </Link>
+          )}
           <Button
             variant="outline"
             size="icon"
@@ -134,6 +146,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Gradient Metric Cards */}
+      {metricCards.length > 0 && (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {metricCards.map(({ label, value, sub, icon: Icon, gradient, link, urgent }) => (
           <Link key={label} href={link} className="group block">
@@ -158,10 +171,13 @@ export default function DashboardPage() {
           </Link>
         ))}
       </div>
+      )}
 
       {/* Collection ratio + insights strip */}
+      {(showRevenue || showProducts) && (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Collection health */}
+        {showRevenue && (
         <div className="col-span-1 bg-linear-to-br from-slate-800 to-slate-900 rounded-2xl p-5 text-white">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -181,8 +197,10 @@ export default function DashboardPage() {
             <span>{metrics.unpaidInvoicesCount} pending</span>
           </div>
         </div>
+        )}
 
         {/* Projected revenue insight */}
+        {showRevenue && (
         <div className="col-span-1 bg-linear-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 text-white flex flex-col justify-between">
           <div className="flex items-center gap-2 mb-2">
             <Lightbulb className="h-4 w-4 text-yellow-300" />
@@ -200,8 +218,10 @@ export default function DashboardPage() {
             </p>
           )}
         </div>
+        )}
 
         {/* Low stock or all-clear */}
+        {showProducts && (
         <div className={`col-span-1 rounded-2xl p-5 border ${
           reports.lowStockAlerts.length > 0
             ? 'bg-rose-50 border-rose-200 dark:bg-rose-950/30 dark:border-rose-800'
@@ -230,9 +250,12 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+        )}
       </div>
+      )}
 
       {/* Charts Row */}
+      {showRevenue && (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* 30-Day Area Chart */}
         <div className="lg:col-span-8">
@@ -300,10 +323,13 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
+      )}
 
       {/* Bottom Row */}
+      {(showOutstanding || showRevenue) && (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Top Outstanding Customers */}
+        {showOutstanding && (
         <Card className="border-border rounded-2xl overflow-hidden">
           <CardHeader className="border-b border-border py-4 px-6 flex flex-row items-center justify-between">
             <div>
@@ -340,8 +366,10 @@ export default function DashboardPage() {
             )}
           </div>
         </Card>
+        )}
 
         {/* Best Sellers */}
+        {showRevenue && (
         <Card className="border-border rounded-2xl overflow-hidden">
           <CardHeader className="border-b border-border py-4 px-6 flex flex-row items-center justify-between">
             <div>
@@ -379,7 +407,9 @@ export default function DashboardPage() {
             )}
           </div>
         </Card>
+        )}
       </div>
+      )}
     </div>
   );
 }
