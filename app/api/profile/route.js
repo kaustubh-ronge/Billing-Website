@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/authHelper';
 import { db } from '@/lib/prisma';
@@ -48,3 +49,4 @@ export async function PUT(req) {
     return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
   }
 }
+

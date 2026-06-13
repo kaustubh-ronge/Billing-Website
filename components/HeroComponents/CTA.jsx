@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { ctaData } from "@/data/HeroData/heroData";
 export default function CTA() {
   return (
     <section className="py-28 relative overflow-hidden bg-blue-600">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-blue-900/40" />
+      <div className="absolute inset-0 bg-linear-to-b from-transparent to-blue-900/40" />
       
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4 }}

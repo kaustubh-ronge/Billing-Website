@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,13 +10,14 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from 'sonner';
 import { Plus, Search, Edit2, Trash2, User, Phone, Mail, MapPin, Receipt, ArrowRight, Download, Printer, RefreshCw, ChevronRight, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
+import { downloadCSV } from '@/lib/csv';
 
 export default function CustomersPage() {
   const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
   const [vendorShop, setVendorShop] = useState(null);
-  
+
   // Active Customer profile drill-down
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerInvoices, setCustomerInvoices] = useState([]);
@@ -25,7 +26,7 @@ export default function CustomersPage() {
   // Dialog/Modal state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -62,7 +63,7 @@ export default function CustomersPage() {
       if (res.ok) {
         const data = await res.json();
         setCustomers(data.customers || []);
-        
+
         // If a customer was selected, update their stats
         if (selectedCustomer) {
           const updatedSelected = data.customers.find(c => c.id === selectedCustomer.id);
@@ -204,14 +205,14 @@ export default function CustomersPage() {
 
     const lines = pendingInvoices.slice(0, 5).map(inv => {
       const bal = inv.grandTotal - inv.amountPaid;
-      return `  • ${inv.invoiceNum} | ${new Date(inv.issuedAt).toLocaleDateString()} | Due: ₹${bal.toFixed(2)}`;
+      return `  â€¢ ${inv.invoiceNum} | ${new Date(inv.issuedAt).toLocaleDateString()} | Due: â‚¹${bal.toFixed(2)}`;
     }).join('\n');
 
     const message = `Dear ${selectedCustomer.name},
 
 This is a payment reminder from ${vendorShop.businessName}.
 
-You have ${pendingInvoices.length} unpaid invoice(s) totaling ₹${totalPending.toFixed(2)}.
+You have ${pendingInvoices.length} unpaid invoice(s) totaling â‚¹${totalPending.toFixed(2)}.
 
 Pending Bills:
 ${lines || '  (no pending invoices)'}
@@ -231,16 +232,38 @@ ${vendorShop.businessName}`;
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-28 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-0 sm:px-6 lg:px-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-gray-900">Customer Directory</h1>
           <p className="text-sm text-gray-500 mt-1">Manage customer registry, view financial ledgers, and track bills.</p>
         </div>
-        <Button onClick={openAddDialog} className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6 flex items-center gap-2 self-start sm:self-center">
-          <Plus className="h-4 w-4" />
-          Add Customer
-        </Button>
+        <div className="flex items-center gap-2 self-start sm:self-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const rows = customers.map((c) => ({
+                Name: c.name,
+                Phone: c.phone,
+                Email: c.email ?? '',
+                Address: c.address ?? '',
+                GSTIN: c.gstNumber ?? '',
+                'Credit Limit': c.creditLimit ?? 0,
+                'Credit Used': c.creditUsed ?? 0,
+                Notes: c.notes ?? '',
+              }));
+              downloadCSV(rows, 'customers');
+            }}
+            className="rounded-full border-gray-200 font-bold text-sm flex items-center gap-1.5"
+          >
+            <Download className="h-4 w-4" /> Export CSV
+          </Button>
+          <Button onClick={openAddDialog} className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6 flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add Customer
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -257,7 +280,7 @@ ${vendorShop.businessName}`;
             />
           </form>
 
-          <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden max-h-[600px] overflow-y-auto">
+          <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden max-h-150 overflow-y-auto">
             <CardHeader className="bg-gray-50/50 border-b border-gray-100 py-4">
               <CardTitle className="text-sm font-bold text-gray-700">Customers ({customers.length})</CardTitle>
             </CardHeader>
@@ -276,14 +299,12 @@ ${vendorShop.businessName}`;
                   <div
                     key={c.id}
                     onClick={() => fetchCustomerLedger(c)}
-                    className={`p-4 flex items-center justify-between cursor-pointer transition-colors ${
-                      selectedCustomer?.id === c.id ? 'bg-blue-50/40 border-l-4 border-blue-600 pl-3' : 'hover:bg-gray-50/50'
-                    }`}
+                    className={`p-4 flex items-center justify-between cursor-pointer transition-colors ${selectedCustomer?.id === c.id ? 'bg-blue-50/40 border-l-4 border-blue-600 pl-3' : 'hover:bg-gray-50/50'
+                      }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${
-                        selectedCustomer?.id === c.id ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
-                      }`}>
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${selectedCustomer?.id === c.id ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
+                        }`}>
                         {c.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -296,10 +317,9 @@ ${vendorShop.businessName}`;
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right hidden sm:block">
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                          c.totalPending > 0 ? 'bg-rose-50 text-rose-600' : 'bg-green-50 text-green-600'
-                        }`}>
-                          {c.totalPending > 0 ? `Pending: ₹${c.totalPending.toFixed(0)}` : 'Cleared'}
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${c.totalPending > 0 ? 'bg-rose-50 text-rose-600' : 'bg-green-50 text-green-600'
+                          }`}>
+                          {c.totalPending > 0 ? `Pending: â‚¹${c.totalPending.toFixed(0)}` : 'Cleared'}
                         </span>
                       </div>
                       <div className="flex gap-1">
@@ -324,7 +344,7 @@ ${vendorShop.businessName}`;
             <div className="space-y-6">
               {/* Ledger Summary Card */}
               <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden print:shadow-none print:border-none">
-                <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 py-6 flex flex-row items-center justify-between gap-4">
+                <CardHeader className="bg-linear-to-r from-gray-50 to-white border-b border-gray-100 py-6 flex flex-row items-center justify-between gap-4">
                   <div>
                     <CardTitle className="text-xl font-bold flex items-center gap-2 text-gray-900">
                       <User className="h-5 w-5 text-gray-500" />
@@ -364,12 +384,12 @@ ${vendorShop.businessName}`;
                     </div>
                     <div className="text-center border-x border-gray-200">
                       <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Total Paid</p>
-                      <h3 className="text-lg font-black text-green-600 mt-1">₹{selectedCustomer.totalPaid.toFixed(2)}</h3>
+                      <h3 className="text-lg font-black text-green-600 mt-1">â‚¹{selectedCustomer.totalPaid.toFixed(2)}</h3>
                     </div>
                     <div className="text-center">
                       <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Balance Due</p>
                       <h3 className={`text-lg font-black mt-1 ${selectedCustomer.totalPending > 0 ? 'text-rose-600 animate-pulse' : 'text-gray-900'}`}>
-                        ₹{selectedCustomer.totalPending.toFixed(2)}
+                        â‚¹{selectedCustomer.totalPending.toFixed(2)}
                       </h3>
                     </div>
                   </div>
@@ -387,7 +407,7 @@ ${vendorShop.businessName}`;
                       <Receipt className="h-4 w-4 text-gray-400" />
                       Invoice Ledger Timeline
                     </h4>
-                    
+
                     <div className="border border-gray-100 rounded-xl overflow-hidden">
                       <Table>
                         <TableHeader className="bg-gray-50/50">
@@ -422,17 +442,16 @@ ${vendorShop.businessName}`;
                                   <TableCell className="font-semibold text-gray-900">{inv.invoiceNum}</TableCell>
                                   <TableCell>{new Date(inv.issuedAt).toLocaleDateString()}</TableCell>
                                   <TableCell className="text-center">
-                                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                                      inv.status === 'PAID' ? 'bg-green-50 text-green-700' :
-                                      inv.status === 'PARTIAL' ? 'bg-amber-50 text-amber-700' :
-                                      'bg-rose-50 text-rose-700'
-                                    }`}>
+                                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${inv.status === 'PAID' ? 'bg-green-50 text-green-700' :
+                                        inv.status === 'PARTIAL' ? 'bg-amber-50 text-amber-700' :
+                                          'bg-rose-50 text-rose-700'
+                                      }`}>
                                       {inv.status}
                                     </span>
                                   </TableCell>
-                                  <TableCell className="text-right font-bold text-gray-900">₹{inv.grandTotal.toFixed(0)}</TableCell>
-                                  <TableCell className="text-right text-green-600 font-semibold">₹{inv.amountPaid.toFixed(0)}</TableCell>
-                                  <TableCell className="text-right text-rose-600 font-semibold">₹{bal.toFixed(0)}</TableCell>
+                                  <TableCell className="text-right font-bold text-gray-900">â‚¹{inv.grandTotal.toFixed(0)}</TableCell>
+                                  <TableCell className="text-right text-green-600 font-semibold">â‚¹{inv.amountPaid.toFixed(0)}</TableCell>
+                                  <TableCell className="text-right text-rose-600 font-semibold">â‚¹{bal.toFixed(0)}</TableCell>
                                   <TableCell className="text-right print:hidden">
                                     <Link href={`/invoices?search=${inv.invoiceNum}`} className="inline-flex h-6 w-6 items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-full border border-gray-100 text-gray-500 hover:text-black">
                                       <ChevronRight className="h-3.5 w-3.5" />
@@ -470,11 +489,11 @@ ${vendorShop.businessName}`;
                   </div>
                   <div className="text-center border-x-2 border-gray-300">
                     <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Total Paid</p>
-                    <h3 className="text-xl font-black mt-1">₹{selectedCustomer.totalPaid.toFixed(2)}</h3>
+                    <h3 className="text-xl font-black mt-1">â‚¹{selectedCustomer.totalPaid.toFixed(2)}</h3>
                   </div>
                   <div className="text-center">
                     <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Total Outstanding</p>
-                    <h3 className="text-xl font-black mt-1 text-red-600">₹{selectedCustomer.totalPending.toFixed(2)}</h3>
+                    <h3 className="text-xl font-black mt-1 text-red-600">â‚¹{selectedCustomer.totalPending.toFixed(2)}</h3>
                   </div>
                 </div>
 
@@ -497,9 +516,9 @@ ${vendorShop.businessName}`;
                           <td className="py-2 font-semibold">{inv.invoiceNum}</td>
                           <td className="py-2">{new Date(inv.issuedAt).toLocaleDateString()}</td>
                           <td className="py-2 text-center uppercase font-bold">{inv.status}</td>
-                          <td className="py-2 text-right">₹{inv.grandTotal.toFixed(2)}</td>
-                          <td className="py-2 text-right">₹{inv.amountPaid.toFixed(2)}</td>
-                          <td className="py-2 text-right font-bold">₹{(inv.grandTotal - inv.amountPaid).toFixed(2)}</td>
+                          <td className="py-2 text-right">â‚¹{inv.grandTotal.toFixed(2)}</td>
+                          <td className="py-2 text-right">â‚¹{inv.amountPaid.toFixed(2)}</td>
+                          <td className="py-2 text-right font-bold">â‚¹{(inv.grandTotal - inv.amountPaid).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -508,7 +527,7 @@ ${vendorShop.businessName}`;
               </div>
             </div>
           ) : (
-            <Card className="border border-gray-150 border-dashed rounded-2xl bg-gray-50/50 p-12 text-center h-[400px] flex flex-col justify-center items-center">
+            <Card className="border border-gray-150 border-dashed rounded-2xl bg-gray-50/50 p-12 text-center h-100 flex flex-col justify-center items-center">
               <User className="h-10 w-10 text-gray-300 mb-3" />
               <h3 className="font-bold text-gray-700 text-lg">No Customer Selected</h3>
               <p className="text-sm text-gray-500 max-w-sm mt-1">Select a customer from the sidebar to inspect their billing history, active transactions ledger, and download reports.</p>
@@ -519,7 +538,7 @@ ${vendorShop.businessName}`;
 
       {/* Add / Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="rounded-2xl sm:max-w-[425px] overflow-hidden bg-white">
+        <DialogContent className="rounded-2xl sm:max-w-106.25 overflow-hidden bg-white">
           <form onSubmit={handleSave}>
             <DialogHeader className="mb-4">
               <DialogTitle className="text-xl font-bold text-gray-900">
@@ -596,7 +615,7 @@ ${vendorShop.businessName}`;
                   value={formData.notes}
                   onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                   placeholder="Credit limits, custom rates, delivery notes..."
-                  className="rounded-xl border-gray-200 min-h-[60px]"
+                  className="rounded-xl border-gray-200 min-h-15"
                 />
               </div>
             </div>
@@ -615,3 +634,4 @@ ${vendorShop.businessName}`;
     </div>
   );
 }
+

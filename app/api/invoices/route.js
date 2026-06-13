@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/authHelper';
 import { db } from '@/lib/prisma';
@@ -11,22 +12,14 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
-    const status = searchParams.get('status') || ''; // PAID, PARTIAL, PENDING, DRAFT
+    const status = searchParams.get('status') || '';
     const customerId = searchParams.get('customerId') || '';
 
-    let whereClause = {
-      shopId: user.shopId,
-    };
+    const whereClause = { shopId: user.shopId };
 
-    if (status) {
-      whereClause.status = status;
-    }
+    if (status) whereClause.status = status;
+    if (customerId) whereClause.customerId = customerId;
 
-    if (customerId) {
-      whereClause.customerId = customerId;
-    }
-
-    // Apply customer/invoice details search
     if (search) {
       whereClause.OR = [
         { invoiceNum: { contains: search, mode: 'insensitive' } },
@@ -35,9 +28,9 @@ export async function GET(req) {
             OR: [
               { name: { contains: search, mode: 'insensitive' } },
               { phone: { contains: search, mode: 'insensitive' } },
-            ]
-          }
-        }
+            ],
+          },
+        },
       ];
     }
 
@@ -45,19 +38,15 @@ export async function GET(req) {
       where: whereClause,
       include: {
         customer: true,
-        items: {
-          include: {
-            product: true
-          }
-        },
-        payments: true
+        items: { include: { product: true } },
+        payments: true,
       },
-      orderBy: { issuedAt: 'desc' }
+      orderBy: { issuedAt: 'desc' },
     });
 
     return NextResponse.json({ invoices });
   } catch (error) {
-    console.error("Error fetching invoices:", error);
+    console.error('Error fetching invoices:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -70,104 +59,151 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { customerId, items, discountPercentage, amountPaid, paymentMethod, notes, issuedAt } = body;
+    const {
+      customerId,
+      items,
+      discountPercentage,
+      amountPaid,
+      paymentMethod,
+      notes,
+      issuedAt,
+      paymentTerms,
+      dueDate,
+      customDueDays,
+    } = body;
 
     if (!customerId || !items || items.length === 0) {
-      return NextResponse.json({ error: 'Customer ID and Invoice Items are required.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Customer ID and Invoice Items are required.' },
+        { status: 400 }
+      );
     }
 
-    // Validate Customer
+    // Validate customer belongs to this shop
     const customer = await db.customer.findFirst({
-      where: { id: customerId, shopId: user.shopId }
+      where: { id: customerId, shopId: user.shopId },
     });
     if (!customer) {
       return NextResponse.json({ error: 'Customer not found.' }, { status: 404 });
     }
 
-    // Calculate totals based on DB products (for safety)
-    const dbProductIds = items.map(item => item.productId);
-    const dbProducts = await db.product.findMany({
-      where: {
-        id: { in: dbProductIds },
-        shopId: user.shopId
-      }
-    });
+    // Credit limit soft-check (warn but don't block unless over limit with no payment)
+    // Hard enforcement: if creditLimit set and outstanding would exceed available credit, reject
+    // Outstanding = grandTotal - amountPaid (computed later) â€” checked post-calculation below
 
-    const productsMap = new Map(dbProducts.map(p => [p.id, p]));
+    // Validate products and compute totals using DB values (never trust client prices)
+    const dbProducts = await db.product.findMany({
+      where: { id: { in: items.map((i) => i.productId) }, shopId: user.shopId },
+    });
+    const productsMap = new Map(dbProducts.map((p) => [p.id, p]));
 
     let calculatedTax = 0;
     let calculatedSubtotal = 0;
     const discountPercent = parseFloat(discountPercentage || 0);
-
     const invoiceItemsData = [];
-    const stockUpdates = [];
 
     for (const item of items) {
       const prod = productsMap.get(item.productId);
       if (!prod) {
-        return NextResponse.json({ error: `Product ID ${item.productId} not found in inventory.` }, { status: 400 });
+        return NextResponse.json(
+          { error: `Product ID ${item.productId} not found in inventory.` },
+          { status: 400 }
+        );
       }
 
       const qty = parseInt(item.quantity);
-      const unitPrice = parseFloat(item.unitPrice || prod.price);
-      
+      // Use DB price by default; allow client to supply a lower price (for ad-hoc discounts)
+      // but never above the catalog price — prevents price manipulation attacks
+      const clientPrice = item.unitPrice !== undefined ? parseFloat(item.unitPrice) : prod.price;
+      const unitPrice = Math.min(clientPrice, prod.price);
       const itemSubtotal = qty * unitPrice;
       const itemDiscount = itemSubtotal * (discountPercent / 100);
       const taxableAmount = itemSubtotal - itemDiscount;
-      const itemTax = taxableAmount * (prod.taxRate / 100);
 
       calculatedSubtotal += itemSubtotal;
-      calculatedTax += itemTax;
+      calculatedTax += taxableAmount * (prod.taxRate / 100);
 
-      invoiceItemsData.push({
-        productId: prod.id,
-        quantity: qty,
-        unitPrice: unitPrice
-      });
-
-      // Prepare stock inventory decrease
-      if (prod.trackInventory && prod.stockCount !== null) {
-        stockUpdates.push({
-          id: prod.id,
-          newStock: Math.max(0, prod.stockCount - qty)
-        });
-      }
+      invoiceItemsData.push({ productId: prod.id, quantity: qty, unitPrice });
     }
 
     const discountAmount = calculatedSubtotal * (discountPercent / 100);
-    const grandTotal = Math.round(((calculatedSubtotal - discountAmount) + calculatedTax) * 100) / 100;
+    const grandTotal =
+      Math.round(((calculatedSubtotal - discountAmount) + calculatedTax) * 100) / 100;
     const paidAmt = parseFloat(amountPaid || 0);
 
-    // Determine status
     let status = 'PENDING';
-    if (paidAmt >= grandTotal) {
-      status = 'PAID';
-    } else if (paidAmt > 0) {
-      status = 'PARTIAL';
+    if (paidAmt >= grandTotal) status = 'PAID';
+    else if (paidAmt > 0) status = 'PARTIAL';
+
+    // Credit limit enforcement: reject if adding the outstanding balance would exceed the limit
+    const outstanding = grandTotal - paidAmt;
+    if (
+      customer.creditLimit > 0 &&
+      outstanding > 0 &&
+      customer.creditUsed + outstanding > customer.creditLimit
+    ) {
+      const available = Math.max(0, customer.creditLimit - customer.creditUsed);
+      return NextResponse.json(
+        {
+          error: `Credit limit exceeded. ${customer.name} has â‚¹${available.toFixed(2)} available credit but this sale requires â‚¹${outstanding.toFixed(2)} on credit.`,
+          code: 'CREDIT_LIMIT_EXCEEDED',
+          available,
+          required: outstanding,
+        },
+        { status: 422 }
+      );
     }
 
-    // Auto-generate invoice number
-    // Formats e.g. INV-YYYY-001
-    const invoiceCount = await db.invoice.count({
-      where: { shopId: user.shopId }
-    });
-    
-    const prefix = user.shop.invoicePrefix || 'INV';
-    const year = new Date(issuedAt || Date.now()).getFullYear();
-    const formattedCount = String(invoiceCount + 1).padStart(4, '0');
-    const invoiceNum = `${prefix}-${year}-${formattedCount}`;
+    // Resolve due date from payment terms
+    let resolvedDueDate = null;
+    const terms = paymentTerms || 'IMMEDIATE';
+    if (terms !== 'IMMEDIATE') {
+      if (dueDate) {
+        resolvedDueDate = new Date(dueDate);
+      } else {
+        const base = issuedAt ? new Date(issuedAt) : new Date();
+        const daysMap = { NET_7: 7, NET_15: 15, NET_30: 30, NET_45: 45 };
+        const days = daysMap[terms] ?? parseInt(customDueDays || 0);
+        if (days > 0) {
+          resolvedDueDate = new Date(base);
+          resolvedDueDate.setDate(resolvedDueDate.getDate() + days);
+        }
+      }
+    }
 
-    // Perform database transactions
+    // All mutations in a single transaction
     const result = await db.$transaction(async (tx) => {
-      // 1. Update Inventory Stock levels
-      for (const update of stockUpdates) {
-        await tx.product.update({
-          where: { id: update.id },
-          data: { stockCount: update.newStock }
-        });
+      // 1. Atomically claim the next invoice number (prevents race on concurrent requests)
+      const updatedShop = await tx.shop.update({
+        where: { id: user.shopId },
+        data: { nextInvoiceNumber: { increment: 1 } },
+        select: { nextInvoiceNumber: true, invoicePrefix: true },
+      });
+
+      const prefix = updatedShop.invoicePrefix || 'INV';
+      const year = new Date(issuedAt || Date.now()).getFullYear();
+      const invoiceNum = `${prefix}-${year}-${String(updatedShop.nextInvoiceNumber).padStart(4, '0')}`;
+
+      // 2. Deduct stock atomically â€” conditional UPDATE prevents overselling
+      for (const item of invoiceItemsData) {
+        const prod = productsMap.get(item.productId);
+        if (!prod.trackInventory || prod.stockCount === null) continue;
+
+        const rowsUpdated = await tx.$executeRaw`
+          UPDATE "Product"
+          SET "stockCount" = "stockCount" - ${item.quantity}
+          WHERE id = ${item.productId}
+            AND "stockCount" >= ${item.quantity}
+        `;
+
+        if (rowsUpdated === 0) {
+          throw new Error(
+            `Insufficient stock for "${prod.name}". Available: ${prod.stockCount}, Requested: ${item.quantity}`
+          );
+        }
       }
 
-      // 2. Create Invoice
+      // 3. Create invoice
       const newInvoice = await tx.invoice.create({
         data: {
           invoiceNum,
@@ -176,45 +212,63 @@ export async function POST(req) {
           grandTotal,
           amountPaid: paidAmt,
           status,
+          paymentTerms: terms,
+          dueDate: resolvedDueDate,
+          customDueDays: terms === 'CUSTOM' ? parseInt(customDueDays || 0) : null,
+          notes: notes || null,
           issuedAt: issuedAt ? new Date(issuedAt) : new Date(),
           customerId,
           shopId: user.shopId,
-          items: {
-            create: invoiceItemsData
-          }
+          items: { create: invoiceItemsData },
         },
         include: {
           customer: true,
-          items: {
-            include: {
-              product: true
-            }
-          }
-        }
+          items: { include: { product: true } },
+        },
       });
 
-      // 3. Create Payment record if amountPaid > 0
+      // 4. Create initial payment record if any amount was paid
+      let payment = null;
       if (paidAmt > 0) {
-        const payment = await tx.payment.create({
+        payment = await tx.payment.create({
           data: {
             amount: paidAmt,
             paymentMethod: paymentMethod || 'CASH',
-            notes: notes || 'Initial Payment',
+            notes: 'Initial payment',
             invoiceId: newInvoice.id,
             paymentDate: issuedAt ? new Date(issuedAt) : new Date(),
-          }
+          },
         });
-        
-        return { invoice: newInvoice, payment };
       }
 
-      return { invoice: newInvoice, payment: null };
+      // 5. Update customer's creditUsed if there is an outstanding balance
+      if (outstanding > 0) {
+        await tx.customer.update({
+          where: { id: customerId },
+          data: { creditUsed: { increment: outstanding } },
+        });
+      }
+
+      return { invoice: newInvoice, payment };
     });
 
-    return NextResponse.json({ success: true, invoice: result.invoice, payment: result.payment });
-
+    return NextResponse.json({
+      success: true,
+      invoice: result.invoice,
+      payment: result.payment,
+    });
   } catch (error) {
-    console.error("Error creating invoice:", error);
-    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+    console.error('Error creating invoice:', error);
+
+    // Surface stock errors as 409 so the client can display them
+    if (error.message?.startsWith('Insufficient stock')) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
+
+    return NextResponse.json(
+      { error: 'Internal Server Error', details: error.message },
+      { status: 500 }
+    );
   }
 }
+

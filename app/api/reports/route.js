@@ -1,172 +1,179 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/authHelper';
 import { db } from '@/lib/prisma';
-import { startOfDay, endOfDay, startOfMonth, subMonths, format, eachDayOfInterval, subDays } from 'date-fns';
+import { startOfDay, endOfDay, startOfMonth, subMonths, subDays, format, eachDayOfInterval } from 'date-fns';
 
-export async function GET(req) {
+export async function GET() {
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const { searchParams } = new URL(req.url);
-    const filterType = searchParams.get('filter') || 'monthly'; // daily, weekly, monthly, yearly
-
-    // Fetch all active customers count
-    const totalCustomers = await db.customer.count({
-      where: { shopId: user.shopId, isDeleted: false }
-    });
-
-    // Fetch all invoices for this shop to calculate metrics
-    const invoices = await db.invoice.findMany({
-      where: { shopId: user.shopId },
-      include: {
-        customer: true,
-        items: {
-          include: {
-            product: true
-          }
-        }
-      },
-      orderBy: { issuedAt: 'asc' }
-    });
-
     const now = new Date();
     const todayStart = startOfDay(now);
     const todayEnd = endOfDay(now);
     const monthStart = startOfMonth(now);
+    const last30DaysStart = subDays(todayStart, 29);
+    const last12MonthsStart = subMonths(startOfMonth(now), 11);
 
-    let todaySales = 0;
-    let monthlySales = 0;
-    let totalPendingPayments = 0;
-    let paidInvoicesCount = 0;
-    let unpaidInvoicesCount = 0; // pending + partial
-    
-    // Grouping sales for charts
-    // Daily sales for the last 30 days
-    const last30Days = eachDayOfInterval({
-      start: subDays(now, 29),
-      end: now
+    const shopId = user.shopId;
+
+    // Run all aggregation queries in parallel — never loads invoice rows into Node.js
+    const [
+      totalCustomers,
+      todayAgg,
+      monthAgg,
+      pendingAgg,
+      paidCount,
+      unpaidCount,
+      dailyRaw,
+      monthlyRaw,
+      topPendingRaw,
+      topProductsRaw,
+      lowStockProducts,
+    ] = await Promise.all([
+      db.customer.count({ where: { shopId, isDeleted: false } }),
+
+      db.invoice.aggregate({
+        where: { shopId, issuedAt: { gte: todayStart, lte: todayEnd } },
+        _sum: { grandTotal: true },
+      }),
+
+      db.invoice.aggregate({
+        where: { shopId, issuedAt: { gte: monthStart } },
+        _sum: { grandTotal: true },
+      }),
+
+      // Outstanding = sum of (grandTotal - amountPaid) for unpaid invoices
+      db.$queryRaw`
+        SELECT COALESCE(SUM("grandTotal" - "amountPaid"), 0)::float AS outstanding
+        FROM "Invoice"
+        WHERE "shopId" = ${shopId} AND "status" != 'PAID'
+      `,
+
+      db.invoice.count({ where: { shopId, status: 'PAID' } }),
+      db.invoice.count({ where: { shopId, status: { not: 'PAID' } } }),
+
+      // Daily sales for last 30 days
+      db.$queryRaw`
+        SELECT
+          DATE("issuedAt") AS date,
+          SUM("grandTotal")::float AS sales,
+          COUNT(*)::int AS count
+        FROM "Invoice"
+        WHERE "shopId" = ${shopId}
+          AND "issuedAt" >= ${last30DaysStart}
+        GROUP BY DATE("issuedAt")
+        ORDER BY date
+      `,
+
+      // Monthly sales for last 12 months
+      db.$queryRaw`
+        SELECT
+          TO_CHAR(DATE_TRUNC('month', "issuedAt"), 'YYYY-MM') AS month,
+          SUM("grandTotal")::float AS sales,
+          COUNT(*)::int AS count
+        FROM "Invoice"
+        WHERE "shopId" = ${shopId}
+          AND "issuedAt" >= ${last12MonthsStart}
+        GROUP BY DATE_TRUNC('month', "issuedAt")
+        ORDER BY DATE_TRUNC('month', "issuedAt")
+      `,
+
+      // Top pending customers
+      db.$queryRaw`
+        SELECT
+          c.id,
+          c.name,
+          c.phone,
+          SUM(i."grandTotal" - i."amountPaid")::float AS outstanding,
+          COUNT(i.id)::int AS "invoiceCount"
+        FROM "Invoice" i
+        JOIN "Customer" c ON i."customerId" = c.id
+        WHERE i."shopId" = ${shopId}
+          AND i."status" != 'PAID'
+        GROUP BY c.id, c.name, c.phone
+        ORDER BY outstanding DESC
+        LIMIT 10
+      `,
+
+      // Top products by quantity sold
+      db.$queryRaw`
+        SELECT
+          p.id,
+          p.name,
+          p.category,
+          p."isService",
+          SUM(ii.quantity)::int AS quantity,
+          SUM(ii.quantity * ii."unitPrice")::float AS revenue
+        FROM "InvoiceItem" ii
+        JOIN "Product" p ON ii."productId" = p.id
+        JOIN "Invoice" i ON ii."invoiceId" = i.id
+        WHERE i."shopId" = ${shopId}
+        GROUP BY p.id, p.name, p.category, p."isService"
+        ORDER BY quantity DESC
+        LIMIT 5
+      `,
+
+      db.product.findMany({
+        where: { shopId, trackInventory: true, stockCount: { not: null } },
+        select: { id: true, name: true, stockCount: true, lowStockAlert: true },
+      }),
+    ]);
+
+    // Build filled daily chart (zero-pad missing days)
+    const last30Days = eachDayOfInterval({ start: last30DaysStart, end: now });
+    const dailyMap = new Map(
+      (dailyRaw).map((r) => [String(r.date).substring(0, 10), r])
+    );
+    const dailyChartData = last30Days.map((day) => {
+      const key = format(day, 'yyyy-MM-dd');
+      const row = dailyMap.get(key);
+      return { date: format(day, 'MMM dd'), sales: row ? Number(row.sales) : 0, count: row ? Number(row.count) : 0 };
     });
-    
-    const dailySalesMap = new Map(last30Days.map(day => [format(day, 'yyyy-MM-dd'), { date: format(day, 'MMM dd'), sales: 0, count: 0 }]));
-    
-    // Monthly sales for the last 12 months
-    const last12Months = Array.from({ length: 12 }, (_, i) => subMonths(now, i)).reverse();
-    const monthlySalesMap = new Map(last12Months.map(month => [format(month, 'yyyy-MM'), { month: format(month, 'MMM yyyy'), sales: 0, count: 0 }]));
 
-    // Customer analytics
-    const customerOutstanding = {}; // customerId -> { name, phone, outstanding }
-    const productSales = {}; // productId -> { name, quantity, revenue, isService }
-
-    invoices.forEach(inv => {
-      const dateStr = format(inv.issuedAt, 'yyyy-MM-dd');
-      const monthStr = format(inv.issuedAt, 'yyyy-MM');
-      const balance = inv.grandTotal - inv.amountPaid;
-
-      // Basic stats
-      if (inv.issuedAt >= todayStart && inv.issuedAt <= todayEnd) {
-        todaySales += inv.grandTotal;
-      }
-      if (inv.issuedAt >= monthStart) {
-        monthlySales += inv.grandTotal;
-      }
-
-      totalPendingPayments += Math.max(0, balance);
-
-      if (inv.status === 'PAID') {
-        paidInvoicesCount++;
-      } else {
-        unpaidInvoicesCount++;
-      }
-
-      // Chart mapping
-      if (dailySalesMap.has(dateStr)) {
-        const current = dailySalesMap.get(dateStr);
-        current.sales += inv.grandTotal;
-        current.count += 1;
-      }
-      if (monthlySalesMap.has(monthStr)) {
-        const current = monthlySalesMap.get(monthStr);
-        current.sales += inv.grandTotal;
-        current.count += 1;
-      }
-
-      // Customer Outstanding
-      if (balance > 0 && inv.customer) {
-        if (!customerOutstanding[inv.customerId]) {
-          customerOutstanding[inv.customerId] = {
-            id: inv.customerId,
-            name: inv.customer.name,
-            phone: inv.customer.phone,
-            outstanding: 0,
-            invoiceCount: 0
-          };
-        }
-        customerOutstanding[inv.customerId].outstanding += balance;
-        customerOutstanding[inv.customerId].invoiceCount += 1;
-      }
-
-      // Product sales tracking
-      inv.items.forEach(item => {
-        const prod = item.product;
-        if (!productSales[prod.id]) {
-          productSales[prod.id] = {
-            id: prod.id,
-            name: prod.name,
-            quantity: 0,
-            revenue: 0,
-            isService: prod.isService,
-            category: prod.category || 'Other'
-          };
-        }
-        productSales[prod.id].quantity += item.quantity;
-        productSales[prod.id].revenue += item.quantity * item.unitPrice;
-      });
+    // Build filled monthly chart (zero-pad missing months)
+    const monthlyMap = new Map((monthlyRaw).map((r) => [r.month, r]));
+    const monthlyChartData = Array.from({ length: 12 }, (_, i) => {
+      const m = subMonths(now, 11 - i);
+      const key = format(m, 'yyyy-MM');
+      const row = monthlyMap.get(key);
+      return { month: format(m, 'MMM yyyy'), sales: row ? Number(row.sales) : 0, count: row ? Number(row.count) : 0 };
     });
 
-    // Formatting charts for Recharts
-    const dailyChartData = Array.from(dailySalesMap.values());
-    const monthlyChartData = Array.from(monthlySalesMap.values());
+    const todaySales = Number(todayAgg._sum.grandTotal ?? 0);
+    const monthlySales = Number(monthAgg._sum.grandTotal ?? 0);
+    const pendingPayments = Number((pendingAgg)[0]?.outstanding ?? 0);
 
-    // Top pending customers list
-    const topPendingCustomers = Object.values(customerOutstanding)
-      .sort((a, b) => b.outstanding - a.outstanding)
-      .slice(0, 10);
+    // Avg of previous 3 months for forecast
+    const prev3Keys = [1, 2, 3].map((i) => format(subMonths(now, i), 'yyyy-MM'));
+    const prev3Total = prev3Keys.reduce((sum, key) => {
+      const row = monthlyMap.get(key);
+      return sum + (row ? Number(row.sales) : 0);
+    }, 0);
+    const avgMonthly = prev3Total / 3 || monthlySales || 0;
 
-    // Top selling products list
-    const topProducts = Object.values(productSales)
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 5);
+    const lowStockAlerts = lowStockProducts
+      .filter((p) => p.stockCount <= (p.lowStockAlert ?? 5))
+      .map((p) => ({ id: p.id, name: p.name, stockCount: p.stockCount, lowStockAlert: p.lowStockAlert }));
 
-    // AI Insights - Expected Monthly Revenue & Trends
-    const previous3Months = Array.from({ length: 3 }, (_, i) => subMonths(now, i + 1));
-    let previous3MonthsSales = 0;
-    previous3Months.forEach(m => {
-      const monthStr = format(m, 'yyyy-MM');
-      if (monthlySalesMap.has(monthStr)) {
-        previous3MonthsSales += monthlySalesMap.get(monthStr).sales;
-      }
-    });
-    const avgMonthlyRevenue = previous3MonthsSales / 3 || monthlySales || 0;
-    
-    // Low stock warnings
-    const lowStockProducts = await db.product.findMany({
-      where: {
-        shopId: user.shopId,
-        trackInventory: true,
-        stockCount: {
-          not: null
-        }
-      }
-    });
-    
-    const lowStockAlerts = lowStockProducts.filter(p => p.stockCount <= (p.lowStockAlert ?? 5)).map(p => ({
-      id: p.id,
-      name: p.name,
-      stockCount: p.stockCount,
-      lowStockAlert: p.lowStockAlert
+    const topProducts = (topProductsRaw).map((r) => ({
+      id: r.id,
+      name: r.name,
+      category: r.category || 'Other',
+      isService: r.isService,
+      quantity: Number(r.quantity),
+      revenue: Number(r.revenue),
+    }));
+
+    const topPendingCustomers = (topPendingRaw).map((r) => ({
+      id: r.id,
+      name: r.name,
+      phone: r.phone,
+      outstanding: Number(r.outstanding),
+      invoiceCount: Number(r.invoiceCount),
     }));
 
     return NextResponse.json({
@@ -174,28 +181,30 @@ export async function GET(req) {
         todaySales: Math.round(todaySales * 100) / 100,
         monthlySales: Math.round(monthlySales * 100) / 100,
         totalCustomers,
-        pendingPayments: Math.round(totalPendingPayments * 100) / 100,
-        paidInvoicesCount,
-        unpaidInvoicesCount
+        pendingPayments: Math.round(pendingPayments * 100) / 100,
+        paidInvoicesCount: paidCount,
+        unpaidInvoicesCount: unpaidCount,
       },
       charts: {
         daily: dailyChartData,
-        monthly: monthlyChartData
+        monthly: monthlyChartData,
       },
       reports: {
         topPendingCustomers,
         topProducts,
-        lowStockAlerts
+        lowStockAlerts,
       },
       insights: {
-        expectedMonthlyRevenue: Math.round(Math.max(avgMonthlyRevenue, monthlySales) * 1.1 * 100) / 100, // 10% projection
+        expectedMonthlyRevenue: Math.round(Math.max(avgMonthly, monthlySales) * 1.1 * 100) / 100,
         bestCategory: topProducts.length > 0 ? topProducts[0].category : 'N/A',
-        collectionRatio: todaySales > 0 ? Math.round((paidInvoicesCount / (paidInvoicesCount + unpaidInvoicesCount)) * 100) : 100
-      }
+        collectionRatio:
+          paidCount + unpaidCount > 0
+            ? Math.round((paidCount / (paidCount + unpaidCount)) * 100)
+            : 100,
+      },
     });
-
   } catch (error) {
-    console.error("Error generating report analytics:", error);
+    console.error('Error generating report analytics:', error);
     return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
   }
 }

@@ -2,7 +2,7 @@ import React from "react";
 import { db } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import PrintButton from "@/components/PrintButton";
-import { CheckCircle, AlertCircle, HelpCircle, Calendar, ShieldCheck, FileText } from "lucide-react";
+import { CheckCircle, AlertCircle, HelpCircle, Calendar, ShieldCheck, FileText, FileDown } from "lucide-react";
 
 export const revalidate = 0; // Disable static cache to reflect payment updates immediately
 
@@ -75,7 +75,16 @@ export default async function PublicInvoicePage({ params }) {
             <span className="text-xs text-gray-400 font-bold block">Balance Due</span>
             <span className="text-sm font-black text-rose-600">₹{balance.toFixed(2)}</span>
           </div>
-          <PrintButton />
+          <div className="flex items-center gap-2">
+            <a
+              href={`/api/public/invoices/${invoice.id}/pdf`}
+              download
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors no-print"
+            >
+              <FileDown className="h-4 w-4" /> Download PDF
+            </a>
+            <PrintButton />
+          </div>
         </div>
       </div>
 

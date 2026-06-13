@@ -7,7 +7,8 @@ datasource db {
   provider = "postgresql"
 }
 
-// --- STRICT ENUMS ---
+// --- ENUMS ---
+
 enum Role {
   OWNER
   MANAGER
@@ -27,127 +28,162 @@ enum InvoiceStatus {
   DRAFT
 }
 
+enum PaymentTerms {
+  IMMEDIATE
+  NET_7
+  NET_15
+  NET_30
+  NET_45
+  CUSTOM
+}
+
 // --- CORE MODELS ---
+
 model Shop {
-  id               String   @id @default(cuid())
+  id               String  @id @default(cuid())
   businessName     String
   taxId            String?
-  logoBase64       String?  @db.Text 
-  subscriptionPlan Plan     @default(FREE)
-  
+  logoBase64       String? @db.Text
+  subscriptionPlan Plan    @default(FREE)
+
   // Profile details
-  ownerName        String?
-  phone            String?
-  email            String?
-  address          String?
-  
+  ownerName String?
+  phone     String?
+  email     String?
+  address   String?
+
   // Banking details
-  bankName         String?
-  accountNum       String?
-  ifscCode         String?
-  upiId            String?
-  
-  // Custom Settings
-  invoicePrefix    String   @default("INV")
-  invoiceFormat    String   @default("INV-{YEAR}-{NUMBER}")
-  currency         String   @default("INR")
-  footerMessage    String   @default("Thank you for your business!")
-  taxRate          Float    @default(18)
-  
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Tenant Relationships
-  users            User[]
-  customers        Customer[]
-  products         Product[]
-  invoices         Invoice[]
+  bankName   String?
+  accountNum String?
+  ifscCode   String?
+  upiId      String?
+
+  // Invoice settings
+  invoicePrefix       String @default("INV")
+  invoiceFormat       String @default("INV-{YEAR}-{NUMBER}")
+  currency            String @default("INR")
+  footerMessage       String @default("Thank you for your business!")
+  taxRate             Float  @default(18)
+  // Atomic counter — prevents duplicate invoice numbers under concurrent requests
+  nextInvoiceNumber   Int    @default(1)
+
+  // Employee invite — owner shares this code for team members to join
+  inviteCode String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Tenant relationships
+  users     User[]
+  customers Customer[]
+  products  Product[]
+  invoices  Invoice[]
 }
 
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  name      String
-  email     String   @unique
-  role      Role     @default(OWNER)
-  
-  shopId    String
-  shop      Shop     @relation(fields: [shopId], references: [id])
-  
+  id       String  @id @default(cuid())
+  clerkId  String  @unique
+  name     String
+  email    String  @unique
+  role     Role    @default(OWNER)
+  isActive Boolean @default(true)
+
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id])
+
   createdAt DateTime @default(now())
 }
 
 model Customer {
-  id        String    @id @default(cuid())
+  id        String  @id @default(cuid())
   name      String
   phone     String
   email     String?
   address   String?
   gstNumber String?
   notes     String?
-  isDeleted Boolean   @default(false)
-  
-  shopId    String
-  shop      Shop      @relation(fields: [shopId], references: [id])
-  
-  invoices  Invoice[]
+  isDeleted Boolean @default(false)
 
-  @@unique([phone, shopId]) // Unique phone per shop
+  // Credit management
+  creditLimit Float @default(0)
+  creditUsed  Float @default(0)
+
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id])
+
+  invoices Invoice[]
+
+  @@unique([phone, shopId])
 }
 
 model Product {
-  id             String   @id @default(cuid())
-  name           String
-  price          Float
-  taxRate        Float    @default(0) 
-  
-  trackInventory Boolean  @default(false)
-  stockCount     Int?     
+  id      String @id @default(cuid())
+  name    String
+  price   Float
+  taxRate Float  @default(0)
+
+  trackInventory Boolean @default(false)
+  stockCount     Int?
   lowStockAlert  Int?
-  imageBase64    String?  @db.Text
-  
-  category       String?
-  unit           String?
-  isService      Boolean  @default(false)
-  description    String?
-  
-  shopId         String
-  shop           Shop     @relation(fields: [shopId], references: [id])
-  
-  invoiceItems   InvoiceItem[]
+  imageBase64    String? @db.Text
+
+  category    String?
+  unit        String?
+  isService   Boolean @default(false)
+  description String?
+
+  // Extended product fields
+  sku       String?
+  barcode   String?
+  costPrice Float?
+
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id])
+
+  invoiceItems InvoiceItem[]
 }
 
 model Invoice {
-  id                 String         @id @default(cuid())
-  invoiceNum         String
-  
-  discountPercentage Float          @default(0)
+  id         String @id @default(cuid())
+  invoiceNum String
+
+  discountPercentage Float         @default(0)
   totalTax           Float
   grandTotal         Float
-  amountPaid         Float          @default(0)
-  status             InvoiceStatus  @default(PAID)
-  
-  issuedAt           DateTime       @default(now()) 
-  createdAt          DateTime       @default(now())
-  
-  shopId             String
-  shop               Shop           @relation(fields: [shopId], references: [id])
-  
-  customerId         String
-  customer           Customer       @relation(fields: [customerId], references: [id])
-  
-  items              InvoiceItem[] 
-  payments           Payment[]
+  amountPaid         Float         @default(0)
+  status             InvoiceStatus @default(PAID)
+
+  // Credit sales fields
+  paymentTerms    PaymentTerms @default(IMMEDIATE)
+  dueDate         DateTime?
+  customDueDays   Int?
+
+  notes String?
+
+  issuedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id])
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  items    InvoiceItem[]
+  payments Payment[]
+
+  @@index([shopId, status])
+  @@index([shopId, dueDate])
 }
 
 model InvoiceItem {
-  id        String  @id @default(cuid())
+  id        String @id @default(cuid())
   quantity  Int
-  unitPrice Float   
-  
+  unitPrice Float
+
   invoiceId String
   invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  
+
   productId String
   product   Product @relation(fields: [productId], references: [id])
 }
@@ -156,9 +192,10 @@ model Payment {
   id            String   @id @default(cuid())
   amount        Float
   paymentDate   DateTime @default(now())
-  paymentMethod String   // CASH, UPI, BANK_TRANSFER, CARD, etc.
+  paymentMethod String
   notes         String?
-  
-  invoiceId     String
-  invoice       Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  referenceNumber String?
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }

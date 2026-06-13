@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/authHelper';
 import { db } from '@/lib/prisma';
@@ -57,24 +58,32 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    // Perform refund of inventory stock and delete invoice in transaction
+    // Perform refund of inventory stock, credit correction, and delete in a single transaction
     await db.$transaction(async (tx) => {
-      // Refund items stock
+      // 1. Atomically return stock — avoid stale-read overwrite with raw INCREMENT
       for (const item of invoice.items) {
         if (item.product.trackInventory && item.product.stockCount !== null) {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: {
-              stockCount: item.product.stockCount + item.quantity
-            }
-          });
+          await tx.$executeRaw`
+            UPDATE "Product"
+            SET "stockCount" = "stockCount" + ${item.quantity}
+            WHERE id = ${item.productId}
+          `;
         }
       }
 
-      // Delete invoice (cascades to payments and invoice items)
-      await tx.invoice.delete({
-        where: { id }
-      });
+      // 2. Decrement creditUsed by the outstanding balance so the customer is not
+      //    permanently locked out after an invoice they never paid is deleted
+      const outstanding = invoice.grandTotal - invoice.amountPaid;
+      if (outstanding > 0) {
+        await tx.$executeRaw`
+          UPDATE "Customer"
+          SET "creditUsed" = GREATEST(0, "creditUsed" - ${outstanding})
+          WHERE id = ${invoice.customerId}
+        `;
+      }
+
+      // 3. Delete invoice (cascades to payments and invoice items)
+      await tx.invoice.delete({ where: { id } });
     });
 
     return NextResponse.json({ success: true, message: 'Invoice deleted and inventory refunded' });

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect, Suspense } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,17 +8,19 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { 
-  FileText, Search, Plus, Printer, DollarSign, MessageSquare, Bell, 
-  RefreshCw, CheckCircle, AlertCircle, HelpCircle, Calendar, Trash2
+import {
+  FileText, Search, Plus, DollarSign, MessageSquare, Bell,
+  RefreshCw, CheckCircle, AlertCircle, HelpCircle, Calendar, Trash2, Download,
+  FileDown, ArrowUpRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { downloadCSV } from '@/lib/csv';
 
 export default function InvoicesPage() {
   return (
     <Suspense fallback={
-      <div className="mx-auto max-w-6xl px-4 py-28 sm:px-6 lg:px-8 text-center text-gray-500">
+      <div className="mx-auto max-w-6xl px-4 py-0 sm:px-6 lg:px-8 text-center text-gray-500">
         <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-gray-400" />
         <p className="mt-2 text-sm text-gray-500">Loading invoices...</p>
       </div>
@@ -112,7 +114,7 @@ function InvoicesList() {
     const amt = parseFloat(paymentForm.amount);
     const balance = selectedInvoice.grandTotal - selectedInvoice.amountPaid;
     if (isNaN(amt) || amt <= 0 || amt > balance) {
-      toast.error(`Please enter a valid amount between 0 and ₹${balance.toFixed(2)}`);
+      toast.error(`Please enter a valid amount between 0 and â‚¹${balance.toFixed(2)}`);
       return;
     }
 
@@ -162,14 +164,14 @@ function InvoicesList() {
   const getReminderLink = (inv) => {
     if (!inv.customer || !vendorShop) return '#';
     const balance = inv.grandTotal - inv.amountPaid;
-    
+
     const publicInvoiceUrl = typeof window !== 'undefined'
       ? `${window.location.origin}/public/invoices/${inv.id}`
       : '';
 
     const message = `Dear ${inv.customer.name},
 
-Your invoice ${inv.invoiceNum} for ₹${balance.toFixed(2)} is pending.
+Your invoice ${inv.invoiceNum} for â‚¹${balance.toFixed(2)} is pending.
 
 Please make the payment at your earliest convenience. You can view and download the PDF here:
 ${publicInvoiceUrl}
@@ -187,7 +189,7 @@ ${vendorShop.businessName}`;
 
   const getWhatsAppShareLink = (inv) => {
     if (!inv.customer || !vendorShop) return '#';
-    
+
     const publicInvoiceUrl = typeof window !== 'undefined'
       ? `${window.location.origin}/public/invoices/${inv.id}`
       : '';
@@ -197,7 +199,7 @@ ${vendorShop.businessName}`;
 Thank you for your purchase.
 
 Invoice Number: ${inv.invoiceNum}
-Amount: ₹${inv.grandTotal.toFixed(2)}
+Amount: â‚¹${inv.grandTotal.toFixed(2)}
 Payment Status: ${inv.status}
 
 View and Download PDF Invoice:
@@ -236,20 +238,44 @@ ${vendorShop.businessName}`;
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-28 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-0 sm:px-6 lg:px-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-gray-900">Invoices Directory</h1>
-          <p className="text-sm text-gray-500 mt-1">Review all sales transactions, record payments, and send customer reminders.</p>
+          <h1 className="text-3xl font-black tracking-tight text-foreground">Invoices</h1>
+          <p className="text-sm text-muted-foreground mt-1">Review all sales transactions, record payments, and send customer reminders.</p>
         </div>
-        <Link href="/invoices/new" className="font-bold bg-black text-white hover:bg-gray-900 rounded-full px-6 py-2.5 text-sm flex items-center gap-2 self-start sm:self-center">
-          <Plus className="h-4 w-4" /> Create Bill
-        </Link>
+        <div className="flex items-center gap-2 self-start sm:self-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const rows = invoices.map((inv) => ({
+                Invoice: inv.invoiceNum,
+                Customer: inv.customer?.name ?? '',
+                Phone: inv.customer?.phone ?? '',
+                Date: new Date(inv.issuedAt).toLocaleDateString('en-IN'),
+                'Due Date': inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('en-IN') : '',
+                'Payment Terms': inv.paymentTerms ?? 'IMMEDIATE',
+                'Grand Total': inv.grandTotal.toFixed(2),
+                'Amount Paid': inv.amountPaid.toFixed(2),
+                Outstanding: (inv.grandTotal - inv.amountPaid).toFixed(2),
+                Status: inv.status,
+              }));
+              downloadCSV(rows, 'invoices');
+            }}
+            className="rounded-full border-gray-200 font-bold text-sm flex items-center gap-1.5"
+          >
+            <Download className="h-4 w-4" /> Export CSV
+          </Button>
+          <Link href="/invoices/new" className="font-bold bg-black text-white hover:bg-gray-900 rounded-full px-6 py-2.5 text-sm flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Create Bill
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-col gap-6">
         {/* Search and Filters panel */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-gray-50 p-4 rounded-2xl border border-gray-100">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-muted/40 p-4 rounded-2xl border border-border">
           <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
@@ -257,12 +283,12 @@ ${vendorShop.businessName}`;
               placeholder="Search by invoice # or customer name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 rounded-full border-gray-200 bg-white"
+              className="pl-9 rounded-full border-border bg-background"
             />
           </form>
           <div className="flex gap-3 w-full md:w-auto justify-end">
             <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val)}>
-              <SelectTrigger className="w-[180px] rounded-full bg-white border-gray-200">
+              <SelectTrigger className="w-45 rounded-full bg-background border-border">
                 <SelectValue placeholder="Filter Payment Status" />
               </SelectTrigger>
               <SelectContent>
@@ -272,7 +298,7 @@ ${vendorShop.businessName}`;
                 <SelectItem value="PENDING">Pending / Unpaid</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="icon" onClick={fetchInvoices} className="rounded-full bg-white border-gray-200">
+            <Button variant="outline" size="icon" onClick={fetchInvoices} className="rounded-full bg-background border-border">
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
@@ -324,51 +350,53 @@ ${vendorShop.businessName}`;
                       <TableCell className="text-center">
                         {getStatusBadge(inv.status)}
                       </TableCell>
-                      <TableCell className="text-right font-bold text-gray-900">₹{inv.grandTotal.toFixed(2)}</TableCell>
-                      <TableCell className="text-right text-green-600 font-semibold">₹{inv.amountPaid.toFixed(2)}</TableCell>
-                      <TableCell className="text-right text-rose-600 font-semibold">₹{bal.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-bold text-gray-900">â‚¹{inv.grandTotal.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-green-600 font-semibold">â‚¹{inv.amountPaid.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-rose-600 font-semibold">â‚¹{bal.toFixed(2)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1.5 flex-wrap md:flex-nowrap">
                           {bal > 0 && (
                             <>
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
-                                onClick={() => openPaymentDialog(inv)} 
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openPaymentDialog(inv)}
                                 className="h-8 rounded-full border-gray-200 font-bold hover:bg-gray-100 flex items-center gap-1 text-xs"
                               >
                                 <DollarSign className="h-3 w-3" /> Record
                               </Button>
-                              <a 
-                                href={getReminderLink(inv)} 
-                                target="_blank" 
-                                rel="noreferrer" 
+                              <a
+                                href={getReminderLink(inv)}
+                                target="_blank"
+                                rel="noreferrer"
                                 className="inline-flex h-8 items-center px-3 border border-amber-200 hover:bg-amber-50 text-amber-700 rounded-full font-bold text-xs gap-1"
                               >
                                 <Bell className="h-3 w-3" /> Alert
                               </a>
                             </>
                           )}
-                          <a 
-                            href={getWhatsAppShareLink(inv)} 
-                            target="_blank" 
-                            rel="noreferrer" 
+                          <a
+                            href={getWhatsAppShareLink(inv)}
+                            target="_blank"
+                            rel="noreferrer"
                             className="inline-flex h-8 items-center px-3 border border-green-200 hover:bg-green-50 text-green-700 rounded-full font-bold text-xs gap-1"
                           >
                             <MessageSquare className="h-3 w-3" /> Share
                           </a>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => { setSelectedInvoice(inv); setTimeout(() => window.print(), 100); }} 
-                            className="h-8 w-8 text-gray-600 hover:text-black hover:bg-gray-100 rounded-full"
+                          <a
+                            href={`/api/invoices/${inv.id}/pdf`}
+                            target="_blank"
+                            rel="noreferrer"
+                            download
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                            title="Download PDF"
                           >
-                            <Printer className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => handleDeleteInvoice(inv.id)} 
+                            <FileDown className="h-4 w-4" />
+                          </a>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteInvoice(inv.id)}
                             className="h-8 w-8 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-full"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -386,7 +414,7 @@ ${vendorShop.businessName}`;
 
       {/* Record Payment Dialog */}
       <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-        <DialogContent className="rounded-2xl sm:max-w-[400px] bg-white">
+        <DialogContent className="rounded-2xl sm:max-w-100 bg-white">
           <form onSubmit={handleRecordPayment}>
             <DialogHeader className="mb-4">
               <DialogTitle className="text-xl font-bold text-gray-900">Record Payment</DialogTitle>
@@ -400,20 +428,20 @@ ${vendorShop.businessName}`;
                 <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-gray-500 font-medium">Billed Grand Total:</span>
-                    <span className="font-bold text-gray-900">₹{selectedInvoice.grandTotal.toFixed(2)}</span>
+                    <span className="font-bold text-gray-900">â‚¹{selectedInvoice.grandTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500 font-medium">Previously Paid:</span>
-                    <span className="font-bold text-green-600">₹{selectedInvoice.amountPaid.toFixed(2)}</span>
+                    <span className="font-bold text-green-600">â‚¹{selectedInvoice.amountPaid.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between border-t border-gray-200/60 pt-1.5 font-bold text-rose-600">
                     <span>Due Balance:</span>
-                    <span>₹{(selectedInvoice.grandTotal - selectedInvoice.amountPaid).toFixed(2)}</span>
+                    <span>â‚¹{(selectedInvoice.grandTotal - selectedInvoice.amountPaid).toFixed(2)}</span>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="payAmount">Amount Collected (₹)</Label>
+                  <Label htmlFor="payAmount">Amount Collected (â‚¹)</Label>
                   <Input
                     id="payAmount"
                     type="number"
@@ -429,8 +457,8 @@ ${vendorShop.businessName}`;
 
                 <div className="space-y-1.5">
                   <Label htmlFor="payMethod">Payment Method</Label>
-                  <Select 
-                    value={paymentForm.paymentMethod} 
+                  <Select
+                    value={paymentForm.paymentMethod}
                     onValueChange={(val) => setPaymentForm(prev => ({ ...prev, paymentMethod: val }))}
                   >
                     <SelectTrigger id="payMethod" className="rounded-xl border-gray-200">
@@ -530,9 +558,9 @@ ${vendorShop.businessName}`;
                     {item.product?.name || 'Unnamed Product'}
                     {item.product?.isService && <span className="ml-1 text-[8px] px-1 bg-gray-100 rounded">Service</span>}
                   </td>
-                  <td className="py-2 text-right">₹{item.unitPrice.toFixed(2)}</td>
+                  <td className="py-2 text-right">â‚¹{item.unitPrice.toFixed(2)}</td>
                   <td className="py-2 text-center">{item.quantity}</td>
-                  <td className="py-2 text-right">₹{(item.quantity * item.unitPrice).toFixed(2)}</td>
+                  <td className="py-2 text-right">â‚¹{(item.quantity * item.unitPrice).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -549,29 +577,29 @@ ${vendorShop.businessName}`;
             <div className="w-64 space-y-1.5 border-t border-gray-200 pt-3">
               <div className="flex justify-between text-gray-500">
                 <span>Subtotal:</span>
-                <span>₹{(selectedInvoice.items?.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) || 0).toFixed(2)}</span>
+                <span>â‚¹{(selectedInvoice.items?.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) || 0).toFixed(2)}</span>
               </div>
               {selectedInvoice.discountPercentage > 0 && (
                 <div className="flex justify-between text-rose-600 font-medium text-xs">
                   <span>Discount ({selectedInvoice.discountPercentage}%):</span>
-                  <span>-₹{((selectedInvoice.items?.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) || 0) * (selectedInvoice.discountPercentage / 100)).toFixed(2)}</span>
+                  <span>-â‚¹{((selectedInvoice.items?.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) || 0) * (selectedInvoice.discountPercentage / 100)).toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between text-gray-500">
                 <span>GST Tax:</span>
-                <span>₹{selectedInvoice.totalTax.toFixed(2)}</span>
+                <span>â‚¹{selectedInvoice.totalTax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-black text-gray-900 border-t border-gray-900 pt-1.5 text-sm">
                 <span>Grand Total:</span>
-                <span>₹{selectedInvoice.grandTotal.toFixed(2)}</span>
+                <span>â‚¹{selectedInvoice.grandTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-semibold text-green-600">
                 <span>Amount Paid:</span>
-                <span>₹{selectedInvoice.amountPaid.toFixed(2)}</span>
+                <span>â‚¹{selectedInvoice.amountPaid.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-bold text-rose-600 border-t border-gray-200 pt-1.5 text-xs">
                 <span>Balance Due:</span>
-                <span>₹{(selectedInvoice.grandTotal - selectedInvoice.amountPaid).toFixed(2)}</span>
+                <span>â‚¹{(selectedInvoice.grandTotal - selectedInvoice.amountPaid).toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -587,3 +615,4 @@ ${vendorShop.businessName}`;
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
@@ -27,7 +27,7 @@ export default function HeroClient() {
         {/* Refined Typography */}
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tight md:text-6xl mb-6 leading-tight">
           <span className="text-gray-900">The intelligent way to run your </span>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">entire business.</span>
+          <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">entire business.</span>
         </motion.h1>
 
         {/* Scaled Subtitle */}
@@ -38,7 +38,7 @@ export default function HeroClient() {
         {/* Standardized Button Sizes */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/dashboard" className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+            <div className="absolute -inset-0.5 bg-linear-to-r from-blue-500 to-purple-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
             <Button className="relative h-12 px-8 rounded-full text-sm font-semibold bg-gray-900 hover:bg-black text-white transition-all transform group-hover:-translate-y-0.5 shadow-md">
               Enter Dashboard
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

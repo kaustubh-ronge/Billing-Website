@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Plus, Search, Edit2, Trash2, Package, Tag, Layers, Settings, FileText, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, Tag, Layers, Settings, FileText, AlertTriangle, CheckCircle, RefreshCw, Download } from 'lucide-react';
+import { downloadCSV } from '@/lib/csv';
 
 const CATEGORIES = [
   // General
@@ -79,11 +80,11 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [activeTab, setActiveTab] = useState('products');
-  
+
   // Dialog/Modal state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -111,7 +112,7 @@ export default function ProductsPage() {
         url += `&category=${encodeURIComponent(categoryFilter)}`;
       }
       url += `&isService=${activeTab === 'services'}`;
-      
+
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -232,21 +233,47 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-28 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-0 sm:px-6 lg:px-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-gray-900">Inventory & Catalog</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage physical products and service charges sold to customers.</p>
+          <h1 className="text-3xl font-black tracking-tight text-foreground">Inventory & Catalog</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage physical products and service charges sold to customers.</p>
         </div>
-        <Button onClick={openAddDialog} className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6 flex items-center gap-2 self-start sm:self-center">
-          <Plus className="h-4 w-4" />
-          Add Item
-        </Button>
+        <div className="flex items-center gap-2 self-start sm:self-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const rows = products.map((p) => ({
+                Name: p.name,
+                Category: p.category ?? '',
+                Unit: p.unit ?? '',
+                Price: p.price.toFixed(2),
+                'Tax Rate %': p.taxRate,
+                'Cost Price': p.costPrice?.toFixed(2) ?? '',
+                SKU: p.sku ?? '',
+                Barcode: p.barcode ?? '',
+                'Track Inventory': p.trackInventory ? 'Yes' : 'No',
+                'Stock Count': p.stockCount ?? '',
+                'Low Stock Alert': p.lowStockAlert ?? '',
+                'Is Service': p.isService ? 'Yes' : 'No',
+              }));
+              downloadCSV(rows, 'products');
+            }}
+            className="rounded-full border-gray-200 font-bold text-sm flex items-center gap-1.5"
+          >
+            <Download className="h-4 w-4" /> Export CSV
+          </Button>
+          <Button onClick={openAddDialog} className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6 flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add Item
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-6">
         {/* Filters Panel */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-gray-50 p-4 rounded-2xl border border-gray-100">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-muted/40 p-4 rounded-2xl border border-border">
           <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
@@ -254,7 +281,7 @@ export default function ProductsPage() {
               placeholder="Search by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 rounded-full border-gray-200 bg-white"
+              className="pl-9 rounded-full border-border bg-background"
             />
           </form>
           <div className="flex gap-3 w-full md:w-auto justify-end">
@@ -263,28 +290,28 @@ export default function ProductsPage() {
               Category:
             </div>
             <Select value={categoryFilter} onValueChange={(val) => setCategoryFilter(val)}>
-              <SelectTrigger className="w-[200px] rounded-full bg-white border-gray-200">
+              <SelectTrigger className="w-50 rounded-full bg-background border-border">
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
               <SelectContent className="max-h-80">
                 <SelectItem value="ALL">All Categories</SelectItem>
-                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">— General —</div>
+                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">â€” General â€”</div>
                 {['Grocery', 'Hardware', 'Electronics', 'Medical / Pharma', 'Clothing & Apparel', 'Stationery', 'Furniture', 'Food & Beverages'].map(cat => (
                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                 ))}
-                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-600 mt-1">— Agriculture & Farming —</div>
+                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-600 mt-1">â€” Agriculture & Farming â€”</div>
                 {['Seeds & Planting', 'Fertilizers', 'Pesticides & Insecticides', 'Herbicides & Weedicides', 'Fungicides', 'Crop Protection', 'Irrigation Equipment', 'Farm Tools & Equipment', 'Animal Feed & Fodder', 'Veterinary Medicines', 'Organic Products', 'Soil Amendments'].map(cat => (
                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                 ))}
-                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-500 mt-1">— Services —</div>
+                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-500 mt-1">â€” Services â€”</div>
                 {['Services', 'Repair & Maintenance', 'Transport & Delivery', 'Consulting'].map(cat => (
                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                 ))}
-                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">— Other —</div>
+                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">â€” Other â€”</div>
                 <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="icon" onClick={fetchProducts} className="rounded-full bg-white border-gray-200">
+            <Button variant="outline" size="icon" onClick={fetchProducts} className="rounded-full bg-background border-border">
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
@@ -351,7 +378,7 @@ export default function ProductsPage() {
                               {item.category || 'Grocery'}
                             </span>
                           </TableCell>
-                          <TableCell className="text-right font-bold text-gray-900">₹{item.price.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-bold text-gray-900">â‚¹{item.price.toFixed(2)}</TableCell>
                           <TableCell className="text-center text-gray-600 font-medium">{item.taxRate}%</TableCell>
                           <TableCell className="text-center text-gray-600 font-medium">{item.unit || 'pcs'}</TableCell>
                           <TableCell className="text-center">
@@ -436,7 +463,7 @@ export default function ProductsPage() {
                             {item.category || 'Services'}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right font-bold text-gray-900">₹{item.price.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-bold text-gray-900">â‚¹{item.price.toFixed(2)}</TableCell>
                         <TableCell className="text-center text-gray-600 font-medium">{item.taxRate}%</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
@@ -460,7 +487,7 @@ export default function ProductsPage() {
 
       {/* Add / Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="rounded-2xl sm:max-w-[425px] overflow-hidden bg-white">
+        <DialogContent className="rounded-2xl sm:max-w-106.25 overflow-hidden bg-white">
           <form onSubmit={handleSave}>
             <DialogHeader className="mb-4">
               <DialogTitle className="text-xl font-bold text-gray-900">
@@ -486,7 +513,7 @@ export default function ProductsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="price">Price (₹)</Label>
+                  <Label htmlFor="price">Price (â‚¹)</Label>
                   <Input
                     id="price"
                     type="number"
@@ -525,24 +552,24 @@ export default function ProductsPage() {
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent className="max-h-72">
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400">— General —</div>
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400">â€” General â€”</div>
                       {['Grocery', 'Hardware', 'Electronics', 'Medical / Pharma', 'Clothing & Apparel', 'Stationery', 'Furniture', 'Food & Beverages'].map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-600 mt-1">— Agriculture & Farming —</div>
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-600 mt-1">â€” Agriculture & Farming â€”</div>
                       {['Seeds & Planting', 'Fertilizers', 'Pesticides & Insecticides', 'Herbicides & Weedicides', 'Fungicides', 'Crop Protection', 'Irrigation Equipment', 'Farm Tools & Equipment', 'Animal Feed & Fodder', 'Veterinary Medicines', 'Organic Products', 'Soil Amendments'].map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-500 mt-1">— Services —</div>
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-500 mt-1">â€” Services â€”</div>
                       {['Services', 'Repair & Maintenance', 'Transport & Delivery', 'Consulting'].map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">— Other —</div>
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">â€” Other â€”</div>
                       <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 {activeTab === 'products' && (
                   <div className="space-y-1.5">
                     <Label htmlFor="unit">Unit Measure</Label>
@@ -609,7 +636,7 @@ export default function ProductsPage() {
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Optional brief description..."
-                  className="rounded-xl border-gray-200 min-h-[60px]"
+                  className="rounded-xl border-gray-200 min-h-15"
                 />
               </div>
             </div>
@@ -628,3 +655,4 @@ export default function ProductsPage() {
     </div>
   );
 }
+
