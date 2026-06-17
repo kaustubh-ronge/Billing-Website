@@ -1,4 +1,4 @@
-﻿export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server';
 import { requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
@@ -111,23 +111,23 @@ export async function POST(req) {
       }
 
       const qty = parseInt(item.quantity);
-      // Use DB price by default; allow client to supply a lower price (for ad-hoc discounts)
-      // but never above the catalog price — prevents price manipulation attacks
+      // Treat unitPrice as a tax-inclusive unit rate
       const clientPrice = item.unitPrice !== undefined ? parseFloat(item.unitPrice) : prod.price;
       const unitPrice = Math.min(clientPrice, prod.price);
-      const itemSubtotal = qty * unitPrice;
-      const itemDiscount = itemSubtotal * (discountPercent / 100);
-      const taxableAmount = itemSubtotal - itemDiscount;
+      
+      const itemSubtotal = qty * unitPrice; // Inclusive subtotal
+      const itemDiscountedTotal = itemSubtotal * (1 - discountPercent / 100);
+      const taxableAmount = itemDiscountedTotal / (1 + (prod.taxRate / 100));
+      const itemTax = itemDiscountedTotal - taxableAmount;
 
       calculatedSubtotal += itemSubtotal;
-      calculatedTax += taxableAmount * (prod.taxRate / 100);
+      calculatedTax += itemTax;
 
       invoiceItemsData.push({ productId: prod.id, quantity: qty, unitPrice });
     }
 
     const discountAmount = calculatedSubtotal * (discountPercent / 100);
-    const grandTotal =
-      Math.round(((calculatedSubtotal - discountAmount) + calculatedTax) * 100) / 100;
+    const grandTotal = Math.round((calculatedSubtotal - discountAmount) * 100) / 100;
     const paidAmt = parseFloat(amountPaid || 0);
 
     let status = 'PENDING';
