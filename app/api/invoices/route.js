@@ -144,7 +144,7 @@ export async function POST(req) {
       const available = Math.max(0, customer.creditLimit - customer.creditUsed);
       return NextResponse.json(
         {
-          error: `Credit limit exceeded. ${customer.name} has â‚¹${available.toFixed(2)} available credit but this sale requires â‚¹${outstanding.toFixed(2)} on credit.`,
+          error: `Credit limit exceeded. ${customer.name} has \u20B9${available.toFixed(2)} available credit but this sale requires \u20B9${outstanding.toFixed(2)} on credit.`,
           code: 'CREDIT_LIMIT_EXCEEDED',
           available,
           required: outstanding,
@@ -254,7 +254,7 @@ export async function POST(req) {
     await logActivity({
       shopId: user.shopId, userId: user.id,
       action: 'invoice.create', entityType: 'Invoice', entityId: result.invoice.id,
-      description: `Created invoice ${result.invoice.invoiceNum} (₹${grandTotal.toFixed(2)})`,
+      description: `Created invoice ${result.invoice.invoiceNum} (\u20B9${grandTotal.toFixed(2)})`,
     });
 
     return NextResponse.json({

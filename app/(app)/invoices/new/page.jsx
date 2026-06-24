@@ -282,7 +282,7 @@ export default function NewInvoicePage() {
 Thank you for your purchase.
 
 Invoice Number: ${savedInvoice.invoiceNum}
-Amount: â‚¹${savedInvoice.grandTotal.toFixed(2)}
+Amount: \u20B9${savedInvoice.grandTotal.toFixed(2)}
 Payment Status: ${savedInvoice.status}
 
 View and Download PDF Invoice:
@@ -418,7 +418,7 @@ ${vendorShop.businessName}`;
                     >
                       <div className="pr-2">
                         <h4 className="font-semibold text-xs text-gray-900 group-hover:text-blue-600 transition-colors">{p.name}</h4>
-                        <p className="text-[10px] text-gray-500 mt-0.5">â‚¹{p.price.toFixed(2)} | Tax: {p.taxRate}%</p>
+                        <p className="text-[10px] text-gray-500 mt-0.5">{"\u20B9"}{p.price.toFixed(2)} | Tax: {p.taxRate}%</p>
                       </div>
                       <Plus className="h-3.5 w-3.5 text-gray-400 group-hover:text-blue-600" />
                     </div>
@@ -449,7 +449,7 @@ ${vendorShop.businessName}`;
                 <TableHeader className="bg-gray-50/50">
                   <TableRow>
                     <TableHead className="font-bold text-xs">Item Name</TableHead>
-                    <TableHead className="font-bold text-xs text-center w-24">Price (â‚¹)</TableHead>
+                    <TableHead className="font-bold text-xs text-center w-24">Price ({"\u20B9"})</TableHead>
                     <TableHead className="font-bold text-xs text-center w-20">Qty</TableHead>
                     <TableHead className="font-bold text-xs text-center">Tax %</TableHead>
                     <TableHead className="font-bold text-xs text-right">Total</TableHead>
@@ -490,7 +490,7 @@ ${vendorShop.businessName}`;
                             />
                           </TableCell>
                           <TableCell className="text-center text-xs font-semibold text-gray-600">{item.product.taxRate}%</TableCell>
-                          <TableCell className="text-right font-bold text-gray-900 text-xs">â‚¹{totalLine.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-bold text-gray-900 text-xs">{"\u20B9"}{totalLine.toFixed(2)}</TableCell>
                           <TableCell className="text-right">
                             <Button variant="ghost" size="icon" onClick={() => removeItem(item.product.id)} className="h-7 w-7 rounded-full hover:bg-rose-50 text-gray-400 hover:text-rose-600">
                               <Trash2 className="h-3.5 w-3.5" />
@@ -578,7 +578,7 @@ ${vendorShop.businessName}`;
                 <h4 className="font-bold text-sm text-gray-700">Record Initial Payment</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="amountPaid">Amount Collected Today (â‚¹)</Label>
+                    <Label htmlFor="amountPaid">Amount Collected Today ({"\u20B9"})</Label>
                     <Input
                       id="amountPaid"
                       type="number"
@@ -640,21 +640,21 @@ ${vendorShop.businessName}`;
               <div className="space-y-2">
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>Subtotal</span>
-                  <span>â‚¹{totals.subtotal.toFixed(2)}</span>
+                  <span>{"\u20B9"}{totals.subtotal.toFixed(2)}</span>
                 </div>
                 {totals.totalDiscount > 0 && (
                   <div className="flex justify-between text-sm text-rose-600 font-medium">
                     <span>Discount ({discountPercentage}%)</span>
-                    <span>-â‚¹{totals.totalDiscount.toFixed(2)}</span>
+                    <span>-{"\u20B9"}{totals.totalDiscount.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>GST Taxes</span>
-                  <span>â‚¹{totals.totalTax.toFixed(2)}</span>
+                  <span>{"\u20B9"}{totals.totalTax.toFixed(2)}</span>
                 </div>
                 <div className="pt-2 border-t border-gray-150 flex justify-between font-black text-gray-900 text-lg">
                   <span>Grand Total</span>
-                  <span>â‚¹{totals.grandTotal.toFixed(2)}</span>
+                  <span>{"\u20B9"}{totals.grandTotal.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -776,7 +776,7 @@ ${vendorShop.businessName}`;
                         {qrCodeUrl && <img src={qrCodeUrl} alt="UPI Payment QR Code" className="h-44 w-44 object-contain" />}
                       </div>
                       <div className="bg-purple-50 p-2.5 rounded-xl border border-purple-100">
-                        <p className="text-xs font-bold text-purple-900">Outstanding: â‚¹{(savedInvoice.grandTotal - savedInvoice.amountPaid).toFixed(2)}</p>
+                        <p className="text-xs font-bold text-purple-900">Outstanding: {"\u20B9"}{(savedInvoice.grandTotal - savedInvoice.amountPaid).toFixed(2)}</p>
                         <p className="text-[10px] text-purple-600 mt-0.5">UPI: {vendorShop.upiId}</p>
                       </div>
                     </DialogContent>
@@ -905,15 +905,15 @@ ${vendorShop.businessName}`;
                             </td>
                             <td className="border-r border-gray-300 py-2 px-1 text-gray-600">{item.product?.sku || item.product?.category || "8302"}</td>
                             <td className="border-r border-gray-300 py-2 px-1 font-bold text-gray-900">{item.quantity} {item.product?.unit || "NOS"}</td>
-                            <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700">₹{rateExclusive.toFixed(2)}</td>
-                            <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700 font-medium">₹{taxableValue.toFixed(2)}</td>
+                            <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700">{"\u20B9"}{rateExclusive.toFixed(2)}</td>
+                            <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700 font-medium">{"\u20B9"}{taxableValue.toFixed(2)}</td>
                             <td className="border-r border-gray-300 p-0 text-gray-750">
                               <div className="flex h-full items-stretch">
                                 <span className="w-1/2 border-r border-gray-300 py-2 px-1 flex items-center justify-center font-medium">{itemTaxRate}%</span>
-                                <span className="w-1/2 py-2 px-1 flex items-center justify-end font-medium">₹{gstAmount.toFixed(2)}</span>
+                                <span className="w-1/2 py-2 px-1 flex items-center justify-end font-medium">{"\u20B9"}{gstAmount.toFixed(2)}</span>
                               </div>
                             </td>
-                            <td className="py-2 px-2 text-right font-black text-gray-900">₹{lineTotal.toFixed(2)}</td>
+                            <td className="py-2 px-2 text-right font-black text-gray-900">{"\u20B9"}{lineTotal.toFixed(2)}</td>
                           </tr>
                         );
                       })}
@@ -924,7 +924,7 @@ ${vendorShop.businessName}`;
                         <td className="border-r border-gray-300 py-2 px-1">{invoiceItems.reduce((sum, item) => sum + item.quantity, 0)} {invoiceItems[0]?.product?.unit || "NOS"}</td>
                         <td className="border-r border-gray-300 py-2 px-2"></td>
                         <td className="border-r border-gray-300 py-2 px-2 text-right">
-                          ₹{invoiceItems.reduce((sum, item) => {
+                          {"\u20B9"}{invoiceItems.reduce((sum, item) => {
                             const itemTaxRate = item.product?.taxRate ?? 0;
                             const rateExclusive = item.unitPrice / (1 + itemTaxRate / 100);
                             return sum + (item.quantity * rateExclusive);
@@ -934,7 +934,7 @@ ${vendorShop.businessName}`;
                           <div className="flex h-full items-stretch">
                             <span className="w-1/2 border-r border-gray-300"></span>
                             <span className="w-1/2 py-2 px-1 text-right">
-                              ₹{invoiceItems.reduce((sum, item) => {
+                              {"\u20B9"}{invoiceItems.reduce((sum, item) => {
                                 const itemTaxRate = item.product?.taxRate ?? 0;
                                 const lineTotal = item.quantity * item.unitPrice;
                                 const rateExclusive = item.unitPrice / (1 + itemTaxRate / 100);
@@ -943,7 +943,7 @@ ${vendorShop.businessName}`;
                             </span>
                           </div>
                         </td>
-                        <td className="py-2 px-2 text-right">₹{totals.subtotal.toFixed(2)}</td>
+                        <td className="py-2 px-2 text-right">{"\u20B9"}{totals.subtotal.toFixed(2)}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -1003,37 +1003,37 @@ ${vendorShop.businessName}`;
                       <div className="space-y-1.5 bg-gray-50/50 p-3 rounded border border-gray-200 text-[10px]">
                         <div className="flex justify-between text-gray-600">
                           <span>Taxable Amount</span>
-                          <span className="font-semibold text-gray-900">₹{(totals.grandTotal - totals.totalTax).toFixed(2)}</span>
+                          <span className="font-semibold text-gray-900">{"\u20B9"}{(totals.grandTotal - totals.totalTax).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-gray-650">
                           <span>Add : GST Tax</span>
-                          <span className="font-semibold text-gray-900">₹{totals.totalTax.toFixed(2)}</span>
+                          <span className="font-semibold text-gray-900">{"\u20B9"}{totals.totalTax.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-1.5">
                           <span>Total Tax</span>
-                          <span>₹{totals.totalTax.toFixed(2)}</span>
+                          <span>{"\u20B9"}{totals.totalTax.toFixed(2)}</span>
                         </div>
                         
                         {totals.totalDiscount > 0 && (
                           <div className="flex justify-between text-rose-600 font-bold">
                             <span>Less: Discount ({discountPercentage}%)</span>
-                            <span>-₹{totals.totalDiscount.toFixed(2)}</span>
+                            <span>-{"\u20B9"}{totals.totalDiscount.toFixed(2)}</span>
                           </div>
                         )}
                         
                         <div className="flex justify-between font-black text-gray-950 border-t-2 border-gray-900 pt-2 text-xs">
                           <span>Total Amount After Tax</span>
-                          <span>₹{totals.grandTotal.toFixed(2)}</span>
+                          <span>{"\u20B9"}{totals.grandTotal.toFixed(2)}</span>
                         </div>
                         
                         <div className="flex justify-between text-green-600 font-bold pt-1">
                           <span>Amount Paid</span>
-                          <span>₹{parseFloat(amountPaid || 0).toFixed(2)}</span>
+                          <span>{"\u20B9"}{parseFloat(amountPaid || 0).toFixed(2)}</span>
                         </div>
                         
                         <div className="flex justify-between text-rose-600 font-black border-t border-gray-200 pt-1.5">
                           <span>Balance Due</span>
-                          <span>₹{(totals.grandTotal - parseFloat(amountPaid || 0)).toFixed(2)}</span>
+                          <span>{"\u20B9"}{(totals.grandTotal - parseFloat(amountPaid || 0)).toFixed(2)}</span>
                         </div>
                       </div>
 

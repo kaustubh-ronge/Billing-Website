@@ -74,7 +74,7 @@ export default async function PublicInvoicePage({ params }) {
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
             <span className="text-xs text-gray-400 font-bold block">Balance Due</span>
-            <span className="text-sm font-black text-rose-600">₹{balance.toFixed(2)}</span>
+            <span className="text-sm font-black text-rose-600">{"\u20B9"}{balance.toFixed(2)}</span>
           </div>
           <div className="flex items-center gap-2">
             <a
@@ -188,15 +188,15 @@ export default async function PublicInvoicePage({ params }) {
                     </td>
                     <td className="border-r border-gray-300 py-2 px-1 text-gray-600">{item.product?.sku || item.product?.category || "8302"}</td>
                     <td className="border-r border-gray-300 py-2 px-1 font-bold text-gray-900">{item.quantity} {item.product?.unit || "NOS"}</td>
-                    <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700">₹{rateExclusive.toFixed(2)}</td>
-                    <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700 font-medium">₹{taxableValue.toFixed(2)}</td>
+                    <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700">{"\u20B9"}{rateExclusive.toFixed(2)}</td>
+                    <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700 font-medium">{"\u20B9"}{taxableValue.toFixed(2)}</td>
                     <td className="border-r border-gray-300 p-0 text-gray-750">
                       <div className="flex h-full items-stretch">
                         <span className="w-1/2 border-r border-gray-300 py-2 px-1 flex items-center justify-center font-medium">{itemTaxRate}%</span>
-                        <span className="w-1/2 py-2 px-1 flex items-center justify-end font-medium">₹{gstAmount.toFixed(2)}</span>
+                        <span className="w-1/2 py-2 px-1 flex items-center justify-end font-medium">{"\u20B9"}{gstAmount.toFixed(2)}</span>
                       </div>
                     </td>
-                    <td className="py-2 px-2 text-right font-black text-gray-900">₹{lineTotal.toFixed(2)}</td>
+                    <td className="py-2 px-2 text-right font-black text-gray-900">{"\u20B9"}{lineTotal.toFixed(2)}</td></td>
                   </tr>
                 );
               })}
@@ -207,7 +207,7 @@ export default async function PublicInvoicePage({ params }) {
                 <td className="border-r border-gray-300 py-2 px-1">{items.reduce((sum, item) => sum + item.quantity, 0)} {items[0]?.product?.unit || "NOS"}</td>
                 <td className="border-r border-gray-300 py-2 px-2"></td>
                 <td className="border-r border-gray-300 py-2 px-2 text-right">
-                  ₹{items.reduce((sum, item) => {
+                  {"\u20B9"}{items.reduce((sum, item) => {
                     const itemTaxRate = item.product?.taxRate ?? 0;
                     const rateExclusive = item.unitPrice / (1 + itemTaxRate / 100);
                     return sum + (item.quantity * rateExclusive);
@@ -217,7 +217,7 @@ export default async function PublicInvoicePage({ params }) {
                   <div className="flex h-full items-stretch">
                     <span className="w-1/2 border-r border-gray-300"></span>
                     <span className="w-1/2 py-2 px-1 text-right">
-                      ₹{items.reduce((sum, item) => {
+                      {"\u20B9"}{items.reduce((sum, item) => {
                         const itemTaxRate = item.product?.taxRate ?? 0;
                         const lineTotal = item.quantity * item.unitPrice;
                         const rateExclusive = item.unitPrice / (1 + itemTaxRate / 100);
@@ -226,7 +226,7 @@ export default async function PublicInvoicePage({ params }) {
                     </span>
                   </div>
                 </td>
-                <td className="py-2 px-2 text-right">₹{subtotal.toFixed(2)}</td>
+                <td className="py-2 px-2 text-right">{"\u20B9"}{subtotal.toFixed(2)}</td></td>
               </tr>
             </tbody>
           </table>
@@ -286,37 +286,37 @@ export default async function PublicInvoicePage({ params }) {
               <div className="space-y-1.5 bg-gray-50/50 p-3 rounded border border-gray-200 text-[10px]">
                 <div className="flex justify-between text-gray-600">
                   <span>Taxable Amount</span>
-                  <span className="font-semibold text-gray-900">₹{(invoice.grandTotal - invoice.totalTax).toFixed(2)}</span>
+                  <span className="font-semibold text-gray-900">{"\u20B9"}{(invoice.grandTotal - invoice.totalTax).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Add : GST Tax</span>
-                  <span className="font-semibold text-gray-900">₹{invoice.totalTax.toFixed(2)}</span>
+                  <span className="font-semibold text-gray-900">{"\u20B9"}{invoice.totalTax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-1.5">
                   <span>Total Tax</span>
-                  <span>₹{invoice.totalTax.toFixed(2)}</span>
+                  <span>{"\u20B9"}{invoice.totalTax.toFixed(2)}</span>
                 </div>
                 
                 {invoice.discountPercentage > 0 && (
                   <div className="flex justify-between text-rose-600 font-bold">
                     <span>Less: Discount ({invoice.discountPercentage}%)</span>
-                    <span>-₹{discountAmount.toFixed(2)}</span>
+                    <span>-{"\u20B9"}{discountAmount.toFixed(2)}</span>
                   </div>
                 )}
                 
                 <div className="flex justify-between font-black text-gray-950 border-t-2 border-gray-900 pt-2 text-xs">
                   <span>Total Amount After Tax</span>
-                  <span>₹{invoice.grandTotal.toFixed(2)}</span>
+                  <span>{"\u20B9"}{invoice.grandTotal.toFixed(2)}</span>
                 </div>
                 
                 <div className="flex justify-between text-green-600 font-bold pt-1">
                   <span>Amount Paid</span>
-                  <span>₹{invoice.amountPaid.toFixed(2)}</span>
+                  <span>{"\u20B9"}{invoice.amountPaid.toFixed(2)}</span>
                 </div>
                 
                 <div className="flex justify-between text-rose-600 font-black border-t border-gray-200 pt-1.5">
                   <span>Balance Due</span>
-                  <span>₹{balance.toFixed(2)}</span>
+                  <span>{"\u20B9"}{balance.toFixed(2)}</span>
                 </div>
               </div>
 

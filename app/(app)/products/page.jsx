@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -102,6 +102,9 @@ export default function ProductsPage() {
     imageBase64: ''
   });
 
+  const [customCategory, setCustomCategory] = useState('');
+  const [customUnit, setCustomUnit] = useState('');
+
   useEffect(() => {
     fetchProducts();
   }, [categoryFilter, activeTab]);
@@ -149,6 +152,8 @@ export default function ProductsPage() {
       description: '',
       imageBase64: ''
     });
+    setCustomCategory('');
+    setCustomUnit('');
     setEditingItem(null);
   };
 
@@ -159,6 +164,22 @@ export default function ProductsPage() {
 
   const openEditDialog = (item) => {
     setEditingItem(item);
+
+    const standardCategories = [
+      'Grocery', 'Hardware', 'Electronics', 'Medical / Pharma', 'Clothing & Apparel', 'Stationery', 'Furniture', 'Food & Beverages',
+      'Seeds & Planting', 'Fertilizers', 'Pesticides & Insecticides', 'Herbicides & Weedicides', 'Fungicides', 'Crop Protection',
+      'Irrigation Equipment', 'Farm Tools & Equipment', 'Animal Feed & Fodder', 'Veterinary Medicines', 'Organic Products', 'Soil Amendments',
+      'Services', 'Repair & Maintenance', 'Transport & Delivery', 'Consulting'
+    ];
+    const isStandardCategory = standardCategories.includes(item.category);
+    const categoryVal = isStandardCategory ? (item.category || 'Other') : 'Other';
+    setCustomCategory(isStandardCategory ? '' : (item.category || ''));
+
+    const standardUnits = ['pcs', 'kg', 'g', 'ltr', 'ml', 'box', 'nos', 'bag', 'mtr', 'doz', 'pac'];
+    const isStandardUnit = standardUnits.includes(item.unit);
+    const unitVal = item.isService ? '' : (isStandardUnit ? (item.unit || 'pcs') : 'Other');
+    setCustomUnit(isStandardUnit ? '' : (item.unit || ''));
+
     setFormData({
       name: item.name,
       price: item.price.toString(),
@@ -166,8 +187,8 @@ export default function ProductsPage() {
       trackInventory: item.trackInventory,
       stockCount: item.stockCount !== null ? item.stockCount.toString() : '',
       lowStockAlert: item.lowStockAlert !== null ? item.lowStockAlert.toString() : '',
-      category: item.category || 'Other',
-      unit: item.unit || '',
+      category: categoryVal,
+      unit: unitVal,
       isService: item.isService,
       description: item.description || '',
       imageBase64: item.imageBase64 || ''
@@ -190,7 +211,8 @@ export default function ProductsPage() {
       trackInventory: activeTab === 'services' ? false : formData.trackInventory,
       stockCount: (activeTab === 'services' || !formData.trackInventory) ? null : parseInt(formData.stockCount || '0'),
       lowStockAlert: (activeTab === 'services' || !formData.trackInventory) ? null : parseInt(formData.lowStockAlert || '0'),
-      unit: activeTab === 'services' ? null : formData.unit
+      category: formData.category === 'Other' ? customCategory : formData.category,
+      unit: activeTab === 'services' ? null : (formData.unit === 'Other' ? customUnit : formData.unit)
     };
 
     try {
@@ -382,7 +404,7 @@ export default function ProductsPage() {
                               {item.category || 'Grocery'}
                             </span>
                           </TableCell>
-                          <TableCell className="text-right font-bold text-gray-900">â‚¹{item.price.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-bold text-gray-900">{"\u20B9"}{item.price.toFixed(2)}</TableCell>
                           <TableCell className="text-center text-gray-600 font-medium">{item.taxRate}%</TableCell>
                           <TableCell className="text-center text-gray-600 font-medium">{item.unit || 'pcs'}</TableCell>
                           <TableCell className="text-center">
@@ -471,7 +493,7 @@ export default function ProductsPage() {
                             {item.category || 'Services'}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right font-bold text-gray-900">â‚¹{item.price.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-bold text-gray-900">{"\u20B9"}{item.price.toFixed(2)}</TableCell>
                         <TableCell className="text-center text-gray-600 font-medium">{item.taxRate}%</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
@@ -525,7 +547,7 @@ export default function ProductsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="price">Price (â‚¹)</Label>
+                  <Label htmlFor="price">Price ({"\u20B9"})</Label>
                   <Input
                     id="price"
                     type="number"
@@ -564,19 +586,19 @@ export default function ProductsPage() {
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent className="max-h-72">
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400">â€” General â€”</div>
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400">— General —</div>
                       {['Grocery', 'Hardware', 'Electronics', 'Medical / Pharma', 'Clothing & Apparel', 'Stationery', 'Furniture', 'Food & Beverages'].map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-600 mt-1">â€” Agriculture & Farming â€”</div>
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-600 mt-1">— Agriculture & Farming —</div>
                       {['Seeds & Planting', 'Fertilizers', 'Pesticides & Insecticides', 'Herbicides & Weedicides', 'Fungicides', 'Crop Protection', 'Irrigation Equipment', 'Farm Tools & Equipment', 'Animal Feed & Fodder', 'Veterinary Medicines', 'Organic Products', 'Soil Amendments'].map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-500 mt-1">â€” Services â€”</div>
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-500 mt-1">— Services —</div>
                       {['Services', 'Repair & Maintenance', 'Transport & Delivery', 'Consulting'].map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">â€” Other â€”</div>
+                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">— Other —</div>
                       <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
@@ -585,16 +607,55 @@ export default function ProductsPage() {
                 {activeTab === 'products' && (
                   <div className="space-y-1.5">
                     <Label htmlFor="unit">Unit Measure</Label>
-                    <Input
-                      id="unit"
+                    <Select
                       value={formData.unit}
-                      onChange={(e) => setFormData(prev => ({ ...prev, unit: e.target.value }))}
-                      placeholder="e.g. kg, pcs, box"
-                      className="rounded-xl border-gray-200"
-                    />
+                      onValueChange={(val) => setFormData(prev => ({ ...prev, unit: val }))}
+                    >
+                      <SelectTrigger className="rounded-xl border-gray-200">
+                        <SelectValue placeholder="Unit" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60">
+                        {['pcs', 'kg', 'g', 'ltr', 'ml', 'box', 'nos', 'bag', 'mtr', 'doz', 'pac', 'Other'].map(u => (
+                          <SelectItem key={u} value={u}>{u}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
               </div>
+
+              {/* Custom Category and Custom Unit text boxes */}
+              {(formData.category === 'Other' || (activeTab === 'products' && formData.unit === 'Other')) && (
+                <div className="grid grid-cols-2 gap-4">
+                  {formData.category === 'Other' ? (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="customCategory">Custom Category Name</Label>
+                      <Input
+                        id="customCategory"
+                        value={customCategory}
+                        onChange={(e) => setCustomCategory(e.target.value)}
+                        placeholder="Enter custom category"
+                        className="rounded-xl border-gray-200"
+                        required
+                      />
+                    </div>
+                  ) : <div />}
+
+                  {activeTab === 'products' && formData.unit === 'Other' ? (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="customUnit">Custom Unit Name</Label>
+                      <Input
+                        id="customUnit"
+                        value={customUnit}
+                        onChange={(e) => setCustomUnit(e.target.value)}
+                        placeholder="Enter custom unit (e.g. roll)"
+                        className="rounded-xl border-gray-200"
+                        required
+                      />
+                    </div>
+                  ) : <div />}
+                </div>
+              )}
 
               {activeTab === 'products' && (
                 <div className="space-y-4 pt-2 border-t border-gray-100">

@@ -683,7 +683,7 @@ export function InvoicePDF({ invoice }) {
                     `upi://pay?pa=${shop.upiId}&pn=${encodeURIComponent(shop.businessName)}&am=${balance.toFixed(2)}&cu=INR&tn=${encodeURIComponent(invoice.invoiceNum)}`
                   )}`}
                 />
-                <Text style={styles.qrCaption}>Scan to Pay{'\n'}Outstanding: ₹{balance.toFixed(2)}</Text>
+                <Text style={styles.qrCaption}>Scan to Pay{'\n'}Outstanding: Rs. {balance.toFixed(2)}</Text>
               </View>
             )}
 
@@ -702,38 +702,38 @@ export function InvoicePDF({ invoice }) {
             <View>
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Taxable Amount</Text>
-                <Text style={styles.summaryValue}>₹{totalTaxable.toFixed(2)}</Text>
+                <Text style={styles.summaryValue}>Rs. {totalTaxable.toFixed(2)}</Text>
               </View>
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Add: GST</Text>
-                <Text style={styles.summaryValue}>₹{totalGst.toFixed(2)}</Text>
+                <Text style={styles.summaryValue}>Rs. {totalGst.toFixed(2)}</Text>
               </View>
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Sub Total</Text>
-                <Text style={styles.summaryValue}>₹{subtotal.toFixed(2)}</Text>
+                <Text style={styles.summaryValue}>Rs. {subtotal.toFixed(2)}</Text>
               </View>
               {(invoice.discountPercentage ?? 0) > 0 && (
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>
                     Less: Discount ({invoice.discountPercentage}%)
                   </Text>
-                  <Text style={styles.summaryValueRed}>-₹{discountAmt.toFixed(2)}</Text>
+                  <Text style={styles.summaryValueRed}>-Rs. {discountAmt.toFixed(2)}</Text>
                 </View>
               )}
               <View style={styles.summaryDivider} />
               <View style={styles.summaryTotalRow}>
                 <Text style={styles.summaryTotalLabel}>Grand Total</Text>
-                <Text style={styles.summaryTotalValue}>₹{Number(invoice.grandTotal).toFixed(2)}</Text>
+                <Text style={styles.summaryTotalValue}>Rs. {Number(invoice.grandTotal).toFixed(2)}</Text>
               </View>
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Amount Paid</Text>
-                <Text style={styles.summaryValueGreen}>₹{Number(invoice.amountPaid).toFixed(2)}</Text>
+                <Text style={styles.summaryValueGreen}>Rs. {Number(invoice.amountPaid).toFixed(2)}</Text>
               </View>
               <View style={styles.summaryRow}>
                 <Text style={[styles.summaryLabel, { fontFamily: 'Helvetica-Bold', color: '#dc2626' }]}>
                   Balance Due
                 </Text>
-                <Text style={styles.summaryValueRed}>₹{balance.toFixed(2)}</Text>
+                <Text style={styles.summaryValueRed}>Rs. {balance.toFixed(2)}</Text>
               </View>
             </View>
 

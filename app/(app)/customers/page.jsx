@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Plus, Search, Edit2, Trash2, User, Phone, Mail, MapPin, Receipt, ArrowRight, Download, Printer, RefreshCw, ChevronRight, MessageSquare } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, User, Phone, Mail, MapPin, Receipt, ArrowRight, Download, Printer, RefreshCw, ChevronRight, MessageSquare, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { downloadCSV } from '@/lib/csv';
 import { useCan } from '@/lib/permissions/PermissionContext';
@@ -29,6 +30,17 @@ export default function CustomersPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
+  // Settle Payment Dialog State
+  const [isSettleDialogOpen, setIsSettleDialogOpen] = useState(false);
+  const [settleForm, setSettleForm] = useState({
+    amount: '',
+    paymentMethod: 'CASH',
+    notes: '',
+    paymentDate: new Date().toISOString().substring(0, 10),
+    referenceNumber: ''
+  });
+  const [settlingPayment, setSettlingPayment] = useState(false);
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -40,6 +52,44 @@ export default function CustomersPage() {
   });
 
   const printRef = useRef(null);
+
+  const handleSettlePayment = async (e) => {
+    e.preventDefault();
+    if (!selectedCustomer) return;
+
+    const amt = parseFloat(settleForm.amount);
+    if (isNaN(amt) || amt <= 0 || amt > selectedCustomer.totalPending) {
+      toast.error(`Please enter a valid amount between 0 and \u20B9${selectedCustomer.totalPending.toFixed(2)}`);
+      return;
+    }
+
+    setSettlingPayment(true);
+    try {
+      const res = await fetch(`/api/customers/${selectedCustomer.id}/settle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settleForm),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(`Settled \u20B9${amt.toFixed(2)} across customer invoices!`);
+        setIsSettleDialogOpen(false);
+        await fetchCustomers();
+        if (data.customer) {
+          await fetchCustomerLedger(data.customer);
+        }
+      } else {
+        const err = await res.json();
+        toast.error(err.error || 'Failed to settle payment');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Error recording settlement');
+    } finally {
+      setSettlingPayment(false);
+    }
+  };
 
   useEffect(() => {
     fetchCustomers();
@@ -207,14 +257,14 @@ export default function CustomersPage() {
 
     const lines = pendingInvoices.slice(0, 5).map(inv => {
       const bal = inv.grandTotal - inv.amountPaid;
-      return `  â€¢ ${inv.invoiceNum} | ${new Date(inv.issuedAt).toLocaleDateString()} | Due: â‚¹${bal.toFixed(2)}`;
+      return `  \u2022 ${inv.invoiceNum} | ${new Date(inv.issuedAt).toLocaleDateString()} | Due: \u20B9${bal.toFixed(2)}`;
     }).join('\n');
 
     const message = `Dear ${selectedCustomer.name},
 
 This is a payment reminder from ${vendorShop.businessName}.
 
-You have ${pendingInvoices.length} unpaid invoice(s) totaling â‚¹${totalPending.toFixed(2)}.
+You have ${pendingInvoices.length} unpaid invoice(s) totaling \u20B9${totalPending.toFixed(2)}.
 
 Pending Bills:
 ${lines || '  (no pending invoices)'}
@@ -323,7 +373,7 @@ ${vendorShop.businessName}`;
                       <div className="text-right hidden sm:block">
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${c.totalPending > 0 ? 'bg-rose-50 text-rose-600' : 'bg-green-50 text-green-600'
                           }`}>
-                          {c.totalPending > 0 ? `Pending: â‚¹${c.totalPending.toFixed(0)}` : 'Cleared'}
+                          {c.totalPending > 0 ? `Pending: \u20B9${c.totalPending.toFixed(0)}` : 'Cleared'}
                         </span>
                       </div>
                       <div className="flex gap-1">
@@ -370,15 +420,34 @@ ${vendorShop.businessName}`;
                       Print / PDF
                     </Button>
                     {selectedCustomer.totalPending > 0 && (
-                      <a
-                        href={getWhatsAppLedgerLink()}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold bg-green-600 hover:bg-green-700 text-white transition-colors"
-                      >
-                        <MessageSquare className="h-3.5 w-3.5" />
-                        Send Reminder
-                      </a>
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setSettleForm({
+                              amount: selectedCustomer.totalPending.toFixed(2),
+                              paymentMethod: 'CASH',
+                              notes: '',
+                              paymentDate: new Date().toISOString().substring(0, 10),
+                              referenceNumber: ''
+                            });
+                            setIsSettleDialogOpen(true);
+                          }}
+                          className="rounded-full font-bold flex items-center gap-1 text-xs px-3 bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <DollarSign className="h-3.5 w-3.5" />
+                          Settle Balance
+                        </Button>
+                        <a
+                          href={getWhatsAppLedgerLink()}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold bg-green-600 hover:bg-green-700 text-white transition-colors"
+                        >
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          Send Reminder
+                        </a>
+                      </>
                     )}
                   </div>
                 </CardHeader>
@@ -392,12 +461,12 @@ ${vendorShop.businessName}`;
                     </div>
                     <div className="text-center border-x border-gray-200">
                       <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Total Paid</p>
-                      <h3 className="text-lg font-black text-green-600 mt-1">â‚¹{selectedCustomer.totalPaid.toFixed(2)}</h3>
+                      <h3 className="text-lg font-black text-green-600 mt-1">{"\u20B9"}{selectedCustomer.totalPaid.toFixed(2)}</h3>
                     </div>
                     <div className="text-center">
                       <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Balance Due</p>
                       <h3 className={`text-lg font-black mt-1 ${selectedCustomer.totalPending > 0 ? 'text-rose-600 animate-pulse' : 'text-gray-900'}`}>
-                        â‚¹{selectedCustomer.totalPending.toFixed(2)}
+                        {"\u20B9"}{selectedCustomer.totalPending.toFixed(2)}
                       </h3>
                     </div>
                   </div>
@@ -457,9 +526,9 @@ ${vendorShop.businessName}`;
                                       {inv.status}
                                     </span>
                                   </TableCell>
-                                  <TableCell className="text-right font-bold text-gray-900">â‚¹{inv.grandTotal.toFixed(0)}</TableCell>
-                                  <TableCell className="text-right text-green-600 font-semibold">â‚¹{inv.amountPaid.toFixed(0)}</TableCell>
-                                  <TableCell className="text-right text-rose-600 font-semibold">â‚¹{bal.toFixed(0)}</TableCell>
+                                  <TableCell className="text-right font-bold text-gray-900">{"\u20B9"}{inv.grandTotal.toFixed(0)}</TableCell>
+                                  <TableCell className="text-right text-green-600 font-semibold">{"\u20B9"}{inv.amountPaid.toFixed(0)}</TableCell>
+                                  <TableCell className="text-right text-rose-600 font-semibold">{"\u20B9"}{bal.toFixed(0)}</TableCell>
                                   <TableCell className="text-right print:hidden">
                                     <Link href={`/invoices?search=${inv.invoiceNum}`} className="inline-flex h-6 w-6 items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-full border border-gray-100 text-gray-500 hover:text-black">
                                       <ChevronRight className="h-3.5 w-3.5" />
@@ -497,11 +566,11 @@ ${vendorShop.businessName}`;
                   </div>
                   <div className="text-center border-x-2 border-gray-300">
                     <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Total Paid</p>
-                    <h3 className="text-xl font-black mt-1">â‚¹{selectedCustomer.totalPaid.toFixed(2)}</h3>
+                    <h3 className="text-xl font-black mt-1">{"\u20B9"}{selectedCustomer.totalPaid.toFixed(2)}</h3>
                   </div>
                   <div className="text-center">
                     <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Total Outstanding</p>
-                    <h3 className="text-xl font-black mt-1 text-red-600">â‚¹{selectedCustomer.totalPending.toFixed(2)}</h3>
+                    <h3 className="text-xl font-black mt-1 text-red-600">{"\u20B9"}{selectedCustomer.totalPending.toFixed(2)}</h3>
                   </div>
                 </div>
 
@@ -524,9 +593,9 @@ ${vendorShop.businessName}`;
                           <td className="py-2 font-semibold">{inv.invoiceNum}</td>
                           <td className="py-2">{new Date(inv.issuedAt).toLocaleDateString()}</td>
                           <td className="py-2 text-center uppercase font-bold">{inv.status}</td>
-                          <td className="py-2 text-right">â‚¹{inv.grandTotal.toFixed(2)}</td>
-                          <td className="py-2 text-right">â‚¹{inv.amountPaid.toFixed(2)}</td>
-                          <td className="py-2 text-right font-bold">â‚¹{(inv.grandTotal - inv.amountPaid).toFixed(2)}</td>
+                          <td className="py-2 text-right">{"\u20B9"}{inv.grandTotal.toFixed(2)}</td>
+                          <td className="py-2 text-right">{"\u20B9"}{inv.amountPaid.toFixed(2)}</td>
+                          <td className="py-2 text-right font-bold">{"\u20B9"}{(inv.grandTotal - inv.amountPaid).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -634,6 +703,125 @@ ${vendorShop.businessName}`;
               </Button>
               <Button type="submit" className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6">
                 Save Customer
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settle Balance Dialog */}
+      <Dialog open={isSettleDialogOpen} onOpenChange={setIsSettleDialogOpen}>
+        <DialogContent className="rounded-2xl sm:max-w-100 bg-white">
+          <form onSubmit={handleSettlePayment}>
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-xl font-bold text-gray-900">Settle Balance</DialogTitle>
+              <DialogDescription>
+                Record a lump-sum payment of X amount for {selectedCustomer?.name} to settle their oldest outstanding invoices first.
+              </DialogDescription>
+            </DialogHeader>
+
+            {selectedCustomer && (
+              <div className="space-y-4 py-2">
+                <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs space-y-1.5 font-medium">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Total Billed:</span>
+                    <span className="text-gray-900">{"\u20B9"}{(selectedCustomer.totalPaid + selectedCustomer.totalPending).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Total Paid:</span>
+                    <span className="text-green-600">{"\u20B9"}{selectedCustomer.totalPaid.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-gray-200/60 pt-1.5 font-bold text-rose-600">
+                    <span>Balance Outstanding:</span>
+                    <span>{"\u20B9"}{selectedCustomer.totalPending.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="settleAmount">Settlement Amount ({"\u20B9"})</Label>
+                  <Input
+                    id="settleAmount"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max={selectedCustomer.totalPending}
+                    value={settleForm.amount}
+                    onChange={(e) => setSettleForm(prev => ({ ...prev, amount: e.target.value }))}
+                    required
+                    className="rounded-xl border-gray-200 font-bold"
+                    placeholder={`e.g. ${selectedCustomer.totalPending.toFixed(0)}`}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="settlePaymentMethod">Method</Label>
+                    <Select
+                      value={settleForm.paymentMethod}
+                      onValueChange={(val) => setSettleForm(prev => ({ ...prev, paymentMethod: val }))}
+                    >
+                      <SelectTrigger id="settlePaymentMethod" className="rounded-xl border-gray-200">
+                        <SelectValue placeholder="Select Method" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="CASH">Cash</SelectItem>
+                        <SelectItem value="UPI">UPI</SelectItem>
+                        <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+                        <SelectItem value="CHEQUE">Cheque</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="settlePaymentDate">Date</Label>
+                    <Input
+                      id="settlePaymentDate"
+                      type="date"
+                      value={settleForm.paymentDate}
+                      onChange={(e) => setSettleForm(prev => ({ ...prev, paymentDate: e.target.value }))}
+                      required
+                      className="rounded-xl border-gray-200"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="settleReferenceNumber">Reference Number (Optional)</Label>
+                  <Input
+                    id="settleReferenceNumber"
+                    value={settleForm.referenceNumber}
+                    onChange={(e) => setSettleForm(prev => ({ ...prev, referenceNumber: e.target.value }))}
+                    placeholder="Transaction ID, Cheque No, etc."
+                    className="rounded-xl border-gray-200"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="settleNotes">Notes / Remarks</Label>
+                  <Input
+                    id="settleNotes"
+                    value={settleForm.notes}
+                    onChange={(e) => setSettleForm(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="e.g. Paid in full / Part payment"
+                    className="rounded-xl border-gray-200"
+                  />
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsSettleDialogOpen(false)} className="rounded-full border-gray-200 px-6 font-bold">
+                Cancel
+              </Button>
+              <Button type="submit" disabled={settlingPayment} className="font-bold bg-green-600 hover:bg-green-700 text-white rounded-full px-6 gap-1.5">
+                {settlingPayment ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Settling...
+                  </>
+                ) : (
+                  'Settle Dues'
+                )}
               </Button>
             </DialogFooter>
           </form>

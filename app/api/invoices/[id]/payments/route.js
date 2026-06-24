@@ -51,7 +51,7 @@ export async function POST(req, { params }) {
           ? Math.round((current.grandTotal - current.amountPaid) * 100) / 100
           : 0;
         throw Object.assign(
-          new Error(`Payment of ₹${parsedAmount} exceeds remaining balance of ₹${remaining}`),
+          new Error(`Payment of \u20B9${parsedAmount} exceeds remaining balance of \u20B9${remaining}`),
           { code: 'OVER_PAYMENT', remaining }
         );
       }
@@ -98,7 +98,7 @@ export async function POST(req, { params }) {
     await logActivity({
       shopId: user.shopId, userId: user.id,
       action: 'payment.record', entityType: 'Invoice', entityId: id,
-      description: `Recorded ₹${parsedAmount.toFixed(2)} payment on ${invoice.invoiceNum}`,
+      description: `Recorded \u20B9${parsedAmount.toFixed(2)} payment on ${invoice.invoiceNum}`,
     });
 
     return NextResponse.json({

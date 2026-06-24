@@ -74,7 +74,7 @@ export default async function PublicCustomerLedgerPage({ params }) {
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
             <span className="text-xs text-gray-400 font-bold block">Total Outstanding</span>
-            <span className="text-sm font-black text-rose-600">₹{totalPending.toFixed(2)}</span>
+            <span className="text-sm font-black text-rose-600">{"\u20B9"}{totalPending.toFixed(2)}</span></span>
           </div>
           <PrintButton />
         </div>
@@ -161,12 +161,12 @@ export default async function PublicCustomerLedgerPage({ params }) {
           </div>
           <div className="border-x border-gray-200">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Paid</p>
-            <h3 className="text-xl font-black text-green-600 mt-1">₹{totalPaid.toFixed(2)}</h3>
+            <h3 className="text-xl font-black text-green-600 mt-1">{"\u20B9"}{totalPaid.toFixed(2)}</h3>
           </div>
           <div>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Outstanding Due</p>
             <h3 className={`text-xl font-black mt-1 ${totalPending > 0 ? 'text-rose-600' : 'text-gray-900'}`}>
-              ₹{totalPending.toFixed(2)}
+              {"\u20B9"}{totalPending.toFixed(2)}
             </h3>
           </div>
         </div>
@@ -197,9 +197,9 @@ export default async function PublicCustomerLedgerPage({ params }) {
                       <td className="py-3 px-3 font-semibold text-gray-900">{inv.invoiceNum}</td>
                       <td className="py-3 px-3 text-gray-650">{new Date(inv.issuedAt).toLocaleDateString()}</td>
                       <td className="py-3 px-3 text-center">{getStatusBadge(inv.status)}</td>
-                      <td className="py-3 px-3 text-right font-bold text-gray-900">₹{inv.grandTotal.toFixed(2)}</td>
-                      <td className="py-3 px-3 text-right text-green-600 font-semibold">₹{inv.amountPaid.toFixed(2)}</td>
-                      <td className="py-3 px-3 text-right text-rose-600 font-bold">₹{bal.toFixed(2)}</td>
+                      <td className="py-3 px-3 text-right font-bold text-gray-900">{"\u20B9"}{inv.grandTotal.toFixed(2)}</td>
+                      <td className="py-3 px-3 text-right text-green-600 font-semibold">{"\u20B9"}{inv.amountPaid.toFixed(2)}</td>
+                      <td className="py-3 px-3 text-right text-rose-600 font-bold">{"\u20B9"}{bal.toFixed(2)}</td></td>
                     </tr>
                   );
                 })}

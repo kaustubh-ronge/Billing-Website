@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import {
   FileText, Search, Plus, DollarSign, MessageSquare, Bell,
   RefreshCw, CheckCircle, AlertCircle, HelpCircle, Calendar, Trash2, Download,
-  FileDown, ArrowUpRight
+  FileDown, ArrowUpRight, Printer
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -117,7 +117,7 @@ function InvoicesList() {
     const amt = parseFloat(paymentForm.amount);
     const balance = selectedInvoice.grandTotal - selectedInvoice.amountPaid;
     if (isNaN(amt) || amt <= 0 || amt > balance) {
-      toast.error(`Please enter a valid amount between 0 and â‚¹${balance.toFixed(2)}`);
+      toast.error(`Please enter a valid amount between 0 and \u20B9${balance.toFixed(2)}`);
       return;
     }
 
@@ -174,7 +174,7 @@ function InvoicesList() {
 
     const message = `Dear ${inv.customer.name},
 
-Your invoice ${inv.invoiceNum} for â‚¹${balance.toFixed(2)} is pending.
+Your invoice ${inv.invoiceNum} for \u20B9${balance.toFixed(2)} is pending.
 
 Please make the payment at your earliest convenience. You can view and download the PDF here:
 ${publicInvoiceUrl}
@@ -202,7 +202,7 @@ ${vendorShop.businessName}`;
 Thank you for your purchase.
 
 Invoice Number: ${inv.invoiceNum}
-Amount: â‚¹${inv.grandTotal.toFixed(2)}
+Amount: \u20B9${inv.grandTotal.toFixed(2)}
 Payment Status: ${inv.status}
 
 View and Download PDF Invoice:
@@ -355,9 +355,9 @@ ${vendorShop.businessName}`;
                       <TableCell className="text-center">
                         {getStatusBadge(inv.status)}
                       </TableCell>
-                      <TableCell className="text-right font-bold text-gray-900">â‚¹{inv.grandTotal.toFixed(2)}</TableCell>
-                      <TableCell className="text-right text-green-600 font-semibold">â‚¹{inv.amountPaid.toFixed(2)}</TableCell>
-                      <TableCell className="text-right text-rose-600 font-semibold">â‚¹{bal.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-bold text-gray-900">{"\u20B9"}{inv.grandTotal.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-green-600 font-semibold">{"\u20B9"}{inv.amountPaid.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-rose-600 font-semibold">{"\u20B9"}{bal.toFixed(2)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1.5 flex-wrap md:flex-nowrap">
                           {bal > 0 && (
@@ -391,6 +391,15 @@ ${vendorShop.businessName}`;
                             className="inline-flex h-8 items-center px-3 border border-green-200 hover:bg-green-50 text-green-700 rounded-full font-bold text-xs gap-1"
                           >
                             <MessageSquare className="h-3 w-3" /> Share
+                          </a>
+                          <a
+                            href={`/api/invoices/${inv.id}/pdf`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                            title="Print Invoice"
+                          >
+                            <Printer className="h-4 w-4" />
                           </a>
                           <a
                             href={`/api/invoices/${inv.id}/pdf`}
@@ -439,20 +448,20 @@ ${vendorShop.businessName}`;
                 <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-gray-500 font-medium">Billed Grand Total:</span>
-                    <span className="font-bold text-gray-900">â‚¹{selectedInvoice.grandTotal.toFixed(2)}</span>
+                    <span className="font-bold text-gray-900">{"\u20B9"}{selectedInvoice.grandTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500 font-medium">Previously Paid:</span>
-                    <span className="font-bold text-green-600">â‚¹{selectedInvoice.amountPaid.toFixed(2)}</span>
+                    <span className="font-bold text-green-600">{"\u20B9"}{selectedInvoice.amountPaid.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between border-t border-gray-200/60 pt-1.5 font-bold text-rose-600">
                     <span>Due Balance:</span>
-                    <span>â‚¹{(selectedInvoice.grandTotal - selectedInvoice.amountPaid).toFixed(2)}</span>
+                    <span>{"\u20B9"}{(selectedInvoice.grandTotal - selectedInvoice.amountPaid).toFixed(2)}</span>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="payAmount">Amount Collected (â‚¹)</Label>
+                  <Label htmlFor="payAmount">Amount Collected ({"\u20B9"})</Label>
                   <Input
                     id="payAmount"
                     type="number"

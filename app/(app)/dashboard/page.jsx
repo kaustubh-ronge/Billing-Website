@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -71,7 +71,7 @@ export default function DashboardPage() {
   const metricCards = [
     {
       label: "Today's Revenue",
-      value: `₹${metrics.todaySales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+      value: `\u20B9${metrics.todaySales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
       sub: "Bills issued today",
       icon: IndianRupee,
       gradient: "from-blue-500 via-blue-600 to-indigo-600",
@@ -81,7 +81,7 @@ export default function DashboardPage() {
     },
     {
       label: "Monthly Sales",
-      value: `₹${metrics.monthlySales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+      value: `\u20B9${metrics.monthlySales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
       sub: "Current calendar month",
       icon: BarChart2,
       gradient: "from-violet-500 via-purple-600 to-purple-700",
@@ -91,7 +91,7 @@ export default function DashboardPage() {
     },
     {
       label: "Outstanding Due",
-      value: `₹${metrics.pendingPayments.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+      value: `\u20B9${metrics.pendingPayments.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
       sub: "Pending collections",
       icon: CircleDollarSign,
       gradient: "from-rose-500 via-rose-600 to-red-600",
@@ -208,7 +208,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <p className="text-2xl font-black text-white">
-              ₹{insights.expectedMonthlyRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              {"\u20B9"}{insights.expectedMonthlyRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
             </p>
             <p className="text-[11px] text-white/60 mt-1">Projected next month (10% trend)</p>
           </div>
@@ -283,9 +283,9 @@ export default function DashboardPage() {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                     <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} interval={4} />
-                    <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
+                    <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
                     <Tooltip
-                      formatter={(value) => [`₹${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 'Revenue']}
+                      formatter={(value) => [`\u20B9${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 'Revenue']}
                       contentStyle={{ borderRadius: '12px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--popover))', color: 'hsl(var(--popover-foreground))', fontSize: '12px' }}
                       cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
                     />
@@ -310,9 +310,9 @@ export default function DashboardPage() {
                   <BarChart data={charts.monthly} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                     <XAxis dataKey="month" tick={{ fontSize: 8, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
+                    <YAxis tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
                     <Tooltip
-                      formatter={(value) => [`₹${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 'Revenue']}
+                      formatter={(value) => [`\u20B9${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 'Revenue']}
                       contentStyle={{ borderRadius: '12px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--popover))', color: 'hsl(var(--popover-foreground))', fontSize: '12px' }}
                     />
                     <Bar dataKey="sales" fill="#8b5cf6" radius={[6, 6, 0, 0]} maxBarSize={32} />
@@ -359,7 +359,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <span className="text-sm font-black text-rose-600 bg-rose-50 dark:bg-rose-900/40 px-3 py-1 rounded-full border border-rose-200 dark:border-rose-800 shrink-0 ml-3">
-                    ₹{c.outstanding.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                    {"\u20B9"}{c.outstanding.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </span>
                 </div>
               ))
@@ -400,7 +400,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right shrink-0 ml-3">
                     <p className="text-sm font-bold text-foreground">{p.quantity} units</p>
-                    <p className="text-[11px] text-emerald-600 font-semibold">₹{p.revenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+                    <p className="text-[11px] text-emerald-600 font-semibold">{"\u20B9"}{p.revenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
                   </div>
                 </div>
               ))
