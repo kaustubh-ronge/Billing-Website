@@ -196,7 +196,7 @@ export default async function PublicInvoicePage({ params }) {
                         <span className="w-1/2 py-2 px-1 flex items-center justify-end font-medium">{"\u20B9"}{gstAmount.toFixed(2)}</span>
                       </div>
                     </td>
-                    <td className="py-2 px-2 text-right font-black text-gray-900">{"\u20B9"}{lineTotal.toFixed(2)}</td></td>
+                    <td className="py-2 px-2 text-right font-black text-gray-900">{"\u20B9"}{lineTotal.toFixed(2)}</td>
                   </tr>
                 );
               })}
@@ -226,7 +226,7 @@ export default async function PublicInvoicePage({ params }) {
                     </span>
                   </div>
                 </td>
-                <td className="py-2 px-2 text-right">{"\u20B9"}{subtotal.toFixed(2)}</td></td>
+                <td className="py-2 px-2 text-right">{"\u20B9"}{subtotal.toFixed(2)}</td>
               </tr>
             </tbody>
           </table>

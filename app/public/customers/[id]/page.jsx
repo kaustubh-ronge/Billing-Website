@@ -74,7 +74,7 @@ export default async function PublicCustomerLedgerPage({ params }) {
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
             <span className="text-xs text-gray-400 font-bold block">Total Outstanding</span>
-            <span className="text-sm font-black text-rose-600">{"\u20B9"}{totalPending.toFixed(2)}</span></span>
+            <span className="text-sm font-black text-rose-600">{"\u20B9"}{totalPending.toFixed(2)}</span>
           </div>
           <PrintButton />
         </div>
@@ -199,7 +199,7 @@ export default async function PublicCustomerLedgerPage({ params }) {
                       <td className="py-3 px-3 text-center">{getStatusBadge(inv.status)}</td>
                       <td className="py-3 px-3 text-right font-bold text-gray-900">{"\u20B9"}{inv.grandTotal.toFixed(2)}</td>
                       <td className="py-3 px-3 text-right text-green-600 font-semibold">{"\u20B9"}{inv.amountPaid.toFixed(2)}</td>
-                      <td className="py-3 px-3 text-right text-rose-600 font-bold">{"\u20B9"}{bal.toFixed(2)}</td></td>
+                      <td className="py-3 px-3 text-right text-rose-600 font-bold">{"\u20B9"}{bal.toFixed(2)}</td>
                     </tr>
                   );
                 })}
