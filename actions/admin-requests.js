@@ -19,8 +19,18 @@ export async function approveRequest(requestId) {
     throw new Error("Invalid request");
   }
 
-  // Create the Shop and update User
+  // Create the Shop and update User with strict concurrency control
   await db.$transaction(async (tx) => {
+    // 1. Verify the request is still pending INSIDE the transaction to avoid race conditions
+    const currentReq = await tx.registrationRequest.findUnique({
+      where: { id: requestId },
+    });
+
+    if (!currentReq || currentReq.status !== "PENDING") {
+      throw new Error("This request has already been processed by another admin.");
+    }
+
+    // 2. Create the Shop
     const shop = await tx.shop.create({
       data: {
         businessName: req.businessName,
@@ -33,6 +43,7 @@ export async function approveRequest(requestId) {
       },
     });
 
+    // 3. Link the shop to the user and mark as owner
     await tx.user.update({
       where: { id: req.user.id },
       data: {
@@ -41,12 +52,13 @@ export async function approveRequest(requestId) {
       },
     });
 
+    // 4. Mark request as approved
     await tx.registrationRequest.update({
       where: { id: req.id },
       data: { status: "APPROVED" },
     });
     
-    // Log activity
+    // 5. Log activity
     await tx.activityLog.create({
       data: {
         shopId: shop.id,
@@ -54,7 +66,7 @@ export async function approveRequest(requestId) {
         action: 'business.approved',
         entityType: 'Shop',
         entityId: shop.id,
-        description: 'Business registration was approved by Platform Admin',
+        description: 'Business registration was approved by Platform Admin. Shop ID generated.',
       },
     });
   });

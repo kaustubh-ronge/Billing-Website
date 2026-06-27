@@ -140,7 +140,7 @@ export default async function RequestDetailPage({ params }) {
               }}>
                 <Button className="w-full sm:w-auto gap-2">
                   <CheckCircle className="h-4 w-4" />
-                  Approve & Activate
+                  Generate Shop ID & Approve
                 </Button>
               </form>
             </div>

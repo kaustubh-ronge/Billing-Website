@@ -18,7 +18,7 @@ export default async function AppLayout({ children }) {
     redirect("/admin");
   }
 
-  if (user.registrationRequest && user.registrationRequest.status === "PENDING") {
+  if (user.registrationRequest && (user.registrationRequest.status === "PENDING" || user.registrationRequest.status === "REJECTED")) {
     redirect("/pending-approval");
   }
 

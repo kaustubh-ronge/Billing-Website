@@ -1,4 +1,5 @@
 import { submitRegistration } from "@/actions/registration";
+import { SubmitButton } from "./SubmitButton";
 import { checkUser } from "@/lib/checkUser";
 import { redirect } from "next/navigation";
 import { Building2, ArrowRight, FileText, Phone, MapPin } from "lucide-react";
@@ -15,7 +16,7 @@ export default async function RegisterBusinessPage() {
   // If somehow they got here but shouldn't be here, redirect them
   if (!user) redirect("/sign-in");
   if (user.systemRole === "ADMIN") redirect("/admin");
-  if (user.registrationRequest && user.registrationRequest.status === "PENDING") redirect("/pending-approval");
+  if (user.registrationRequest && (user.registrationRequest.status === "PENDING" || user.registrationRequest.status === "REJECTED")) redirect("/pending-approval");
   if (user.shopId) redirect("/dashboard");
 
   return (
@@ -153,10 +154,7 @@ export default async function RegisterBusinessPage() {
             </div>
 
             {/* Submit */}
-            <Button type="submit" className="w-full h-10 gap-2 mt-2" size="lg">
-              Submit Application
-              <ArrowRight className="h-4 w-4" />
-            </Button>
+            <SubmitButton />
 
             <p className="text-xs text-center text-muted-foreground pt-1">
               By submitting, you agree to our platform terms. Your application will be reviewed within 24-48 hours.
