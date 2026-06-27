@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 // Removed SignedIn and SignedOut to fix Turbopack error
@@ -42,13 +42,17 @@ export default function HeaderClient({ user }) {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           {user ? (
-            <>
-              <Link href="/dashboard" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Dashboard</Link>
-              <Link href="/invoices" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Invoices</Link>
-              <Link href="/customers" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Customers</Link>
-              <Link href="/products" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Products</Link>
-              <Link href="/settings" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Settings</Link>
-            </>
+            user.systemRole === "ADMIN" ? (
+              <Link href="/admin" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Admin Console</Link>
+            ) : (
+              <>
+                <Link href="/dashboard" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Dashboard</Link>
+                <Link href="/invoices" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Invoices</Link>
+                <Link href="/customers" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Customers</Link>
+                <Link href="/products" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Products</Link>
+                <Link href="/settings" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Settings</Link>
+              </>
+            )
           ) : (
             <>
               <a href="#features" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Features</a>
@@ -79,11 +83,13 @@ export default function HeaderClient({ user }) {
           ) : (
             /* LOGGED IN STATE */
             <>
-              <div className="hidden lg:flex items-center mr-2 px-4 py-1.5 bg-gray-100/80 backdrop-blur-sm border border-gray-200 rounded-full">
-                <span className="text-xs font-black text-gray-800 uppercase tracking-wider">
-                  {user.shopName}
-                </span>
-              </div>
+              {user.systemRole !== "ADMIN" && (
+                <div className="hidden lg:flex items-center mr-2 px-4 py-1.5 bg-gray-100/80 backdrop-blur-sm border border-gray-200 rounded-full">
+                  <span className="text-xs font-black text-gray-800 uppercase tracking-wider">
+                    {user.shopName || "PENDING"}
+                  </span>
+                </div>
+              )}
               <UserButton 
                 afterSignOutUrl="/" 
                 appearance={{ elements: { avatarBox: "w-10 h-10 border border-gray-200 shadow-sm" } }} 

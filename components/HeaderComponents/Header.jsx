@@ -9,6 +9,7 @@ export default async function Header() {
   const serializedUser = user ? {
     role: user.role,
     shopName: user.shop?.businessName,
+    systemRole: user.systemRole,
   } : null;
 
   return <HeaderClient user={serializedUser} />;

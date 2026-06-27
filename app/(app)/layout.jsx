@@ -9,6 +9,22 @@ export default async function AppLayout({ children }) {
   if (!user) {
     redirect("/sign-in");
   }
+  
+  if (user.error === "SUSPENDED") {
+    throw new Error("Your account has been suspended. Please contact the administrator.");
+  }
+  
+  if (user.systemRole === "ADMIN") {
+    redirect("/admin");
+  }
+
+  if (user.registrationRequest && user.registrationRequest.status === "PENDING") {
+    redirect("/pending-approval");
+  }
+
+  if (!user.shopId) {
+    redirect("/register-business");
+  }
 
   const permissions = resolvePermissions(user);
   const sessionUser = {

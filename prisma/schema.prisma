@@ -45,6 +45,17 @@ enum InvitationStatus {
   EXPIRED
 }
 
+enum SystemRole {
+  USER
+  ADMIN
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // --- CORE TENANT (Organization) ---
 
 model Shop {
@@ -191,9 +202,10 @@ model User {
   // Access control
   isOwner Boolean    @default(false) // org administrator — full access
   status  UserStatus @default(ACTIVE)
+  systemRole SystemRole @default(USER)
 
-  shopId String
-  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopId String?
+  shop   Shop?   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   // Optional org placement
   branchId String?
@@ -213,6 +225,7 @@ model User {
   permissionOverrides UserPermission[]
 
   activityLogs ActivityLog[]
+  registrationRequest RegistrationRequest?
 
   createdAt DateTime @default(now())
 
@@ -250,6 +263,26 @@ model Invitation {
 
   @@index([email])
   @@index([shopId])
+}
+
+// --- REGISTRATION REQUESTS ---
+
+model RegistrationRequest {
+  id           String   @id @default(cuid())
+  businessName String
+  taxId        String?
+  phone        String?
+  address      String?
+  status       RegistrationStatus @default(PENDING)
+  
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Future-ready fields
+  adminNotes   String?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 // --- ACTIVITY LOG ---

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -132,7 +132,7 @@ export default function SettingsPage() {
       <form onSubmit={handleSave}>
         {activeTab === 'profile' && (
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
-            <SectionHeader icon={Building2} title="Business Profile" description="Appears on every invoice header and customer-facing document." iconColor="text-blue-600" iconBg="bg-blue-50" />
+            <SectionHeader icon={Building2} title="Business Profile" description="Appears on every invoice header and customer-facing document." iconColor="text-blue-600 dark:text-blue-400" iconBg="bg-blue-500/10" />
             <div className="flex items-start gap-5 p-4 bg-muted/30 rounded-xl border border-border">
               <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border-2 border-dashed border-border bg-background overflow-hidden">
                 {formData.logoBase64 ? <img src={formData.logoBase64} alt="Logo" className="h-full w-full object-cover" /> : <ImageIcon className="h-7 w-7 text-muted-foreground" />}
@@ -160,7 +160,7 @@ export default function SettingsPage() {
 
         {activeTab === 'banking' && (
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
-            <SectionHeader icon={CreditCard} title="Banking & UPI Details" description="Payment collection info shown on invoices." iconColor="text-purple-600" iconBg="bg-purple-50" />
+            <SectionHeader icon={CreditCard} title="Banking & UPI Details" description="Payment collection info shown on invoices." iconColor="text-purple-600 dark:text-purple-400" iconBg="bg-purple-500/10" />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <FieldGroup label="Bank Name"><Input value={formData.bankName} onChange={set('bankName')} placeholder="e.g. HDFC Bank" className="rounded-xl border-border" /></FieldGroup>
               <FieldGroup label="Account Number"><Input value={formData.accountNum} onChange={set('accountNum')} placeholder="50100012345678" className="rounded-xl border-border font-mono" /></FieldGroup>
@@ -175,7 +175,7 @@ export default function SettingsPage() {
 
         {activeTab === 'invoice' && (
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
-            <SectionHeader icon={Receipt} title="Invoice Configuration" description="Numbering, taxes, and footer message on all invoices." iconColor="text-orange-600" iconBg="bg-orange-50" />
+            <SectionHeader icon={Receipt} title="Invoice Configuration" description="Numbering, taxes, and footer message on all invoices." iconColor="text-orange-600 dark:text-orange-400" iconBg="bg-orange-500/10" />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <FieldGroup label="Invoice Number Prefix" hint={`Preview: ${formData.invoicePrefix || 'INV'}-2025-0001`}><Input value={formData.invoicePrefix} onChange={set('invoicePrefix')} placeholder="INV" maxLength={10} className="rounded-xl border-border font-mono uppercase" /></FieldGroup>
               <FieldGroup label="Default GST Rate (%)" hint="Applied when adding new products."><Input value={formData.taxRate} onChange={set('taxRate')} type="number" step="0.1" min="0" max="100" className="rounded-xl border-border" /></FieldGroup>

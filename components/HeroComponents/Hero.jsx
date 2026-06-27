@@ -1,9 +1,9 @@
-﻿import HeroClient from "./HeroClient";
+import HeroClient from "./HeroClient";
 import Features from "./Features";
 import HowItWorks from "./HowItWorks";
 import CTA from "./CTA";
 
-export default function Hero() {
+export default function Hero({ systemRole }) {
   return (
     <div className="w-full bg-white flex flex-col overflow-x-hidden">
       
@@ -17,7 +17,7 @@ export default function Hero() {
         <div className="absolute top-0 inset-x-0 h-40 bg-linear-to-b from-white to-transparent z-10"></div>
 
         {/* The Animated Client Layer */}
-        <HeroClient />
+        <HeroClient systemRole={systemRole} />
         
       </section>
 
