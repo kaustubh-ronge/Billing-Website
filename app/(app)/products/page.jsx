@@ -358,7 +358,71 @@ export default function ProductsPage() {
 
           {/* Products List Content */}
           <TabsContent value="products">
-            <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden">
+            {/* Mobile card view */}
+            <div className="md:hidden space-y-3">
+              {loading ? (
+                <div className="text-center py-10 text-gray-500">
+                  <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-gray-400" />
+                  Loading products...
+                </div>
+              ) : products.length === 0 ? (
+                <div className="text-center py-12 text-gray-400">
+                  <Package className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                  No products found.
+                </div>
+              ) : products.map((item) => {
+                const isLowStock = item.trackInventory && item.stockCount !== null && item.stockCount <= (item.lowStockAlert ?? 5);
+                return (
+                  <div key={item.id} className="bg-white rounded-2xl border border-gray-150 shadow-sm p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-gray-900 text-sm">{item.name}</div>
+                        {item.description && <p className="text-xs text-gray-400 truncate mt-0.5">{item.description}</p>}
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${CATEGORY_COLORS[item.category] || 'bg-gray-100 text-gray-800'}`}>
+                            {item.category || 'Grocery'}
+                          </span>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+                            {item.unit || 'pcs'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="font-bold text-gray-900">{"\u20B9"}{item.price.toFixed(2)}</div>
+                        <div className="text-xs text-gray-500">GST {item.taxRate}%</div>
+                        {item.trackInventory && (
+                          <div className="mt-1">
+                            {isLowStock ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-black bg-rose-50 text-rose-600">
+                                <AlertTriangle className="h-3 w-3" /> {item.stockCount} Low
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-600">
+                                <CheckCircle className="h-3 w-3" /> {item.stockCount}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-1 mt-3 pt-3 border-t border-gray-100">
+                      {can('products:edit') && (
+                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)} className="h-8 w-8 text-gray-600 hover:text-black hover:bg-gray-100 rounded-full">
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {can('products:delete') && (
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="h-8 w-8 text-gray-600 hover:text-rose-600 hover:bg-rose-50 rounded-full">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Desktop table */}
+            <Card className="hidden md:block border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden">
               <Table>
                 <TableHeader className="bg-gray-50/50">
                   <TableRow>
@@ -451,7 +515,50 @@ export default function ProductsPage() {
 
           {/* Services List Content */}
           <TabsContent value="services">
-            <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden">
+            {/* Mobile card view */}
+            <div className="md:hidden space-y-3">
+              {loading ? (
+                <div className="text-center py-10 text-gray-500">
+                  <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-gray-400" />
+                  Loading services...
+                </div>
+              ) : products.length === 0 ? (
+                <div className="text-center py-12 text-gray-400">
+                  <Tag className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                  No service items found.
+                </div>
+              ) : products.map((item) => (
+                <div key={item.id} className="bg-white rounded-2xl border border-gray-150 shadow-sm p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-gray-900 text-sm">{item.name}</div>
+                      {item.description && <p className="text-xs text-gray-400 truncate mt-0.5">{item.description}</p>}
+                      <span className={`inline-flex items-center mt-2 px-2 py-0.5 rounded-full text-xs font-semibold ${CATEGORY_COLORS[item.category] || 'bg-indigo-50 text-indigo-700'}`}>
+                        {item.category || 'Services'}
+                      </span>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="font-bold text-gray-900">{"\u20B9"}{item.price.toFixed(2)}</div>
+                      <div className="text-xs text-gray-500">GST {item.taxRate}%</div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-1 mt-3 pt-3 border-t border-gray-100">
+                    {can('products:edit') && (
+                      <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)} className="h-8 w-8 text-gray-600 hover:text-black hover:bg-gray-100 rounded-full">
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {can('products:delete') && (
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="h-8 w-8 text-gray-600 hover:text-rose-600 hover:bg-rose-50 rounded-full">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Desktop table */}
+            <Card className="hidden md:block border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden">
               <Table>
                 <TableHeader className="bg-gray-50/50">
                   <TableRow>

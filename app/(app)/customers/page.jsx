@@ -321,8 +321,8 @@ ${vendorShop.businessName}`;
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Side: Customer Listing */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Left Side: Customer Listing — hidden on mobile when ledger is open */}
+        <div className={`lg:col-span-5 space-y-6 ${selectedCustomer ? 'hidden lg:block' : 'block'}`}>
           <form onSubmit={handleSearchSubmit} className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
@@ -370,10 +370,10 @@ ${vendorShop.businessName}`;
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="text-right hidden sm:block">
+                      <div className="text-right">
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${c.totalPending > 0 ? 'bg-rose-50 text-rose-600' : 'bg-green-50 text-green-600'
                           }`}>
-                          {c.totalPending > 0 ? `Pending: \u20B9${c.totalPending.toFixed(0)}` : 'Cleared'}
+                          {c.totalPending > 0 ? `\u20B9${c.totalPending.toFixed(0)}` : '\u2714'}
                         </span>
                       </div>
                       <div className="flex gap-1">
@@ -400,11 +400,18 @@ ${vendorShop.businessName}`;
         <div className="lg:col-span-7">
           {selectedCustomer ? (
             <div className="space-y-6">
+              {/* Mobile back button */}
+              <button
+                className="lg:hidden flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                onClick={() => setSelectedCustomer(null)}
+              >
+                <ChevronRight className="h-4 w-4 rotate-180" /> Back to Customers
+              </button>
               {/* Ledger Summary Card */}
               <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden print:shadow-none print:border-none">
-                <CardHeader className="bg-linear-to-r from-gray-50 to-white border-b border-gray-100 py-6 flex flex-row items-center justify-between gap-4">
+                <CardHeader className="bg-linear-to-r from-gray-50 to-white border-b border-gray-100 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <CardTitle className="text-xl font-bold flex items-center gap-2 text-gray-900">
+                    <CardTitle className="text-lg sm:text-xl font-bold flex items-center gap-2 text-gray-900">
                       <User className="h-5 w-5 text-gray-500" />
                       {selectedCustomer.name}
                     </CardTitle>
@@ -414,7 +421,7 @@ ${vendorShop.businessName}`;
                       {selectedCustomer.address && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {selectedCustomer.address}</span>}
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2 print:hidden">
+                  <div className="flex flex-wrap gap-2 print:hidden">
                     <Button variant="outline" size="sm" onClick={handlePrintLedger} className="rounded-full border-gray-200 font-bold flex items-center gap-1 text-xs px-3">
                       <Printer className="h-3.5 w-3.5" />
                       Print / PDF
@@ -485,8 +492,8 @@ ${vendorShop.businessName}`;
                       Invoice Ledger Timeline
                     </h4>
 
-                    <div className="border border-gray-100 rounded-xl overflow-hidden">
-                      <Table>
+                    <div className="border border-gray-100 rounded-xl overflow-x-auto">
+                      <Table className="min-w-[560px]">
                         <TableHeader className="bg-gray-50/50">
                           <TableRow>
                             <TableHead className="font-bold text-xs">Inv Num</TableHead>

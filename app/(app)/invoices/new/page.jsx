@@ -444,8 +444,8 @@ ${vendorShop.businessName}`;
 
           {/* Cart Table */}
           <div className="lg:col-span-8 space-y-6">
-            <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden">
-              <Table>
+            <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-x-auto">
+              <Table className="min-w-[500px]">
                 <TableHeader className="bg-gray-50/50">
                   <TableRow>
                     <TableHead className="font-bold text-xs">Item Name</TableHead>

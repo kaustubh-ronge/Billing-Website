@@ -309,8 +309,90 @@ ${vendorShop.businessName}`;
           </div>
         </div>
 
-        {/* Invoice list table */}
-        <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden">
+        {/* Invoice list — mobile cards + desktop table */}
+
+        {/* Mobile card list (hidden on md+) */}
+        <div className="md:hidden space-y-3">
+          {loading ? (
+            <div className="text-center py-10 text-gray-500">
+              <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-gray-400" />
+              Loading invoices...
+            </div>
+          ) : invoices.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">
+              <FileText className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+              No invoices found.
+            </div>
+          ) : (
+            invoices.map((inv) => {
+              const bal = inv.grandTotal - inv.amountPaid;
+              return (
+                <div key={inv.id} className="bg-white rounded-2xl border border-gray-150 shadow-sm p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-bold text-gray-900 text-sm">{inv.invoiceNum}</div>
+                      <div className="font-semibold text-gray-700 text-sm mt-0.5">{inv.customer.name}</div>
+                      <div className="text-xs text-gray-400">{inv.customer.phone}</div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5">
+                      {getStatusBadge(inv.status)}
+                      <span className="text-xs text-gray-400">{new Date(inv.issuedAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 bg-gray-50 rounded-xl p-3 text-xs">
+                    <div>
+                      <div className="text-gray-400 font-medium mb-0.5">Total</div>
+                      <div className="font-bold text-gray-900">{"\u20B9"}{inv.grandTotal.toFixed(2)}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-400 font-medium mb-0.5">Paid</div>
+                      <div className="font-bold text-green-600">{"\u20B9"}{inv.amountPaid.toFixed(2)}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-400 font-medium mb-0.5">Due</div>
+                      <div className={`font-bold ${bal > 0 ? 'text-rose-600' : 'text-green-600'}`}>{"\u20B9"}{bal.toFixed(2)}</div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {bal > 0 && can('payments:record') && (
+                      <Button size="sm" variant="outline" onClick={() => openPaymentDialog(inv)}
+                        className="h-7 rounded-full border-gray-200 font-bold text-xs flex items-center gap-1 px-2.5">
+                        <DollarSign className="h-3 w-3" /> Record
+                      </Button>
+                    )}
+                    {bal > 0 && can('reminders:send') && (
+                      <a href={getReminderLink(inv)} target="_blank" rel="noreferrer"
+                        className="inline-flex h-7 items-center px-2.5 border border-amber-200 hover:bg-amber-50 text-amber-700 rounded-full font-bold text-xs gap-1">
+                        <Bell className="h-3 w-3" /> Alert
+                      </a>
+                    )}
+                    <a href={getWhatsAppShareLink(inv)} target="_blank" rel="noreferrer"
+                      className="inline-flex h-7 items-center px-2.5 border border-green-200 hover:bg-green-50 text-green-700 rounded-full font-bold text-xs gap-1">
+                      <MessageSquare className="h-3 w-3" /> Share
+                    </a>
+                    <a href={`/api/invoices/${inv.id}/pdf`} target="_blank" rel="noreferrer"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" title="Print">
+                      <Printer className="h-3.5 w-3.5" />
+                    </a>
+                    <a href={`/api/invoices/${inv.id}/pdf`} target="_blank" rel="noreferrer" download
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" title="Download PDF">
+                      <FileDown className="h-3.5 w-3.5" />
+                    </a>
+                    {can('invoices:delete') && (
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteInvoice(inv.id)}
+                        className="h-7 w-7 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-full">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop table (hidden on mobile) */}
+        <Card className="hidden md:block border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden">
           <Table>
             <TableHeader className="bg-gray-50/50">
               <TableRow>
@@ -359,7 +441,7 @@ ${vendorShop.businessName}`;
                       <TableCell className="text-right text-green-600 font-semibold">{"\u20B9"}{inv.amountPaid.toFixed(2)}</TableCell>
                       <TableCell className="text-right text-rose-600 font-semibold">{"\u20B9"}{bal.toFixed(2)}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-1.5 flex-wrap md:flex-nowrap">
+                        <div className="flex justify-end gap-1.5 flex-wrap lg:flex-nowrap">
                           {bal > 0 && (
                             <>
                               {can('payments:record') && (

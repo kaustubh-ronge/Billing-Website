@@ -121,37 +121,41 @@ export default function EmployeesPage() {
             const st = STATUS_META[m.status] || STATUS_META.ACTIVE;
             const StatusIcon = st.icon;
             return (
-              <div key={m.id} className={`flex items-center gap-4 px-5 py-4 ${m.status !== 'ACTIVE' ? 'opacity-60' : ''}`}>
-                <Avatar name={m.name} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-sm text-foreground truncate">{m.name}</span>
-                    {m.isOwner && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700">
-                        <Crown className="h-2.5 w-2.5" /> Owner
-                      </span>
-                    )}
-                    {m.id === data.currentUserId && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">You</span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground truncate">{m.email}</p>
-                  <div className="flex items-center gap-1.5 mt-1 flex-wrap text-[11px] text-muted-foreground">
-                    {!m.isOwner && <span className="font-medium">{m.roleName || 'No role'}</span>}
-                    {m.branchName && <span>· {m.branchName}</span>}
-                    {m.departmentName && <span>· {m.departmentName}</span>}
-                    {m.teamName && <span>· {m.teamName}</span>}
-                    <span className="text-muted-foreground/60">· {m.permissions.length} permissions</span>
+              <div key={m.id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 ${m.status !== 'ACTIVE' ? 'opacity-60' : ''}`}>
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <Avatar name={m.name} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-sm text-foreground truncate">{m.name}</span>
+                      {m.isOwner && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700">
+                          <Crown className="h-2.5 w-2.5" /> Owner
+                        </span>
+                      )}
+                      {m.id === data.currentUserId && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">You</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{m.email}</p>
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap text-[11px] text-muted-foreground">
+                      {!m.isOwner && <span className="font-medium">{m.roleName || 'No role'}</span>}
+                      {m.branchName && <span>· {m.branchName}</span>}
+                      {m.departmentName && <span>· {m.departmentName}</span>}
+                      {m.teamName && <span>· {m.teamName}</span>}
+                      <span className="text-muted-foreground/60">· {m.permissions.length} permissions</span>
+                    </div>
                   </div>
                 </div>
-                <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${st.cls}`}>
-                  <StatusIcon className="h-3 w-3" /> {st.label}
-                </span>
-                {canManage && (
-                  <Button variant="outline" size="sm" onClick={() => setEditing(m)} className="rounded-full border-border gap-1.5">
-                    <Settings2 className="h-3.5 w-3.5" /> Manage
-                  </Button>
-                )}
+                <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-border border-dashed">
+                  <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${st.cls}`}>
+                    <StatusIcon className="h-3 w-3" /> {st.label}
+                  </span>
+                  {canManage && (
+                    <Button variant="outline" size="sm" onClick={() => setEditing(m)} className="rounded-full border-border gap-1.5">
+                      <Settings2 className="h-3.5 w-3.5" /> Manage
+                    </Button>
+                  )}
+                </div>
               </div>
             );
           })}

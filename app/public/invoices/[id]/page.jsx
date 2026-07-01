@@ -59,9 +59,9 @@ export default async function PublicInvoicePage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50/50 py-12 px-4 overflow-x-auto">
       {/* Top action bar - Hidden during print */}
-      <div className="mx-auto max-w-4xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-150 shadow-sm no-print">
+      <div className="mx-auto max-w-4xl min-w-[800px] mb-6 flex items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-150 shadow-sm no-print">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
             <FileText className="h-5 w-5" />
@@ -72,7 +72,7 @@ export default async function PublicInvoicePage({ params }) {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="text-right hidden sm:block">
+          <div className="text-right">
             <span className="text-xs text-gray-400 font-bold block">Balance Due</span>
             <span className="text-sm font-black text-rose-600">{"\u20B9"}{balance.toFixed(2)}</span>
           </div>
@@ -89,10 +89,10 @@ export default async function PublicInvoicePage({ params }) {
         </div>
       </div>
 
-      {/* Main Invoice Card */}
-      <div className="mx-auto max-w-4xl bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden p-6 sm:p-10 print-area font-sans text-xs text-gray-800">
+      {/* Main Invoice Card - Rigid fixed-width container to look exactly like the printed page */}
+      <div className="mx-auto w-[800px] bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden p-10 print-area font-sans text-xs text-gray-800">
         {/* Top header row */}
-        <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4 border-b border-gray-200 pb-4">
+        <div className="flex justify-between items-start mb-6 gap-4 border-b border-gray-200 pb-4">
           <div className="flex-1">
             <h1 className="text-3xl font-black text-gray-900 tracking-tight leading-none mb-1 uppercase">{shop.businessName}</h1>
             {/* cyan background banner for description/tagline */}
@@ -126,7 +126,7 @@ export default async function PublicInvoicePage({ params }) {
         </div>
 
         {/* 2-Column Info Grid: Customer Details vs Invoice Details */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 border border-gray-300 rounded overflow-hidden mb-6 text-[10px]">
+        <div className="grid grid-cols-2 border border-gray-300 rounded overflow-hidden mb-6 text-[10px]">
           {/* Left Column: Customer Details */}
           <div className="p-3 border-r border-gray-300 space-y-1">
             <div className="text-[9px] font-black text-gray-400 uppercase tracking-wider pb-1 border-b border-gray-200 mb-1.5">Customer Detail</div>
@@ -149,7 +149,7 @@ export default async function PublicInvoicePage({ params }) {
         </div>
 
         {/* Items Table */}
-        <div className="overflow-x-auto mb-6 border border-gray-300 rounded">
+        <div className="mb-6 border border-gray-300 rounded">
           <table className="w-full border-collapse text-[10px]">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-300 font-bold text-gray-700 text-center">
@@ -233,9 +233,9 @@ export default async function PublicInvoicePage({ params }) {
         </div>
 
         {/* Bottom Details Area */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 border border-gray-300 rounded overflow-hidden text-[10px]">
+        <div className="grid grid-cols-2 border border-gray-300 rounded overflow-hidden text-[10px]">
           {/* Left Column: Word Total, Bank Details, Terms, Customer Signature */}
-          <div className="p-3 border-b sm:border-b-0 sm:border-r border-gray-300 flex flex-col justify-between space-y-4">
+          <div className="p-3 border-r border-gray-300 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div>
                 <span className="font-bold text-gray-500 block uppercase text-[8px] tracking-wider mb-1">Total In Words</span>
