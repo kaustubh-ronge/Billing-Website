@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { Loader2, CreditCard, Receipt, Save, Image as ImageIcon, Building2, Lock, Users, ArrowRight } from 'lucide-react';
@@ -52,6 +53,11 @@ export default function SettingsPage() {
     bankName: '', accountNum: '', ifscCode: '', upiId: '',
     invoicePrefix: 'INV', invoiceFormat: 'INV-{YEAR}-{NUMBER}',
     currency: 'INR', footerMessage: 'Thank you for your business!', taxRate: 18,
+    businessType: 'General Store / All',
+    showPaymentTerms: true,
+    showQrCode: true,
+    showBankDetails: true,
+    showFooterMessage: true,
   });
 
   useEffect(() => { if (allowed) fetchProfile(); else setLoading(false); }, [allowed]);
@@ -150,6 +156,20 @@ export default function SettingsPage() {
               <FieldGroup label="Phone Number"><Input value={formData.phone} onChange={set('phone')} placeholder="+91 98765 43210" className="rounded-xl border-border" /></FieldGroup>
               <FieldGroup label="Email Address"><Input value={formData.email} onChange={set('email')} type="email" placeholder="billing@business.com" className="rounded-xl border-border" /></FieldGroup>
               <FieldGroup label="GST / Tax Number" hint="GSTIN appears on all tax invoices."><Input value={formData.taxId} onChange={set('taxId')} placeholder="27AAAAA1111A1Z1" className="rounded-xl border-border font-mono uppercase" /></FieldGroup>
+              <FieldGroup label="Business Type / Main Category" hint="Filters product categories.">
+                <Select value={formData.businessType || 'General Store / All'} onValueChange={(val) => setFormData(p => ({ ...p, businessType: val }))}>
+                  <SelectTrigger className="rounded-xl border-border bg-background">
+                    <SelectValue placeholder="Select Business Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="General Store / All">General Store / All</SelectItem>
+                    <SelectItem value="Agro Store">Agro Store</SelectItem>
+                    <SelectItem value="Clothing Store">Clothing Store</SelectItem>
+                    <SelectItem value="Hardware Store">Hardware Store</SelectItem>
+                    <SelectItem value="Poultry Store">Poultry Store</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FieldGroup>
             </div>
             <FieldGroup label="Business Address"><Textarea value={formData.address} onChange={set('address')} placeholder="123 Main Street, Mumbai, Maharashtra 400001" className="rounded-xl border-border min-h-[80px]" /></FieldGroup>
             <div className="flex justify-end pt-2 border-t border-border">
@@ -182,6 +202,68 @@ export default function SettingsPage() {
               <FieldGroup label="Currency Code"><Input value={formData.currency} onChange={set('currency')} placeholder="INR" maxLength={3} className="rounded-xl border-border font-mono uppercase" /></FieldGroup>
             </div>
             <FieldGroup label="Invoice Footer Message" hint="Printed at the bottom of all invoices."><Textarea value={formData.footerMessage} onChange={set('footerMessage')} placeholder="Thank you for your business." className="rounded-xl border-border min-h-[80px]" /></FieldGroup>
+            
+            {/* Invoice Details Visibility Options */}
+            <div className="pt-5 border-t border-border space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-foreground">Invoice Section Visibility</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Toggle visibility of specific items displayed on the generated invoice.</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.showPaymentTerms}
+                    onChange={(e) => setFormData(p => ({ ...p, showPaymentTerms: e.target.checked }))}
+                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-foreground">Show Payment Terms</span>
+                    <p className="text-[10px] text-muted-foreground">Display payment terms & due date</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.showQrCode}
+                    onChange={(e) => setFormData(p => ({ ...p, showQrCode: e.target.checked }))}
+                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-foreground">Show Scan & Pay QR Code</span>
+                    <p className="text-[10px] text-muted-foreground">UPI QR code for instant scan payment</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.showBankDetails}
+                    onChange={(e) => setFormData(p => ({ ...p, showBankDetails: e.target.checked }))}
+                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-foreground">Show Bank Account Details</span>
+                    <p className="text-[10px] text-muted-foreground">Display bank name, account number, and IFSC</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.showFooterMessage}
+                    onChange={(e) => setFormData(p => ({ ...p, showFooterMessage: e.target.checked }))}
+                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-foreground">Show Footer Message</span>
+                    <p className="text-[10px] text-muted-foreground">Display thank you / terms note at the bottom</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <div className="flex justify-end pt-2 border-t border-border">
               <Button type="submit" disabled={saving} className="rounded-full bg-foreground text-background hover:opacity-90 font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save Invoice Config</Button>
             </div>

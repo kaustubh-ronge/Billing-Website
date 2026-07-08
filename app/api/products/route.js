@@ -1,4 +1,4 @@
-﻿export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server';
 import { requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
@@ -47,7 +47,7 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { name, price, taxRate, trackInventory, stockCount, lowStockAlert, category, unit, isService, description, imageBase64 } = body;
+    const { name, price, taxRate, trackInventory, stockCount, lowStockAlert, category, unit, isService, description, imageBase64, hsnSac, actualValue } = body;
 
     if (!name || price === undefined) {
       return NextResponse.json({ error: 'Product name and price are required' }, { status: 400 });
@@ -66,6 +66,8 @@ export async function POST(req) {
         isService: isService || false,
         description: description || null,
         imageBase64: imageBase64 || null,
+        hsnSac: hsnSac || null,
+        actualValue: actualValue || null,
         shopId: user.shopId
       }
     });

@@ -1,4 +1,4 @@
-﻿export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server';
 import { requireAuth, requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
@@ -39,6 +39,11 @@ export async function PUT(req) {
         currency: body.currency || user.shop.currency,
         footerMessage: body.footerMessage !== undefined ? body.footerMessage : user.shop.footerMessage,
         taxRate: body.taxRate !== undefined ? parseFloat(body.taxRate) : user.shop.taxRate,
+        businessType: body.businessType !== undefined ? body.businessType : user.shop.businessType,
+        showPaymentTerms: body.showPaymentTerms !== undefined ? !!body.showPaymentTerms : user.shop.showPaymentTerms,
+        showQrCode: body.showQrCode !== undefined ? !!body.showQrCode : user.shop.showQrCode,
+        showBankDetails: body.showBankDetails !== undefined ? !!body.showBankDetails : user.shop.showBankDetails,
+        showFooterMessage: body.showFooterMessage !== undefined ? !!body.showFooterMessage : user.shop.showFooterMessage,
       },
     });
 

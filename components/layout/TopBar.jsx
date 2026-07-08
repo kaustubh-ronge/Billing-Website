@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function TopBar({ shopName, onMobileMenuToggle }) {
+export default function TopBar({ shopName, userName, roleName, onMobileMenuToggle }) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -38,14 +38,19 @@ export default function TopBar({ shopName, onMobileMenuToggle }) {
         <Menu className="h-4 w-4" />
       </Button>
 
-      {/* Shop name badge */}
-      {shopName && (
-        <div className="hidden sm:flex items-center">
+      {/* Shop name badge & user role */}
+      <div className="flex items-center gap-2">
+        {shopName && (
           <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">
             {shopName}
           </span>
-        </div>
-      )}
+        )}
+        {roleName && (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-100 dark:border-blue-800">
+            {roleName}
+          </span>
+        )}
+      </div>
 
       <div className="flex-1" />
 

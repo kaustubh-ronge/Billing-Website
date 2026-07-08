@@ -11,7 +11,7 @@ export async function PUT(req, { params }) {
   try {
     const { id } = await params;
     const body = await req.json();
-    const { name, price, taxRate, trackInventory, stockCount, lowStockAlert, category, unit, isService, description, imageBase64 } = body;
+    const { name, price, taxRate, trackInventory, stockCount, lowStockAlert, category, unit, isService, description, imageBase64, hsnSac, actualValue } = body;
 
     if (!name || price === undefined) {
       return NextResponse.json({ error: 'Product name and price are required' }, { status: 400 });
@@ -40,6 +40,8 @@ export async function PUT(req, { params }) {
         isService: isService !== undefined ? isService : existing.isService,
         description: description !== undefined ? description : existing.description,
         imageBase64: imageBase64 !== undefined ? imageBase64 : existing.imageBase64,
+        hsnSac: hsnSac !== undefined ? hsnSac : existing.hsnSac,
+        actualValue: actualValue !== undefined ? actualValue : existing.actualValue,
       }
     });
 

@@ -160,11 +160,14 @@ export default function NewInvoicePage() {
   };
 
   const updateItemQty = (prodId, qty) => {
-    if (qty <= 0) {
-      setInvoiceItems(invoiceItems.filter(item => item.product.id !== prodId));
-    } else {
+    if (qty === '') {
       setInvoiceItems(invoiceItems.map(item =>
-        item.product.id === prodId ? { ...item, quantity: parseInt(qty) } : item
+        item.product.id === prodId ? { ...item, quantity: '' } : item
+      ));
+    } else {
+      const parsed = parseInt(qty);
+      setInvoiceItems(invoiceItems.map(item =>
+        item.product.id === prodId ? { ...item, quantity: isNaN(parsed) ? '' : parsed } : item
       ));
     }
   };
@@ -186,7 +189,8 @@ export default function NewInvoicePage() {
     const discPercent = parseFloat(discountPercentage || 0);
 
     invoiceItems.forEach(item => {
-      const lineSubtotal = item.quantity * item.unitPrice; // Inclusive subtotal
+      const qty = parseFloat(item.quantity) || 0;
+      const lineSubtotal = qty * item.unitPrice; // Inclusive subtotal
       const lineDiscountedTotal = lineSubtotal * (1 - discPercent / 100);
       const lineTaxable = lineDiscountedTotal / (1 + (item.product.taxRate / 100));
       const lineTax = lineDiscountedTotal - lineTaxable;
@@ -224,6 +228,12 @@ export default function NewInvoicePage() {
   const handleSaveInvoice = async () => {
     if (invoiceItems.length === 0) {
       toast.error('Please add at least one item to the invoice.');
+      return;
+    }
+
+    const invalidItem = invoiceItems.find(item => !item.quantity || parseFloat(item.quantity) <= 0);
+    if (invalidItem) {
+      toast.error(`Please enter a valid quantity for ${invalidItem.product.name}.`);
       return;
     }
 
@@ -417,7 +427,7 @@ ${vendorShop.businessName}`;
                       className="py-2.5 flex items-center justify-between cursor-pointer group"
                     >
                       <div className="pr-2">
-                        <h4 className="font-semibold text-xs text-gray-900 group-hover:text-blue-600 transition-colors">{p.name}</h4>
+                        <h4 className="font-semibold text-xs text-gray-900 group-hover:text-blue-600 transition-colors">{p.name} {p.actualValue ? `(${p.actualValue}${p.unit || ''})` : ''}</h4>
                         <p className="text-[10px] text-gray-500 mt-0.5">{"\u20B9"}{p.price.toFixed(2)} | Tax: {p.taxRate}%</p>
                       </div>
                       <Plus className="h-3.5 w-3.5 text-gray-400 group-hover:text-blue-600" />
@@ -465,11 +475,12 @@ ${vendorShop.businessName}`;
                     </TableRow>
                   ) : (
                     invoiceItems.map((item, idx) => {
-                      const totalLine = item.quantity * item.unitPrice;
+                      const qty = parseFloat(item.quantity) || 0;
+                      const totalLine = qty * item.unitPrice;
                       return (
                         <TableRow key={idx}>
                           <TableCell className="font-semibold text-gray-900 text-xs">
-                            {item.product.name}
+                            {item.product.name} {item.product.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}
                             {item.product.isService && <span className="ml-1.5 inline-block text-[9px] px-1 py-0.2 bg-indigo-50 text-indigo-600 rounded">Service</span>}
                           </TableCell>
                           <TableCell className="text-center">
@@ -507,7 +518,7 @@ ${vendorShop.businessName}`;
             {invoiceItems.length > 0 && (
               <div className="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
                 <div className="text-sm font-semibold text-gray-700">
-                  Total Items: {invoiceItems.reduce((acc, item) => acc + item.quantity, 0)}
+                  Total Items: {invoiceItems.reduce((acc, item) => acc + (parseFloat(item.quantity) || 0), 0)}
                 </div>
                 <Button onClick={() => setStep(3)} className="font-bold bg-black text-white hover:bg-gray-900 rounded-full px-6 flex items-center gap-1.5">
                   Next: Financials <ArrowRight className="h-4 w-4" />
@@ -859,8 +870,12 @@ ${vendorShop.businessName}`;
                     <div className="col-span-2 text-[9px] font-black text-gray-400 uppercase tracking-wider pb-1 border-b border-gray-200 mb-1.5">Invoice Details</div>
                     <div><span className="font-bold text-gray-500 block">Invoice No.</span><span className="font-bold text-gray-900">{savedInvoice.invoiceNum}</span></div>
                     <div><span className="font-bold text-gray-500 block">Invoice Date</span><span className="font-bold text-gray-900">{new Date(savedInvoice.issuedAt).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'})}</span></div>
-                    <div><span className="font-bold text-gray-500 block">Payment Terms</span><span className="text-gray-700">{savedInvoice.paymentTerms}</span></div>
-                    <div><span className="font-bold text-gray-500 block">Due Date</span><span className="text-gray-700">{savedInvoice.dueDate ? new Date(savedInvoice.dueDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}) : "Immediate"}</span></div>
+                    {vendorShop.showPaymentTerms !== false && (
+                      <>
+                        <div><span className="font-bold text-gray-500 block">Payment Terms</span><span className="text-gray-700">{savedInvoice.paymentTerms}</span></div>
+                        <div><span className="font-bold text-gray-500 block">Due Date</span><span className="text-gray-700">{savedInvoice.dueDate ? new Date(savedInvoice.dueDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}) : "Immediate"}</span></div>
+                      </>
+                    )}
                     <div className="col-span-2"><span className="font-bold text-gray-500 block">Payment Method</span><span className="text-gray-700 font-semibold">{paymentMethod}</span></div>
                   </div>
                 </div>
@@ -873,7 +888,8 @@ ${vendorShop.businessName}`;
                         <th className="border-r border-gray-300 py-2 px-1 w-10">Sr. No.</th>
                         <th className="border-r border-gray-300 py-2 px-2 text-left">Name of Product / Service</th>
                         <th className="border-r border-gray-300 py-2 px-1 w-20">HSN / SAC</th>
-                        <th className="border-r border-gray-300 py-2 px-1 w-16">Qty</th>
+                        <th className="border-r border-gray-300 py-2 px-1 w-10">Qty</th>
+                        <th className="border-r border-gray-300 py-2 px-1 w-10">Unit</th>
                         <th className="border-r border-gray-300 py-2 px-2 text-right w-20">Rate</th>
                         <th className="border-r border-gray-300 py-2 px-2 text-right w-24">Taxable Value</th>
                         <th className="border-r border-gray-300 p-0 w-28">
@@ -898,13 +914,14 @@ ${vendorShop.businessName}`;
                           <tr key={idx} className="hover:bg-gray-50/20 text-center">
                             <td className="border-r border-gray-300 py-2 px-1 font-medium">{idx + 1}</td>
                             <td className="border-r border-gray-300 py-2 px-2 text-left font-bold text-gray-900">
-                              {item.product?.name || "Unnamed Item"}
+                              {item.product?.name || "Unnamed Item"} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}
                               {item.product?.isService && (
                                 <span className="ml-1.5 text-[8px] px-1.5 py-0.5 bg-gray-105 rounded text-gray-500 font-normal">Service</span>
                               )}
                             </td>
-                            <td className="border-r border-gray-300 py-2 px-1 text-gray-600">{item.product?.sku || item.product?.category || "8302"}</td>
-                            <td className="border-r border-gray-300 py-2 px-1 font-bold text-gray-900">{item.quantity} {item.product?.unit || "NOS"}</td>
+                            <td className="border-r border-gray-300 py-2 px-1 text-gray-600">{item.product?.hsnSac || item.product?.sku || item.product?.category || "—"}</td>
+                            <td className="border-r border-gray-300 py-2 px-1 font-bold text-gray-900">{item.quantity}</td>
+                            <td className="border-r border-gray-300 py-2 px-1 text-gray-605">{item.product?.unit || "NOS"}</td>
                             <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700">{"\u20B9"}{rateExclusive.toFixed(2)}</td>
                             <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700 font-medium">{"\u20B9"}{taxableValue.toFixed(2)}</td>
                             <td className="border-r border-gray-300 p-0 text-gray-750">
@@ -921,7 +938,8 @@ ${vendorShop.businessName}`;
                       {/* Table Total Row */}
                       <tr className="bg-gray-50 font-black text-gray-950 border-t border-gray-300 text-center">
                         <td className="border-r border-gray-300 py-2 px-2 text-right" colSpan={3}>Total</td>
-                        <td className="border-r border-gray-300 py-2 px-1">{invoiceItems.reduce((sum, item) => sum + item.quantity, 0)} {invoiceItems[0]?.product?.unit || "NOS"}</td>
+                        <td className="border-r border-gray-300 py-2 px-1">{invoiceItems.reduce((sum, item) => sum + (parseFloat(item.quantity) || 0), 0)}</td>
+                        <td className="border-r border-gray-300 py-2 px-1"></td>
                         <td className="border-r border-gray-300 py-2 px-2"></td>
                         <td className="border-r border-gray-300 py-2 px-2 text-right">
                           {"\u20B9"}{invoiceItems.reduce((sum, item) => {
@@ -960,20 +978,22 @@ ${vendorShop.businessName}`;
                       </div>
                       
                       <div className="flex gap-4">
-                        <div className="flex-1 space-y-1">
-                          <span className="font-bold text-gray-500 block uppercase text-[8px] tracking-wider mb-1">Bank Details</span>
-                          {vendorShop.bankName ? (
-                            <div className="bg-gray-50 border border-gray-200 p-2 rounded space-y-0.5 text-[9px]">
-                              <p><span className="font-semibold text-gray-600">Bank:</span> {vendorShop.bankName}</p>
-                              {vendorShop.accountNum && <p><span className="font-semibold text-gray-600">A/c No:</span> {vendorShop.accountNum}</p>}
-                              {vendorShop.ifscCode && <p><span className="font-semibold text-gray-600">IFSC:</span> {vendorShop.ifscCode}</p>}
-                              {vendorShop.upiId && <p><span className="font-semibold text-gray-600">UPI ID:</span> {vendorShop.upiId}</p>}
-                            </div>
-                          ) : (
-                            <p className="text-gray-400 italic">No bank details configured.</p>
-                          )}
-                        </div>
-                        {vendorShop.upiId && (totals.grandTotal - parseFloat(amountPaid || 0)) > 0 && (
+                        {vendorShop.showBankDetails !== false && (
+                          <div className="flex-1 space-y-1">
+                            <span className="font-bold text-gray-500 block uppercase text-[8px] tracking-wider mb-1">Bank Details</span>
+                            {vendorShop.bankName ? (
+                              <div className="bg-gray-50 border border-gray-200 p-2 rounded space-y-0.5 text-[9px]">
+                                <p><span className="font-semibold text-gray-600">Bank:</span> {vendorShop.bankName}</p>
+                                {vendorShop.accountNum && <p><span className="font-semibold text-gray-600">A/c No:</span> {vendorShop.accountNum}</p>}
+                                {vendorShop.ifscCode && <p><span className="font-semibold text-gray-600">IFSC:</span> {vendorShop.ifscCode}</p>}
+                                {vendorShop.upiId && <p><span className="font-semibold text-gray-600">UPI ID:</span> {vendorShop.upiId}</p>}
+                              </div>
+                            ) : (
+                              <p className="text-gray-400 italic">No bank details configured.</p>
+                            )}
+                          </div>
+                        )}
+                        {vendorShop.showQrCode !== false && vendorShop.upiId && (totals.grandTotal - parseFloat(amountPaid || 0)) > 0 && (
                           <div className="shrink-0 text-center bg-gray-50 border border-gray-200 p-2 rounded flex flex-col items-center justify-center">
                             <span className="text-[8px] font-black text-blue-700 uppercase tracking-wider block mb-1">Pay using UPI</span>
                             <img 
@@ -985,10 +1005,12 @@ ${vendorShop.businessName}`;
                         )}
                       </div>
 
-                      <div>
-                        <span className="font-bold text-gray-500 block uppercase text-[8px] tracking-wider mb-1">Terms & Conditions</span>
-                        <p className="text-[9px] text-gray-500 leading-relaxed italic border-t border-gray-200 pt-1.5">{vendorShop.footerMessage}</p>
-                      </div>
+                      {vendorShop.showFooterMessage !== false && (
+                        <div>
+                          <span className="font-bold text-gray-500 block uppercase text-[8px] tracking-wider mb-1">Terms & Conditions</span>
+                          <p className="text-[9px] text-gray-500 leading-relaxed italic border-t border-gray-200 pt-1.5">{vendorShop.footerMessage}</p>
+                        </div>
+                      )}
                     </div>
 
                     <div className="mt-8 pt-4 border-t border-gray-200 w-40 text-center">

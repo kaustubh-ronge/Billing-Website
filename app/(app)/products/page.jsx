@@ -38,6 +38,7 @@ const CATEGORIES = [
   'Veterinary Medicines',
   'Organic Products',
   'Soil Amendments',
+  'Biofertilizer',
   // Services
   'Services',
   'Repair & Maintenance',
@@ -50,6 +51,7 @@ const CATEGORIES = [
 const CATEGORY_COLORS = {
   'Seeds & Planting': 'bg-lime-50 text-lime-700',
   'Fertilizers': 'bg-emerald-50 text-emerald-700',
+  'Biofertilizer': 'bg-green-50 text-green-700',
   'Pesticides & Insecticides': 'bg-orange-50 text-orange-700',
   'Herbicides & Weedicides': 'bg-yellow-50 text-yellow-700',
   'Fungicides': 'bg-amber-50 text-amber-700',
@@ -83,6 +85,57 @@ export default function ProductsPage() {
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [activeTab, setActiveTab] = useState('products');
 
+  const getFilteredCategories = () => {
+    const businessType = vendorShop?.businessType || 'General Store / All';
+    
+    const generalCategories = ['Grocery', 'Hardware', 'Electronics', 'Medical / Pharma', 'Clothing & Apparel', 'Stationery', 'Furniture', 'Food & Beverages'];
+    const agroCategories = ['Seeds & Planting', 'Fertilizers', 'Biofertilizer', 'Pesticides & Insecticides', 'Herbicides & Weedicides', 'Fungicides', 'Crop Protection', 'Irrigation Equipment', 'Farm Tools & Equipment', 'Animal Feed & Fodder', 'Veterinary Medicines', 'Organic Products', 'Soil Amendments'];
+    const serviceCategories = ['Services', 'Repair & Maintenance', 'Transport & Delivery', 'Consulting'];
+    
+    if (activeTab === 'services') {
+      return {
+        groups: [
+          { name: 'Services', items: serviceCategories, color: 'text-indigo-500' }
+        ]
+      };
+    }
+    
+    if (businessType === 'Agro Store') {
+      return {
+        groups: [
+          { name: 'Agriculture & Farming', items: agroCategories, color: 'text-green-600' }
+        ]
+      };
+    } else if (businessType === 'Clothing Store') {
+      return {
+        groups: [
+          { name: 'Clothing', items: ['Clothing & Apparel'], color: 'text-pink-500' }
+        ]
+      };
+    } else if (businessType === 'Hardware Store') {
+      return {
+        groups: [
+          { name: 'Hardware', items: ['Hardware'], color: 'text-gray-500' }
+        ]
+      };
+    } else if (businessType === 'Poultry Store') {
+      return {
+        groups: [
+          { name: 'Poultry & Animals', items: ['Animal Feed & Fodder', 'Veterinary Medicines'], color: 'text-teal-600' }
+        ]
+      };
+    }
+    
+    // Default / General Store / All
+    return {
+      groups: [
+        { name: 'General', items: generalCategories, color: 'text-gray-400' },
+        { name: 'Agriculture & Farming', items: agroCategories, color: 'text-green-600' },
+        { name: 'Services', items: serviceCategories, color: 'text-indigo-500' }
+      ]
+    };
+  };
+
   // Dialog/Modal state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -104,6 +157,23 @@ export default function ProductsPage() {
 
   const [customCategory, setCustomCategory] = useState('');
   const [customUnit, setCustomUnit] = useState('');
+  const [vendorShop, setVendorShop] = useState(null);
+
+  useEffect(() => {
+    fetchVendorConfig();
+  }, []);
+
+  const fetchVendorConfig = async () => {
+    try {
+      const res = await fetch('/api/profile');
+      if (res.ok) {
+        const data = await res.json();
+        setVendorShop(data.shop);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -150,7 +220,9 @@ export default function ProductsPage() {
       unit: activeTab === 'services' ? '' : 'pcs',
       isService: activeTab === 'services',
       description: '',
-      imageBase64: ''
+      imageBase64: '',
+      hsnSac: '',
+      actualValue: ''
     });
     setCustomCategory('');
     setCustomUnit('');
@@ -169,7 +241,7 @@ export default function ProductsPage() {
       'Grocery', 'Hardware', 'Electronics', 'Medical / Pharma', 'Clothing & Apparel', 'Stationery', 'Furniture', 'Food & Beverages',
       'Seeds & Planting', 'Fertilizers', 'Pesticides & Insecticides', 'Herbicides & Weedicides', 'Fungicides', 'Crop Protection',
       'Irrigation Equipment', 'Farm Tools & Equipment', 'Animal Feed & Fodder', 'Veterinary Medicines', 'Organic Products', 'Soil Amendments',
-      'Services', 'Repair & Maintenance', 'Transport & Delivery', 'Consulting'
+      'Biofertilizer', 'Services', 'Repair & Maintenance', 'Transport & Delivery', 'Consulting'
     ];
     const isStandardCategory = standardCategories.includes(item.category);
     const categoryVal = isStandardCategory ? (item.category || 'Other') : 'Other';
@@ -191,7 +263,9 @@ export default function ProductsPage() {
       unit: unitVal,
       isService: item.isService,
       description: item.description || '',
-      imageBase64: item.imageBase64 || ''
+      imageBase64: item.imageBase64 || '',
+      hsnSac: item.hsnSac || '',
+      actualValue: item.actualValue || ''
     });
     setIsDialogOpen(true);
   };
@@ -321,19 +395,15 @@ export default function ProductsPage() {
               </SelectTrigger>
               <SelectContent className="max-h-80">
                 <SelectItem value="ALL">All Categories</SelectItem>
-                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">â€” General â€”</div>
-                {['Grocery', 'Hardware', 'Electronics', 'Medical / Pharma', 'Clothing & Apparel', 'Stationery', 'Furniture', 'Food & Beverages'].map(cat => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                {getFilteredCategories().groups.map(group => (
+                  <React.Fragment key={group.name}>
+                    <div className={`px-2 py-1 text-[10px] font-black uppercase tracking-wider ${group.color || 'text-gray-400'} mt-1`}>— {group.name} —</div>
+                    {group.items.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </React.Fragment>
                 ))}
-                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-600 mt-1">â€” Agriculture & Farming â€”</div>
-                {['Seeds & Planting', 'Fertilizers', 'Pesticides & Insecticides', 'Herbicides & Weedicides', 'Fungicides', 'Crop Protection', 'Irrigation Equipment', 'Farm Tools & Equipment', 'Animal Feed & Fodder', 'Veterinary Medicines', 'Organic Products', 'Soil Amendments'].map(cat => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-500 mt-1">â€” Services â€”</div>
-                {['Services', 'Repair & Maintenance', 'Transport & Delivery', 'Consulting'].map(cat => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">â€” Other â€”</div>
+                <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">— Other —</div>
                 <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>
@@ -376,7 +446,10 @@ export default function ProductsPage() {
                   <div key={item.id} className="bg-white rounded-2xl border border-gray-150 shadow-sm p-4">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <div className="font-bold text-gray-900 text-sm">{item.name}</div>
+                        <div className="font-bold text-gray-900 text-sm">
+                          {item.name} {item.actualValue ? `(${item.actualValue}${item.unit || ''})` : ''}
+                        </div>
+                        {item.hsnSac && <p className="text-[10px] text-gray-500 font-medium">HSN/SAC: {item.hsnSac}</p>}
                         {item.description && <p className="text-xs text-gray-400 truncate mt-0.5">{item.description}</p>}
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${CATEGORY_COLORS[item.category] || 'bg-gray-100 text-gray-800'}`}>
@@ -457,9 +530,10 @@ export default function ProductsPage() {
                         <TableRow key={item.id} className="hover:bg-gray-50/50 transition-colors">
                           <TableCell className="font-semibold text-gray-900">
                             <div>
-                              <span>{item.name}</span>
+                              <span>{item.name} {item.actualValue ? `(${item.actualValue}${item.unit || ''})` : ''}</span>
+                              {item.hsnSac && <p className="text-[10px] text-gray-500 font-medium mt-0.5">HSN/SAC: {item.hsnSac}</p>}
                               {item.description && (
-                                <p className="text-xs text-gray-400 font-normal truncate max-w-xs">{item.description}</p>
+                                <p className="text-xs text-gray-400 font-normal truncate max-w-xs mt-0.5">{item.description}</p>
                               )}
                             </div>
                           </TableCell>
@@ -689,21 +763,17 @@ export default function ProductsPage() {
                     value={formData.category}
                     onValueChange={(val) => setFormData(prev => ({ ...prev, category: val }))}
                   >
-                    <SelectTrigger className="rounded-xl border-gray-200">
+                    <SelectTrigger className="rounded-xl border-gray-200 bg-background">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent className="max-h-72">
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400">— General —</div>
-                      {['Grocery', 'Hardware', 'Electronics', 'Medical / Pharma', 'Clothing & Apparel', 'Stationery', 'Furniture', 'Food & Beverages'].map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-600 mt-1">— Agriculture & Farming —</div>
-                      {['Seeds & Planting', 'Fertilizers', 'Pesticides & Insecticides', 'Herbicides & Weedicides', 'Fungicides', 'Crop Protection', 'Irrigation Equipment', 'Farm Tools & Equipment', 'Animal Feed & Fodder', 'Veterinary Medicines', 'Organic Products', 'Soil Amendments'].map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-500 mt-1">— Services —</div>
-                      {['Services', 'Repair & Maintenance', 'Transport & Delivery', 'Consulting'].map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      {getFilteredCategories().groups.map(group => (
+                        <React.Fragment key={group.name}>
+                          <div className={`px-2 py-1 text-[10px] font-black uppercase tracking-wider ${group.color || 'text-gray-400'} mt-1`}>— {group.name} —</div>
+                          {group.items.map(cat => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </React.Fragment>
                       ))}
                       <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">— Other —</div>
                       <SelectItem value="Other">Other</SelectItem>
@@ -718,7 +788,7 @@ export default function ProductsPage() {
                       value={formData.unit}
                       onValueChange={(val) => setFormData(prev => ({ ...prev, unit: val }))}
                     >
-                      <SelectTrigger className="rounded-xl border-gray-200">
+                      <SelectTrigger className="rounded-xl border-gray-200 bg-background">
                         <SelectValue placeholder="Unit" />
                       </SelectTrigger>
                       <SelectContent className="max-h-60">
@@ -727,6 +797,32 @@ export default function ProductsPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                )}
+              </div>
+
+              {/* HSN/SAC and Actual Value Row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="hsnSac">HSN / SAC (Optional)</Label>
+                  <Input
+                    id="hsnSac"
+                    value={formData.hsnSac || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, hsnSac: e.target.value }))}
+                    placeholder="e.g. 3101, 3808"
+                    className="rounded-xl border-gray-200"
+                  />
+                </div>
+                {activeTab === 'products' && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="actualValue">Actual Value (Optional)</Label>
+                    <Input
+                      id="actualValue"
+                      value={formData.actualValue || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, actualValue: e.target.value }))}
+                      placeholder={formData.unit && formData.unit !== 'Other' ? `e.g. 250 (displays as 250${formData.unit})` : 'e.g. 250'}
+                      className="rounded-xl border-gray-200"
+                    />
                   </div>
                 )}
               </div>

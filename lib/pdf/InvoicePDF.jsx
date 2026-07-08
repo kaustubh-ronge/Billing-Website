@@ -10,12 +10,13 @@ import { numberToWords } from '../utils';
 
 // A4 printable width ≈ 505pt with 45pt horizontal padding on each side
 // Column widths MUST sum to exactly 505
-// Sr(20) + Item(160) + HSN(45) + Qty(35) + Rate(55) + Taxable(60) + GstBox(75) + Total(55) = 505
+// Sr(20) + Item(145) + HSN(45) + Qty(25) + Unit(25) + Rate(55) + Taxable(60) + GstBox(75) + Total(55) = 505
 const COL = {
   sr: 20,
-  item: 160,
+  item: 145,
   hsn: 45,
-  qty: 35,
+  qty: 25,
+  unit: 25,
   rate: 55,
   taxable: 60,
   gst: 75,   // contains %25 + Amt50
@@ -193,23 +194,27 @@ const styles = StyleSheet.create({
     borderBottom: BORDER,
     paddingVertical: 2,
   },
-  gstHeaderSub: { flexDirection: 'row', flex: 1 },
+  gstHeaderSub: { 
+    flexDirection: 'row', 
+    flex: 1, 
+    alignItems: 'stretch' 
+  },
   gstHeaderSubRate: {
     width: COL.gstRate,
-    fontSize: 7,
-    fontFamily: 'Helvetica-Bold',
-    color: '#374151',
-    textAlign: 'center',
     borderRight: BORDER,
-    paddingVertical: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   gstHeaderSubAmt: {
     width: COL.gstAmt,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  thLabel: {
     fontSize: 7,
     fontFamily: 'Helvetica-Bold',
     color: '#374151',
     textAlign: 'center',
-    paddingVertical: 2,
   },
 
   // Data rows
@@ -258,6 +263,13 @@ const styles = StyleSheet.create({
   },
   colQty: {
     width: COL.qty,
+    borderRight: BORDER,
+    paddingVertical: 3,
+    paddingHorizontal: 2,
+    textAlign: 'center',
+  },
+  colUnit: {
+    width: COL.unit,
     borderRight: BORDER,
     paddingVertical: 3,
     paddingHorizontal: 2,
@@ -546,16 +558,20 @@ export function InvoicePDF({ invoice }) {
               <Text style={styles.metaLabel}>Invoice Date</Text>
               <Text style={styles.metaValue}>{fmtDate(invoice.issuedAt)}</Text>
             </View>
-            <View style={styles.metaRow}>
-              <Text style={styles.metaLabel}>Payment Terms</Text>
-              <Text style={styles.metaValue}>{invoice.paymentTerms ?? '—'}</Text>
-            </View>
-            <View style={styles.metaRow}>
-              <Text style={styles.metaLabel}>Due Date</Text>
-              <Text style={styles.metaValue}>
-                {invoice.dueDate ? fmtDate(invoice.dueDate) : 'Immediate'}
-              </Text>
-            </View>
+            {shop.showPaymentTerms !== false && (
+              <>
+                <View style={styles.metaRow}>
+                  <Text style={styles.metaLabel}>Payment Terms</Text>
+                  <Text style={styles.metaValue}>{invoice.paymentTerms ?? '—'}</Text>
+                </View>
+                <View style={styles.metaRow}>
+                  <Text style={styles.metaLabel}>Due Date</Text>
+                  <Text style={styles.metaValue}>
+                    {invoice.dueDate ? fmtDate(invoice.dueDate) : 'Immediate'}
+                  </Text>
+                </View>
+              </>
+            )}
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>Status</Text>
               <Text style={styles.metaValueBold}>{invoice.status}</Text>
@@ -571,14 +587,19 @@ export function InvoicePDF({ invoice }) {
             <Text style={[styles.th, styles.colItem]}>Name of Product / Service</Text>
             <Text style={[styles.th, styles.colHsn]}>HSN/SAC</Text>
             <Text style={[styles.th, styles.colQty]}>Qty</Text>
+            <Text style={[styles.th, styles.colUnit]}>Unit</Text>
             <Text style={[styles.th, styles.colRate]}>Rate (Excl.)</Text>
             <Text style={[styles.th, styles.colTaxable]}>Taxable Val</Text>
             {/* GST split header */}
             <View style={styles.gstHeaderBox}>
               <Text style={styles.gstHeaderTop}>GST</Text>
               <View style={styles.gstHeaderSub}>
-                <Text style={styles.gstHeaderSubRate}>%</Text>
-                <Text style={styles.gstHeaderSubAmt}>Amt</Text>
+                <View style={styles.gstHeaderSubRate}>
+                  <Text style={styles.thLabel}>%</Text>
+                </View>
+                <View style={styles.gstHeaderSubAmt}>
+                  <Text style={styles.thLabel}>Amt</Text>
+                </View>
               </View>
             </View>
             <Text style={[styles.th, styles.colTotal]}>Total</Text>
@@ -596,14 +617,19 @@ export function InvoicePDF({ invoice }) {
               <View key={item.id ?? idx} style={idx % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
                 <Text style={[styles.tdCenter, styles.colSr]}>{idx + 1}</Text>
                 <View style={styles.colItem}>
-                  <Text style={styles.tdBold}>{item.product?.name ?? 'Item'}</Text>
+                  <Text style={styles.tdBold}>
+                    {item.product?.name ?? 'Item'}{item.product?.actualValue ? ` (${item.product.actualValue}${item.product.unit || ''})` : ''}
+                  </Text>
                   {item.product?.isService && <Text style={styles.serviceTag}>Service</Text>}
                 </View>
                 <Text style={[styles.tdCenter, styles.colHsn]}>
-                  {item.product?.sku || '—'}
+                  {item.product?.hsnSac || item.product?.sku || '—'}
                 </Text>
                 <Text style={[styles.tdCenter, styles.colQty]}>
-                  {item.quantity} {item.product?.unit || 'NOS'}
+                  {item.quantity}
+                </Text>
+                <Text style={[styles.tdCenter, styles.colUnit]}>
+                  {item.product?.unit || 'NOS'}
                 </Text>
                 <Text style={[styles.td, styles.colRate]}>{rateExcl.toFixed(2)}</Text>
                 <Text style={[styles.td, styles.colTaxable]}>{taxableVal.toFixed(2)}</Text>
@@ -624,6 +650,7 @@ export function InvoicePDF({ invoice }) {
             <Text style={[styles.tdBold, { ...styles.colItem, textAlign: 'right' }]}>Totals</Text>
             <Text style={[styles.tdBold, styles.colHsn]}></Text>
             <Text style={[styles.tdBold, styles.colQty, { textAlign: 'center' }]}>{totalQty}</Text>
+            <Text style={[styles.tdBold, styles.colUnit]}></Text>
             <Text style={[styles.tdBold, styles.colRate]}></Text>
             <Text style={[styles.tdBold, styles.colTaxable]}>{totalTaxable.toFixed(2)}</Text>
             <View style={styles.colGstBox}>
@@ -643,39 +670,43 @@ export function InvoicePDF({ invoice }) {
             <Text style={styles.sectionLabel}>Total In Words</Text>
             <Text style={styles.wordsBox}>{numberToWords(invoice.grandTotal)}</Text>
 
-            <Text style={styles.sectionLabel}>Bank Details</Text>
-            {shop.bankName ? (
-              <View style={styles.bankBox}>
-                <View style={styles.bankRow}>
-                  <Text style={styles.bankLabel}>Bank</Text>
-                  <Text style={styles.bankValue}>{shop.bankName}</Text>
-                </View>
-                {shop.accountNum && (
-                  <View style={styles.bankRow}>
-                    <Text style={styles.bankLabel}>A/c No.</Text>
-                    <Text style={styles.bankValue}>{shop.accountNum}</Text>
+            {shop.showBankDetails !== false && (
+              <>
+                <Text style={styles.sectionLabel}>Bank Details</Text>
+                {shop.bankName ? (
+                  <View style={styles.bankBox}>
+                    <View style={styles.bankRow}>
+                      <Text style={styles.bankLabel}>Bank</Text>
+                      <Text style={styles.bankValue}>{shop.bankName}</Text>
+                    </View>
+                    {shop.accountNum && (
+                      <View style={styles.bankRow}>
+                        <Text style={styles.bankLabel}>A/c No.</Text>
+                        <Text style={styles.bankValue}>{shop.accountNum}</Text>
+                      </View>
+                    )}
+                    {shop.ifscCode && (
+                      <View style={styles.bankRow}>
+                        <Text style={styles.bankLabel}>IFSC</Text>
+                        <Text style={styles.bankValue}>{shop.ifscCode}</Text>
+                      </View>
+                    )}
+                    {shop.upiId && (
+                      <View style={styles.bankRow}>
+                        <Text style={styles.bankLabel}>UPI</Text>
+                        <Text style={styles.bankValue}>{shop.upiId}</Text>
+                      </View>
+                    )}
                   </View>
+                ) : (
+                  <Text style={[styles.termsText, { color: '#9ca3af', marginBottom: 4 }]}>
+                    No bank details configured.
+                  </Text>
                 )}
-                {shop.ifscCode && (
-                  <View style={styles.bankRow}>
-                    <Text style={styles.bankLabel}>IFSC</Text>
-                    <Text style={styles.bankValue}>{shop.ifscCode}</Text>
-                  </View>
-                )}
-                {shop.upiId && (
-                  <View style={styles.bankRow}>
-                    <Text style={styles.bankLabel}>UPI</Text>
-                    <Text style={styles.bankValue}>{shop.upiId}</Text>
-                  </View>
-                )}
-              </View>
-            ) : (
-              <Text style={[styles.termsText, { color: '#9ca3af', marginBottom: 4 }]}>
-                No bank details configured.
-              </Text>
+              </>
             )}
 
-            {shop.upiId && balance > 0 && (
+            {shop.showQrCode !== false && shop.upiId && balance > 0 && (
               <View style={styles.qrRow}>
                 <Image
                   style={styles.qrImage}
@@ -687,9 +718,11 @@ export function InvoicePDF({ invoice }) {
               </View>
             )}
 
-            <Text style={styles.termsText}>
-              {shop.footerMessage || 'Thank you for your business! Goods once sold will not be returned.'}
-            </Text>
+            {shop.showFooterMessage !== false && (
+              <Text style={styles.termsText}>
+                {shop.footerMessage || 'Thank you for your business! Goods once sold will not be returned.'}
+              </Text>
+            )}
 
             <View style={styles.custSigBox}>
               <Text style={styles.custSigLabel}>Customer Signature</Text>

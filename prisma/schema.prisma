@@ -84,6 +84,11 @@ model Shop {
   footerMessage     String @default("Thank you for your business!")
   taxRate           Float  @default(18)
   nextInvoiceNumber Int    @default(1)
+  businessType      String?
+  showPaymentTerms  Boolean @default(true)
+  showQrCode        Boolean @default(true)
+  showBankDetails   Boolean @default(true)
+  showFooterMessage Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -348,9 +353,11 @@ model Product {
   description String?
 
   // Extended product fields
-  sku       String?
-  barcode   String?
-  costPrice Float?
+  sku         String?
+  barcode     String?
+  costPrice   Float?
+  hsnSac      String?
+  actualValue String?
 
   shopId String
   shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)

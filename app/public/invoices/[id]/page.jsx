@@ -142,8 +142,12 @@ export default async function PublicInvoicePage({ params }) {
             <div className="col-span-2 text-[9px] font-black text-gray-400 uppercase tracking-wider pb-1 border-b border-gray-200 mb-1.5">Invoice Details</div>
             <div><span className="font-bold text-gray-500 block">Invoice No.</span><span className="font-bold text-gray-900">{invoice.invoiceNum}</span></div>
             <div><span className="font-bold text-gray-500 block">Invoice Date</span><span className="font-bold text-gray-900">{new Date(invoice.issuedAt).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'})}</span></div>
-            <div><span className="font-bold text-gray-500 block">Payment Terms</span><span className="text-gray-700">{invoice.paymentTerms}</span></div>
-            <div><span className="font-bold text-gray-500 block">Due Date</span><span className="text-gray-700">{invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}) : "Immediate"}</span></div>
+            {shop.showPaymentTerms !== false && (
+              <>
+                <div><span className="font-bold text-gray-500 block">Payment Terms</span><span className="text-gray-700">{invoice.paymentTerms}</span></div>
+                <div><span className="font-bold text-gray-500 block">Due Date</span><span className="text-gray-700">{invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}) : "Immediate"}</span></div>
+              </>
+            )}
             <div className="col-span-2"><span className="font-bold text-gray-500 block">Status</span><span className="mt-0.5 inline-block">{getStatusBadge(invoice.status)}</span></div>
           </div>
         </div>
@@ -156,7 +160,8 @@ export default async function PublicInvoicePage({ params }) {
                 <th className="border-r border-gray-300 py-2 px-1 w-10">Sr. No.</th>
                 <th className="border-r border-gray-300 py-2 px-2 text-left">Name of Product / Service</th>
                 <th className="border-r border-gray-300 py-2 px-1 w-20">HSN / SAC</th>
-                <th className="border-r border-gray-300 py-2 px-1 w-16">Qty</th>
+                <th className="border-r border-gray-300 py-2 px-1 w-12">Qty</th>
+                <th className="border-r border-gray-300 py-2 px-1 w-12">Unit</th>
                 <th className="border-r border-gray-300 py-2 px-2 text-right w-20">Rate</th>
                 <th className="border-r border-gray-300 py-2 px-2 text-right w-24">Taxable Value</th>
                 <th className="border-r border-gray-300 p-0 w-28">
@@ -181,13 +186,14 @@ export default async function PublicInvoicePage({ params }) {
                   <tr key={idx} className="hover:bg-gray-50/20 text-center">
                     <td className="border-r border-gray-300 py-2 px-1 font-medium">{idx + 1}</td>
                     <td className="border-r border-gray-300 py-2 px-2 text-left font-bold text-gray-900">
-                      {item.product?.name || "Unnamed Item"}
+                      {item.product?.name || "Unnamed Item"} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}
                       {item.product?.isService && (
                         <span className="ml-1.5 text-[8px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-500 font-normal">Service</span>
                       )}
                     </td>
-                    <td className="border-r border-gray-300 py-2 px-1 text-gray-600">{item.product?.sku || item.product?.category || "8302"}</td>
-                    <td className="border-r border-gray-300 py-2 px-1 font-bold text-gray-900">{item.quantity} {item.product?.unit || "NOS"}</td>
+                    <td className="border-r border-gray-300 py-2 px-1 text-gray-600">{item.product?.hsnSac || item.product?.sku || item.product?.category || "—"}</td>
+                    <td className="border-r border-gray-300 py-2 px-1 font-bold text-gray-900">{item.quantity}</td>
+                    <td className="border-r border-gray-300 py-2 px-1 text-gray-650">{item.product?.unit || "NOS"}</td>
                     <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700">{"\u20B9"}{rateExclusive.toFixed(2)}</td>
                     <td className="border-r border-gray-300 py-2 px-2 text-right text-gray-700 font-medium">{"\u20B9"}{taxableValue.toFixed(2)}</td>
                     <td className="border-r border-gray-300 p-0 text-gray-750">
@@ -204,7 +210,8 @@ export default async function PublicInvoicePage({ params }) {
               {/* Table Total Row */}
               <tr className="bg-gray-50 font-black text-gray-950 border-t border-gray-300 text-center">
                 <td className="border-r border-gray-300 py-2 px-2 text-right" colSpan={3}>Total</td>
-                <td className="border-r border-gray-300 py-2 px-1">{items.reduce((sum, item) => sum + item.quantity, 0)} {items[0]?.product?.unit || "NOS"}</td>
+                <td className="border-r border-gray-300 py-2 px-1">{items.reduce((sum, item) => sum + item.quantity, 0)}</td>
+                <td className="border-r border-gray-300 py-2 px-1"></td>
                 <td className="border-r border-gray-300 py-2 px-2"></td>
                 <td className="border-r border-gray-300 py-2 px-2 text-right">
                   {"\u20B9"}{items.reduce((sum, item) => {
@@ -243,20 +250,22 @@ export default async function PublicInvoicePage({ params }) {
               </div>
               
               <div className="flex gap-4">
-                <div className="flex-1 space-y-1">
-                  <span className="font-bold text-gray-500 block uppercase text-[8px] tracking-wider mb-1">Bank Details</span>
-                  {shop.bankName ? (
-                    <div className="bg-gray-50 border border-gray-200 p-2 rounded space-y-0.5 text-[9px]">
-                      <p><span className="font-semibold text-gray-600">Bank:</span> {shop.bankName}</p>
-                      {shop.accountNum && <p><span className="font-semibold text-gray-600">A/c No:</span> {shop.accountNum}</p>}
-                      {shop.ifscCode && <p><span className="font-semibold text-gray-600">IFSC:</span> {shop.ifscCode}</p>}
-                      {shop.upiId && <p><span className="font-semibold text-gray-600">UPI ID:</span> {shop.upiId}</p>}
-                    </div>
-                  ) : (
-                    <p className="text-gray-400 italic">No bank details configured.</p>
-                  )}
-                </div>
-                {shop.upiId && balance > 0 && (
+                {shop.showBankDetails !== false && (
+                  <div className="flex-1 space-y-1">
+                    <span className="font-bold text-gray-500 block uppercase text-[8px] tracking-wider mb-1">Bank Details</span>
+                    {shop.bankName ? (
+                      <div className="bg-gray-50 border border-gray-200 p-2 rounded space-y-0.5 text-[9px]">
+                        <p><span className="font-semibold text-gray-600">Bank:</span> {shop.bankName}</p>
+                        {shop.accountNum && <p><span className="font-semibold text-gray-600">A/c No:</span> {shop.accountNum}</p>}
+                        {shop.ifscCode && <p><span className="font-semibold text-gray-600">IFSC:</span> {shop.ifscCode}</p>}
+                        {shop.upiId && <p><span className="font-semibold text-gray-600">UPI ID:</span> {shop.upiId}</p>}
+                      </div>
+                    ) : (
+                      <p className="text-gray-400 italic">No bank details configured.</p>
+                    )}
+                  </div>
+                )}
+                {shop.showQrCode !== false && shop.upiId && balance > 0 && (
                   <div className="shrink-0 text-center bg-gray-50 border border-gray-200 p-2 rounded flex flex-col items-center justify-center">
                     <span className="text-[8px] font-black text-blue-700 uppercase tracking-wider block mb-1">Pay using UPI</span>
                     <img 
@@ -268,10 +277,12 @@ export default async function PublicInvoicePage({ params }) {
                 )}
               </div>
 
-              <div>
-                <span className="font-bold text-gray-500 block uppercase text-[8px] tracking-wider mb-1">Terms & Conditions</span>
-                <p className="text-[9px] text-gray-500 leading-relaxed italic border-t border-gray-200 pt-1.5">{shop.footerMessage}</p>
-              </div>
+              {shop.showFooterMessage !== false && (
+                <div>
+                  <span className="font-bold text-gray-500 block uppercase text-[8px] tracking-wider mb-1">Terms & Conditions</span>
+                  <p className="text-[9px] text-gray-500 leading-relaxed italic border-t border-gray-200 pt-1.5">{shop.footerMessage}</p>
+                </div>
+              )}
             </div>
 
             <div className="mt-8 pt-4 border-t border-gray-200 w-40 text-center">
