@@ -1,1 +1,0 @@
-from docs folder, which all things are left to implement, what about the ui, this ui is very dull, i want fully beautiful ui, another thing is i am not seeingf option to add the employees, go through all the files 
