@@ -41,6 +41,10 @@ function InvoicesList() {
   const [invoices, setInvoices] = useState([]);
   const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [showDeleted, setShowDeleted] = useState(false);
 
   // Vendor Shop config for business name/reminders
   const [vendorShop, setVendorShop] = useState(null);
@@ -57,8 +61,8 @@ function InvoicesList() {
 
   useEffect(() => {
     fetchVendorConfig();
-    fetchInvoices();
-  }, [statusFilter]);
+    fetchInvoices(1);
+  }, [statusFilter, showDeleted]);
 
   const fetchVendorConfig = async () => {
     try {
@@ -72,17 +76,23 @@ function InvoicesList() {
     }
   };
 
-  const fetchInvoices = async () => {
+  const fetchInvoices = async (pageNumber = page) => {
     try {
       setLoading(true);
-      let url = `/api/invoices?search=${encodeURIComponent(search)}`;
+      let url = `/api/invoices?search=${encodeURIComponent(search)}&page=${pageNumber}&limit=10`;
       if (statusFilter !== 'ALL') {
         url += `&status=${encodeURIComponent(statusFilter)}`;
+      }
+      if (showDeleted) {
+        url += `&showDeleted=true`;
       }
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setInvoices(data.invoices || []);
+        setTotalPages(data.totalPages || 1);
+        setTotalCount(data.totalCount || 0);
+        setPage(data.page || 1);
       } else {
         toast.error('Failed to load invoices');
       }
@@ -96,7 +106,7 @@ function InvoicesList() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchInvoices();
+    fetchInvoices(1);
   };
 
   const openPaymentDialog = (invoice) => {
@@ -251,20 +261,37 @@ ${vendorShop.businessName}`;
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              const rows = invoices.map((inv) => ({
-                Invoice: inv.invoiceNum,
-                Customer: inv.customer?.name ?? '',
-                Phone: inv.customer?.phone ?? '',
-                Date: new Date(inv.issuedAt).toLocaleDateString('en-IN'),
-                'Due Date': inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('en-IN') : '',
-                'Payment Terms': inv.paymentTerms ?? 'IMMEDIATE',
-                'Grand Total': inv.grandTotal.toFixed(2),
-                'Amount Paid': inv.amountPaid.toFixed(2),
-                Outstanding: (inv.grandTotal - inv.amountPaid).toFixed(2),
-                Status: inv.status,
-              }));
-              downloadCSV(rows, 'invoices');
+            onClick={async () => {
+              try {
+                let url = `/api/invoices?all=true&search=${encodeURIComponent(search)}`;
+                if (statusFilter !== 'ALL') {
+                  url += `&status=${encodeURIComponent(statusFilter)}`;
+                }
+                if (showDeleted) {
+                  url += `&showDeleted=true`;
+                }
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch export data');
+                const data = await response.json();
+                const allInvoices = data.invoices || [];
+
+                const rows = allInvoices.map((inv) => ({
+                  Invoice: inv.invoiceNum,
+                  Customer: inv.customer?.name ?? '',
+                  Phone: inv.customer?.phone ?? '',
+                  Date: new Date(inv.issuedAt).toLocaleDateString('en-IN'),
+                  'Due Date': inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('en-IN') : '',
+                  'Payment Terms': inv.paymentTerms ?? 'IMMEDIATE',
+                  'Grand Total': inv.grandTotal.toFixed(2),
+                  'Amount Paid': inv.amountPaid.toFixed(2),
+                  Outstanding: (inv.grandTotal - inv.amountPaid).toFixed(2),
+                  Status: inv.status,
+                }));
+                downloadCSV(rows, 'invoices');
+              } catch (err) {
+                console.error(err);
+                toast.error('Failed to export invoices');
+              }
             }}
             className="rounded-full border-gray-200 font-bold text-sm flex items-center gap-1.5"
           >
@@ -281,16 +308,27 @@ ${vendorShop.businessName}`;
       <div className="flex flex-col gap-6">
         {/* Search and Filters panel */}
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-muted/40 p-4 rounded-2xl border border-border">
-          <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search by invoice # or customer name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 rounded-full border-border bg-background"
-            />
-          </form>
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+            <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-80">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search by invoice # or customer name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 rounded-full border-border bg-background"
+              />
+            </form>
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-muted-foreground select-none hover:text-foreground transition-colors shrink-0 self-start sm:self-center">
+              <input
+                type="checkbox"
+                checked={showDeleted}
+                onChange={(e) => setShowDeleted(e.target.checked)}
+                className="h-4 w-4 rounded border-border text-rose-600 focus:ring-rose-500/30"
+              />
+              <span>Show Deleted Bills</span>
+            </label>
+          </div>
           <div className="flex gap-3 w-full md:w-auto justify-end">
             <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val)}>
               <SelectTrigger className="w-45 rounded-full bg-background border-border">
@@ -303,7 +341,7 @@ ${vendorShop.businessName}`;
                 <SelectItem value="PENDING">Pending / Unpaid</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="icon" onClick={fetchInvoices} className="rounded-full bg-background border-border">
+            <Button variant="outline" size="icon" onClick={() => fetchInvoices()} className="rounded-full bg-background border-border">
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
@@ -354,13 +392,13 @@ ${vendorShop.businessName}`;
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 pt-1">
-                    {bal > 0 && can('payments:record') && (
+                    {bal > 0 && !inv.isDeleted && can('payments:record') && (
                       <Button size="sm" variant="outline" onClick={() => openPaymentDialog(inv)}
                         className="h-7 rounded-full border-gray-200 font-bold text-xs flex items-center gap-1 px-2.5">
                         <DollarSign className="h-3 w-3" /> Record
                       </Button>
                     )}
-                    {bal > 0 && can('reminders:send') && (
+                    {bal > 0 && !inv.isDeleted && can('reminders:send') && (
                       <a href={getReminderLink(inv)} target="_blank" rel="noreferrer"
                         className="inline-flex h-7 items-center px-2.5 border border-amber-200 hover:bg-amber-50 text-amber-700 rounded-full font-bold text-xs gap-1">
                         <Bell className="h-3 w-3" /> Alert
@@ -378,7 +416,7 @@ ${vendorShop.businessName}`;
                       className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted" title="Download PDF">
                       <FileDown className="h-3.5 w-3.5" />
                     </a>
-                    {can('invoices:delete') && (
+                    {can('invoices:delete') && !inv.isDeleted && (
                       <Button variant="ghost" size="icon" onClick={() => handleDeleteInvoice(inv.id)}
                         className="h-7 w-7 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-full">
                         <Trash2 className="h-3.5 w-3.5" />
@@ -442,7 +480,7 @@ ${vendorShop.businessName}`;
                       <TableCell className="text-right text-rose-600 font-semibold">{"\u20B9"}{bal.toFixed(2)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1.5 flex-wrap lg:flex-nowrap">
-                          {bal > 0 && (
+                          {bal > 0 && !inv.isDeleted && (
                             <>
                               {can('payments:record') && (
                               <Button
@@ -493,7 +531,7 @@ ${vendorShop.businessName}`;
                           >
                             <FileDown className="h-4 w-4" />
                           </a>
-                          {can('invoices:delete') && (
+                          {can('invoices:delete') && !inv.isDeleted && (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -512,6 +550,42 @@ ${vendorShop.businessName}`;
             </TableBody>
           </Table>
         </Card>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between border-t border-border pt-4 mt-2 gap-4">
+            <p className="text-xs text-muted-foreground">
+              Showing <span className="font-semibold text-foreground">{Math.min(totalCount, (page - 1) * 10 + 1)}</span> to{' '}
+              <span className="font-semibold text-foreground">{Math.min(totalCount, page * 10)}</span> of{' '}
+              <span className="font-semibold text-foreground">{totalCount}</span> invoices
+            </p>
+            <div className="flex gap-2 items-center">
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={page === 1}
+                onClick={() => fetchInvoices(page - 1)}
+                className="rounded-full h-8 w-8 border-border"
+                aria-label="Previous page"
+              >
+                ‹
+              </Button>
+              <span className="text-xs font-bold text-foreground px-2">
+                Page {page} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={page === totalPages}
+                onClick={() => fetchInvoices(page + 1)}
+                className="rounded-full h-8 w-8 border-border"
+                aria-label="Next page"
+              >
+                ›
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Record Payment Dialog */}
@@ -618,6 +692,20 @@ ${vendorShop.businessName}`;
                     {vendorShop.phone && <span>Tel : {vendorShop.phone} </span>}
                     {vendorShop.email && <span>| Web : {vendorShop.email}</span>}
                   </p>
+                  {vendorShop.showGst !== false && vendorShop.taxId && (
+                    <p className="mt-1 font-semibold text-gray-700">GSTIN : {vendorShop.taxId}</p>
+                  )}
+                  {vendorShop.showLicense !== false && (
+                    <div className="mt-1 space-y-0.5">
+                      {vendorShop.licenseNum && <p><span className="font-semibold">Lic No:</span> {vendorShop.licenseNum}</p>}
+                      {(vendorShop.businessType === 'Agro Store' || vendorShop.businessType?.toLowerCase().includes('agro') || vendorShop.businessType?.toLowerCase().includes('krishi')) && (
+                        <>
+                          {vendorShop.aushadhLicenseNum && <p><span className="font-semibold">Aushadh Lic:</span> {vendorShop.aushadhLicenseNum}</p>}
+                          {vendorShop.khateLicenseNum && <p><span className="font-semibold">Khate Lic:</span> {vendorShop.khateLicenseNum}</p>}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="shrink-0 flex flex-col items-end">
@@ -633,7 +721,9 @@ ${vendorShop.businessName}`;
 
             {/* PAN, TAX INVOICE banner line */}
             <div className="border-t border-b border-gray-300 py-1.5 my-3 grid grid-cols-3 items-center text-[10px] font-bold text-gray-850">
-              <div>PAN : {vendorShop.taxId ? vendorShop.taxId.substring(2, 12).toUpperCase() : "N/A"}</div>
+              <div>
+                {vendorShop.showGst !== false && vendorShop.taxId ? `PAN : ${vendorShop.taxId.substring(2, 12).toUpperCase()}` : ""}
+              </div>
               <div className="text-center text-sm font-black tracking-widest text-black">TAX INVOICE</div>
               <div className="text-right text-[8px] text-gray-500 uppercase">Original for Recipient</div>
             </div>

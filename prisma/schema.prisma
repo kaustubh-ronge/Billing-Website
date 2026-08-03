@@ -85,10 +85,15 @@ model Shop {
   taxRate           Float  @default(18)
   nextInvoiceNumber Int    @default(1)
   businessType      String?
+  licenseNum        String?
+  aushadhLicenseNum String?
+  khateLicenseNum   String?
   showPaymentTerms  Boolean @default(true)
   showQrCode        Boolean @default(true)
   showBankDetails   Boolean @default(true)
   showFooterMessage Boolean @default(true)
+  showLicense       Boolean @default(true)
+  showGst           Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -381,6 +386,8 @@ model Invoice {
   customDueDays Int?
 
   notes String?
+
+  isDeleted Boolean @default(false)
 
   issuedAt  DateTime @default(now())
   createdAt DateTime @default(now())

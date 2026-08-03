@@ -105,6 +105,20 @@ export default async function PublicInvoicePage({ params }) {
                 {shop.phone && <span>Tel : {shop.phone} </span>}
                 {shop.email && <span>| Web : {shop.email}</span>}
               </p>
+              {shop.showGst !== false && shop.taxId && (
+                <p className="mt-1 font-semibold text-gray-700">GSTIN : {shop.taxId}</p>
+              )}
+              {shop.showLicense !== false && (
+                <div className="mt-1 space-y-0.5">
+                  {shop.licenseNum && <p><span className="font-semibold">Lic No:</span> {shop.licenseNum}</p>}
+                  {(shop.businessType === 'Agro Store' || shop.businessType?.toLowerCase().includes('agro') || shop.businessType?.toLowerCase().includes('krishi')) && (
+                    <>
+                      {shop.aushadhLicenseNum && <p><span className="font-semibold">Aushadh Lic:</span> {shop.aushadhLicenseNum}</p>}
+                      {shop.khateLicenseNum && <p><span className="font-semibold">Khate Lic:</span> {shop.khateLicenseNum}</p>}
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <div className="shrink-0 flex flex-col items-end">
@@ -120,7 +134,9 @@ export default async function PublicInvoicePage({ params }) {
 
         {/* PAN, TAX INVOICE banner line */}
         <div className="border-t border-b border-gray-300 py-1.5 my-3 grid grid-cols-3 items-center text-[10px] font-bold text-gray-850">
-          <div>PAN : {shop.taxId ? shop.taxId.substring(2, 12).toUpperCase() : "N/A"}</div>
+          <div>
+            {shop.showGst !== false && shop.taxId ? `PAN : ${shop.taxId.substring(2, 12).toUpperCase()}` : ""}
+          </div>
           <div className="text-center text-sm font-black tracking-widest text-black">TAX INVOICE</div>
           <div className="text-right text-[8px] text-gray-500 uppercase">Original for Recipient</div>
         </div>

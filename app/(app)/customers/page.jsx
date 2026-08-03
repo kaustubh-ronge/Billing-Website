@@ -295,16 +295,21 @@ ${vendorShop.businessName}`;
             variant="outline"
             size="sm"
             onClick={() => {
-              const rows = customers.map((c) => ({
-                Name: c.name,
-                Phone: c.phone,
-                Email: c.email ?? '',
-                Address: c.address ?? '',
-                GSTIN: c.gstNumber ?? '',
-                'Credit Limit': c.creditLimit ?? 0,
-                'Credit Used': c.creditUsed ?? 0,
-                Notes: c.notes ?? '',
-              }));
+              const rows = customers.map((c) => {
+                const totalAmount = c.totalPaid + c.totalPending;
+                return {
+                  Name: c.name,
+                  Phone: c.phone,
+                  Email: c.email ?? '',
+                  Address: c.address ?? '',
+                  GSTIN: c.gstNumber ?? '',
+                  'Total Amount': totalAmount.toFixed(2),
+                  'Paid Amount': c.totalPaid.toFixed(2),
+                  'Due Amount': c.totalPending.toFixed(2),
+                  Status: c.totalPending > 0 ? 'Pending' : 'Settled',
+                  Notes: c.notes ?? '',
+                };
+              });
               downloadCSV(rows, 'customers');
             }}
             className="rounded-full border-gray-200 font-bold text-sm flex items-center gap-1.5"

@@ -21,6 +21,7 @@ export default function DashboardPage() {
   const can = useCan();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
+  const [showAllOutstanding, setShowAllOutstanding] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -347,22 +348,36 @@ export default function DashboardPage() {
                 <p className="text-sm text-muted-foreground font-medium">All accounts settled!</p>
               </div>
             ) : (
-              reports.topPendingCustomers.slice(0, 6).map((c, i) => (
-                <div key={c.id} className="px-5 py-3 flex items-center justify-between hover:bg-muted/40 transition-colors">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400 text-xs font-black">
-                      {c.name.charAt(0).toUpperCase()}
+              <>
+                {(showAllOutstanding ? reports.topPendingCustomers : reports.topPendingCustomers.slice(0, 5)).map((c, i) => (
+                  <div key={c.id} className="px-5 py-3 flex items-center justify-between hover:bg-muted/40 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400 text-xs font-black">
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">{c.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{c.phone} · {c.invoiceCount} bill{c.invoiceCount > 1 ? 's' : ''}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{c.name}</p>
-                      <p className="text-[11px] text-muted-foreground">{c.phone} · {c.invoiceCount} bill{c.invoiceCount > 1 ? 's' : ''}</p>
-                    </div>
+                    <span className="text-sm font-black text-rose-600 bg-rose-50 dark:bg-rose-900/40 px-3 py-1 rounded-full border border-rose-200 dark:border-rose-800 shrink-0 ml-3">
+                      {"\u20B9"}{c.outstanding.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                    </span>
                   </div>
-                  <span className="text-sm font-black text-rose-600 bg-rose-50 dark:bg-rose-900/40 px-3 py-1 rounded-full border border-rose-200 dark:border-rose-800 shrink-0 ml-3">
-                    {"\u20B9"}{c.outstanding.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-                  </span>
-                </div>
-              ))
+                ))}
+                {reports.topPendingCustomers.length > 5 && (
+                  <div className="p-3 bg-muted/20 text-center border-t border-border">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAllOutstanding(!showAllOutstanding)}
+                      className="text-xs font-bold text-blue-650 hover:text-blue-700 w-full rounded-xl py-1.5 h-auto hover:bg-muted/50 transition-colors"
+                    >
+                      {showAllOutstanding ? 'Show Less' : `View All (${reports.topPendingCustomers.length})`}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </Card>

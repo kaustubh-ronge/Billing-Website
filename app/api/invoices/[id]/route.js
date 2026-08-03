@@ -81,8 +81,11 @@ export async function DELETE(req, { params }) {
         `;
       }
 
-      // 3. Delete invoice (cascades to payments and invoice items)
-      await tx.invoice.delete({ where: { id } });
+      // 3. Soft delete invoice (mark isDeleted: true)
+      await tx.invoice.update({
+        where: { id },
+        data: { isDeleted: true }
+      });
     });
 
     await logActivity({

@@ -36,12 +36,12 @@ export async function GET() {
       db.customer.count({ where: { shopId, isDeleted: false } }),
 
       db.invoice.aggregate({
-        where: { shopId, issuedAt: { gte: todayStart, lte: todayEnd } },
+        where: { shopId, isDeleted: false, issuedAt: { gte: todayStart, lte: todayEnd } },
         _sum: { grandTotal: true },
       }),
 
       db.invoice.aggregate({
-        where: { shopId, issuedAt: { gte: monthStart } },
+        where: { shopId, isDeleted: false, issuedAt: { gte: monthStart } },
         _sum: { grandTotal: true },
       }),
 
@@ -49,22 +49,23 @@ export async function GET() {
       db.$queryRaw`
         SELECT COALESCE(SUM("grandTotal" - "amountPaid"), 0)::float AS outstanding
         FROM "Invoice"
-        WHERE "shopId" = ${shopId} AND "status" != 'PAID'
+        WHERE "shopId" = ${shopId} AND "status" != 'PAID' AND "isDeleted" = false
       `,
 
-      db.invoice.count({ where: { shopId, status: 'PAID' } }),
-      db.invoice.count({ where: { shopId, status: { not: 'PAID' } } }),
+      db.invoice.count({ where: { shopId, isDeleted: false, status: 'PAID' } }),
+      db.invoice.count({ where: { shopId, isDeleted: false, status: { not: 'PAID' } } }),
 
       // Daily sales for last 30 days
       db.$queryRaw`
         SELECT
-          DATE("issuedAt") AS date,
+          TO_CHAR("issuedAt", 'YYYY-MM-DD') AS date,
           SUM("grandTotal")::float AS sales,
           COUNT(*)::int AS count
         FROM "Invoice"
         WHERE "shopId" = ${shopId}
           AND "issuedAt" >= ${last30DaysStart}
-        GROUP BY DATE("issuedAt")
+          AND "isDeleted" = false
+        GROUP BY TO_CHAR("issuedAt", 'YYYY-MM-DD')
         ORDER BY date
       `,
 
@@ -77,6 +78,7 @@ export async function GET() {
         FROM "Invoice"
         WHERE "shopId" = ${shopId}
           AND "issuedAt" >= ${last12MonthsStart}
+          AND "isDeleted" = false
         GROUP BY DATE_TRUNC('month', "issuedAt")
         ORDER BY DATE_TRUNC('month', "issuedAt")
       `,
@@ -93,6 +95,7 @@ export async function GET() {
         JOIN "Customer" c ON i."customerId" = c.id
         WHERE i."shopId" = ${shopId}
           AND i."status" != 'PAID'
+          AND i."isDeleted" = false
         GROUP BY c.id, c.name, c.phone
         ORDER BY outstanding DESC
         LIMIT 10
@@ -111,6 +114,7 @@ export async function GET() {
         JOIN "Product" p ON ii."productId" = p.id
         JOIN "Invoice" i ON ii."invoiceId" = i.id
         WHERE i."shopId" = ${shopId}
+          AND i."isDeleted" = false
         GROUP BY p.id, p.name, p.category, p."isService"
         ORDER BY quantity DESC
         LIMIT 5

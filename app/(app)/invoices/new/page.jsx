@@ -833,6 +833,20 @@ ${vendorShop.businessName}`;
                         {vendorShop.phone && <span>Tel : {vendorShop.phone} </span>}
                         {vendorShop.email && <span>| Web : {vendorShop.email}</span>}
                       </p>
+                      {vendorShop.showGst !== false && vendorShop.taxId && (
+                        <p className="mt-1 font-semibold text-gray-700">GSTIN : {vendorShop.taxId}</p>
+                      )}
+                      {vendorShop.showLicense !== false && (
+                        <div className="mt-1 space-y-0.5">
+                          {vendorShop.licenseNum && <p><span className="font-semibold">Lic No:</span> {vendorShop.licenseNum}</p>}
+                          {(vendorShop.businessType === 'Agro Store' || vendorShop.businessType?.toLowerCase().includes('agro') || vendorShop.businessType?.toLowerCase().includes('krishi')) && (
+                            <>
+                              {vendorShop.aushadhLicenseNum && <p><span className="font-semibold">Aushadh Lic:</span> {vendorShop.aushadhLicenseNum}</p>}
+                              {vendorShop.khateLicenseNum && <p><span className="font-semibold">Khate Lic:</span> {vendorShop.khateLicenseNum}</p>}
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="shrink-0 flex flex-col items-end">
@@ -848,7 +862,9 @@ ${vendorShop.businessName}`;
 
                 {/* PAN, TAX INVOICE banner line */}
                 <div className="border-t border-b border-gray-300 py-1.5 my-3 grid grid-cols-3 items-center text-[10px] font-bold text-gray-850">
-                  <div>PAN : {vendorShop.taxId ? vendorShop.taxId.substring(2, 12).toUpperCase() : "N/A"}</div>
+                  <div>
+                    {vendorShop.showGst !== false && vendorShop.taxId ? `PAN : ${vendorShop.taxId.substring(2, 12).toUpperCase()}` : ""}
+                  </div>
                   <div className="text-center text-sm font-black tracking-widest text-black">TAX INVOICE</div>
                   <div className="text-right text-[8px] text-gray-500 uppercase">Original for Recipient</div>
                 </div>

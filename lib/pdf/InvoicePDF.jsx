@@ -491,8 +491,25 @@ export function InvoicePDF({ invoice }) {
                 shop.email ? `Email: ${shop.email}` : null,
               ].filter(Boolean).join('  |  ')}
             </Text>
-            {shop.taxId && (
+            {shop.showGst !== false && shop.taxId && (
               <Text style={styles.businessDetail}>GSTIN: {shop.taxId}</Text>
+            )}
+            {shop.showLicense !== false && (
+              <>
+                {shop.licenseNum && (
+                  <Text style={styles.businessDetail}>License No: {shop.licenseNum}</Text>
+                )}
+                {(shop.businessType === 'Agro Store' || shop.businessType?.toLowerCase().includes('agro') || shop.businessType?.toLowerCase().includes('krishi')) && (
+                  <>
+                    {shop.aushadhLicenseNum && (
+                      <Text style={styles.businessDetail}>Aushadh License: {shop.aushadhLicenseNum}</Text>
+                    )}
+                    {shop.khateLicenseNum && (
+                      <Text style={styles.businessDetail}>Khate License: {shop.khateLicenseNum}</Text>
+                    )}
+                  </>
+                )}
+              </>
             )}
           </View>
           {/* Logo: use profile logoBase64 if available, else initials */}
@@ -512,7 +529,7 @@ export function InvoicePDF({ invoice }) {
         {/* ── PAN / TITLE BAR ── */}
         <View style={styles.panTaxBanner}>
           <Text style={styles.panText}>
-            {shop.taxId ? `GSTIN: ${shop.taxId}` : 'GSTIN: N/A'}
+            {shop.showGst !== false && shop.taxId ? `GSTIN: ${shop.taxId}` : ''}
           </Text>
           <Text style={styles.taxInvoiceTitle}>TAX INVOICE</Text>
           <Text style={styles.recipientText}>Original for Recipient</Text>

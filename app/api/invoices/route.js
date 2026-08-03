@@ -14,8 +14,13 @@ export async function GET(req) {
     const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || '';
     const customerId = searchParams.get('customerId') || '';
+    const showDeleted = searchParams.get('showDeleted') === 'true';
+    const all = searchParams.get('all') === 'true';
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const skip = (page - 1) * limit;
 
-    const whereClause = { shopId: user.shopId };
+    const whereClause = { shopId: user.shopId, isDeleted: showDeleted };
 
     if (status) whereClause.status = status;
     if (customerId) whereClause.customerId = customerId;
@@ -34,17 +39,27 @@ export async function GET(req) {
       ];
     }
 
-    const invoices = await db.invoice.findMany({
-      where: whereClause,
-      include: {
-        customer: true,
-        items: { include: { product: true } },
-        payments: true,
-      },
-      orderBy: { issuedAt: 'desc' },
-    });
+    const [invoices, totalCount] = await Promise.all([
+      db.invoice.findMany({
+        where: whereClause,
+        include: {
+          customer: true,
+          items: { include: { product: true } },
+          payments: true,
+        },
+        orderBy: { issuedAt: 'desc' },
+        ...(all ? {} : { skip, take: limit }),
+      }),
+      db.invoice.count({ where: whereClause }),
+    ]);
 
-    return NextResponse.json({ invoices });
+    return NextResponse.json({
+      invoices,
+      totalCount,
+      page,
+      limit,
+      totalPages: Math.ceil(totalCount / limit)
+    });
   } catch (error) {
     console.error('Error fetching invoices:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

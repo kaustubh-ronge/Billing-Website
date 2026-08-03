@@ -44,6 +44,19 @@ export default function SettingsPage() {
   const can = useCan();
   const allowed = can('settings:manage');
 
+  const standardTypes = [
+    'General Store / All',
+    'Agro Store',
+    'Clothing Store',
+    'Hardware Store',
+    'Poultry Store',
+    'Grocery / Kirana Store',
+    'Pharmacy / Medical',
+    'Electronics / Electricals',
+    'Dairy / Milk Parlour',
+    'Automobile / Garage'
+  ];
+
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -54,10 +67,15 @@ export default function SettingsPage() {
     invoicePrefix: 'INV', invoiceFormat: 'INV-{YEAR}-{NUMBER}',
     currency: 'INR', footerMessage: 'Thank you for your business!', taxRate: 18,
     businessType: 'General Store / All',
+    licenseNum: '',
+    aushadhLicenseNum: '',
+    khateLicenseNum: '',
     showPaymentTerms: true,
     showQrCode: true,
     showBankDetails: true,
     showFooterMessage: true,
+    showLicense: true,
+    showGst: true,
   });
 
   useEffect(() => { if (allowed) fetchProfile(); else setLoading(false); }, [allowed]);
@@ -157,19 +175,53 @@ export default function SettingsPage() {
               <FieldGroup label="Email Address"><Input value={formData.email} onChange={set('email')} type="email" placeholder="billing@business.com" className="rounded-xl border-border" /></FieldGroup>
               <FieldGroup label="GST / Tax Number" hint="GSTIN appears on all tax invoices."><Input value={formData.taxId} onChange={set('taxId')} placeholder="27AAAAA1111A1Z1" className="rounded-xl border-border font-mono uppercase" /></FieldGroup>
               <FieldGroup label="Business Type / Main Category" hint="Filters product categories.">
-                <Select value={formData.businessType || 'General Store / All'} onValueChange={(val) => setFormData(p => ({ ...p, businessType: val }))}>
+                <Select 
+                  value={formData.businessType && !standardTypes.includes(formData.businessType) ? 'Custom' : (formData.businessType || 'General Store / All')} 
+                  onValueChange={(val) => {
+                    if (val === 'Custom') {
+                      setFormData(p => ({ ...p, businessType: 'Custom Business Type' }));
+                    } else {
+                      setFormData(p => ({ ...p, businessType: val }));
+                    }
+                  }}
+                >
                   <SelectTrigger className="rounded-xl border-border bg-background">
                     <SelectValue placeholder="Select Business Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="General Store / All">General Store / All</SelectItem>
-                    <SelectItem value="Agro Store">Agro Store</SelectItem>
-                    <SelectItem value="Clothing Store">Clothing Store</SelectItem>
-                    <SelectItem value="Hardware Store">Hardware Store</SelectItem>
-                    <SelectItem value="Poultry Store">Poultry Store</SelectItem>
+                    {standardTypes.map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                    <SelectItem value="Custom">Other / Custom...</SelectItem>
                   </SelectContent>
                 </Select>
+                {((formData.businessType && !standardTypes.includes(formData.businessType)) || formData.businessType === 'Custom Business Type') && (
+                  <div className="mt-2.5">
+                    <Input
+                      value={formData.businessType === 'Custom Business Type' ? '' : formData.businessType}
+                      onChange={(e) => setFormData(p => ({ ...p, businessType: e.target.value || 'Custom Business Type' }))}
+                      placeholder="Enter custom business type (e.g. Toy Store)"
+                      className="rounded-xl border-border mt-1.5"
+                    />
+                  </div>
+                )}
               </FieldGroup>
+
+              {/* License Number Fields */}
+              <FieldGroup label="License Number" hint="General business license (Optional)">
+                <Input value={formData.licenseNum || ''} onChange={set('licenseNum')} placeholder="e.g. LIC-12345678" className="rounded-xl border-border font-mono uppercase" />
+              </FieldGroup>
+
+              {(formData.businessType === 'Agro Store' || formData.businessType?.toLowerCase().includes('agro') || formData.businessType?.toLowerCase().includes('krishi')) && (
+                <>
+                  <FieldGroup label="Aushadh License Number" hint="Medicinal / Drug license (Optional)">
+                    <Input value={formData.aushadhLicenseNum || ''} onChange={set('aushadhLicenseNum')} placeholder="e.g. DL-20B-1234" className="rounded-xl border-border font-mono uppercase" />
+                  </FieldGroup>
+                  <FieldGroup label="Khate License Number" hint="Seed/Fertilizer dealer license (Optional)">
+                    <Input value={formData.khateLicenseNum || ''} onChange={set('khateLicenseNum')} placeholder="e.g. FERT-9876" className="rounded-xl border-border font-mono uppercase" />
+                  </FieldGroup>
+                </>
+              )}
             </div>
             <FieldGroup label="Business Address"><Textarea value={formData.address} onChange={set('address')} placeholder="123 Main Street, Mumbai, Maharashtra 400001" className="rounded-xl border-border min-h-[80px]" /></FieldGroup>
             <div className="flex justify-end pt-2 border-t border-border">
@@ -259,6 +311,32 @@ export default function SettingsPage() {
                   <div className="space-y-0.5">
                     <span className="text-xs font-bold text-foreground">Show Footer Message</span>
                     <p className="text-[10px] text-muted-foreground">Display thank you / terms note at the bottom</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.showLicense}
+                    onChange={(e) => setFormData(p => ({ ...p, showLicense: e.target.checked }))}
+                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-foreground">Show License Info</span>
+                    <p className="text-[10px] text-muted-foreground">Display business / drug / khate license numbers</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.showGst}
+                    onChange={(e) => setFormData(p => ({ ...p, showGst: e.target.checked }))}
+                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-foreground">Show GSTIN Number</span>
+                    <p className="text-[10px] text-muted-foreground">Display shop GST / tax identifier</p>
                   </div>
                 </label>
               </div>
