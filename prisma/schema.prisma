@@ -94,6 +94,12 @@ model Shop {
   showFooterMessage Boolean @default(true)
   showLicense       Boolean @default(true)
   showGst           Boolean @default(true)
+  invoiceTemplate   String  @default("classic")
+  showColHsn        Boolean @default(true)
+  showColUnit       Boolean @default(true)
+  showColRate       Boolean @default(true)
+  showColTaxable    Boolean @default(true)
+  showColGst        Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

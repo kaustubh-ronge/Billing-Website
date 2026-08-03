@@ -9,6 +9,50 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { Loader2, CreditCard, Receipt, Save, Image as ImageIcon, Building2, Lock, Users, ArrowRight } from 'lucide-react';
 import { useCan } from '@/lib/permissions/PermissionContext';
+import InvoicePreviewHTML from '@/components/InvoicePreviewHTML';
+
+const MOCK_INVOICE = {
+  invoiceNum: 'INV-2026-0001',
+  issuedAt: new Date().toISOString(),
+  dueDate: new Date(Date.now() + 15*24*60*60*1000).toISOString(),
+  grandTotal: 1250,
+  amountPaid: 1250,
+  discountPercentage: 0,
+  paymentTerms: 'NET 15',
+  items: [
+    {
+      quantity: 2,
+      unitPrice: 500,
+      product: {
+        name: 'Sample Product A',
+        hsnSac: '3101',
+        unit: 'ml',
+        actualValue: '500',
+        taxRate: 18,
+        isService: false
+      }
+    },
+    {
+      quantity: 1,
+      unitPrice: 250,
+      product: {
+        name: 'Sample Service B',
+        hsnSac: '9983',
+        unit: 'HRS',
+        actualValue: '',
+        taxRate: 0,
+        isService: true
+      }
+    }
+  ]
+};
+
+const MOCK_CUSTOMER = {
+  name: 'John Doe',
+  address: '123 Main St, Mumbai, MH',
+  phone: '9876543210',
+  taxId: '27AAAAA0000A1Z5'
+};
 
 const TABS = [
   { id: 'profile', label: 'Business Profile', icon: Building2 },
@@ -76,6 +120,12 @@ export default function SettingsPage() {
     showFooterMessage: true,
     showLicense: true,
     showGst: true,
+    invoiceTemplate: 'classic',
+    showColHsn: true,
+    showColUnit: true,
+    showColRate: true,
+    showColTaxable: true,
+    showColGst: true,
   });
 
   useEffect(() => { if (allowed) fetchProfile(); else setLoading(false); }, [allowed]);
@@ -252,6 +302,20 @@ export default function SettingsPage() {
               <FieldGroup label="Invoice Number Prefix" hint={`Preview: ${formData.invoicePrefix || 'INV'}-2025-0001`}><Input value={formData.invoicePrefix} onChange={set('invoicePrefix')} placeholder="INV" maxLength={10} className="rounded-xl border-border font-mono uppercase" /></FieldGroup>
               <FieldGroup label="Default GST Rate (%)" hint="Applied when adding new products."><Input value={formData.taxRate} onChange={set('taxRate')} type="number" step="0.1" min="0" max="100" className="rounded-xl border-border" /></FieldGroup>
               <FieldGroup label="Currency Code"><Input value={formData.currency} onChange={set('currency')} placeholder="INR" maxLength={3} className="rounded-xl border-border font-mono uppercase" /></FieldGroup>
+              <FieldGroup label="Invoice PDF Template Layout" hint="Choose the layout design for your printed/PDF invoices.">
+                <Select value={formData.invoiceTemplate || 'classic'} onValueChange={(val) => setFormData(p => ({ ...p, invoiceTemplate: val }))}>
+                  <SelectTrigger className="rounded-xl border-border bg-background">
+                    <SelectValue placeholder="Select Layout Design" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="classic">Classic Premium (Default)</SelectItem>
+                    <SelectItem value="retail">Retail Grid / Agro Invoice (Pink Style)</SelectItem>
+                    <SelectItem value="thermal">Thermal Slip Receipt (80mm Printer)</SelectItem>
+                    <SelectItem value="minimal">Modern Minimalist</SelectItem>
+                    <SelectItem value="landscape">Compact Landscape (A5)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FieldGroup>
             </div>
             <FieldGroup label="Invoice Footer Message" hint="Printed at the bottom of all invoices."><Textarea value={formData.footerMessage} onChange={set('footerMessage')} placeholder="Thank you for your business." className="rounded-xl border-border min-h-[80px]" /></FieldGroup>
             
@@ -339,6 +403,128 @@ export default function SettingsPage() {
                     <p className="text-[10px] text-muted-foreground">Display shop GST / tax identifier</p>
                   </div>
                 </label>
+              </div>
+            </div>
+
+            {/* Invoice Column Visibility Options */}
+            <div className="pt-5 border-t border-border space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-foreground">Invoice Item Column Visibility</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Toggle visibility of specific item columns in the main table.</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.showColHsn}
+                    onChange={(e) => setFormData(p => ({ ...p, showColHsn: e.target.checked }))}
+                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-foreground">Show HSN/SAC Column</span>
+                    <p className="text-[10px] text-muted-foreground">Display product HSN/SAC tax code</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.showColUnit}
+                    onChange={(e) => setFormData(p => ({ ...p, showColUnit: e.target.checked }))}
+                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-foreground">Show Unit Column</span>
+                    <p className="text-[10px] text-muted-foreground">Display unit measurement (e.g. ml, kg)</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.showColRate}
+                    onChange={(e) => setFormData(p => ({ ...p, showColRate: e.target.checked }))}
+                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-foreground">Show Rate (Excl.) Column</span>
+                    <p className="text-[10px] text-muted-foreground">Display base unit price excluding tax</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.showColTaxable}
+                    onChange={(e) => setFormData(p => ({ ...p, showColTaxable: e.target.checked }))}
+                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-foreground">Show Taxable Value Column</span>
+                    <p className="text-[10px] text-muted-foreground">Display line subtotal before GST</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.showColGst}
+                    onChange={(e) => setFormData(p => ({ ...p, showColGst: e.target.checked }))}
+                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-foreground">Show GST Column (% & Amt)</span>
+                    <p className="text-[10px] text-muted-foreground">Display line tax percentage and split amount</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Live Template Preview Section */}
+            <div className="pt-6 border-t border-border space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-foreground">Live Template Preview</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">See how your invoices look with the current configuration in real-time.</p>
+              </div>
+              <div className="border border-border rounded-2xl p-4 bg-muted/5 overflow-hidden flex flex-col items-center">
+                <div className="w-full overflow-auto max-h-[400px] border border-border rounded-xl bg-background shadow-inner">
+                  <div className="scale-95 origin-top p-2 md:scale-100">
+                    <InvoicePreviewHTML
+                      invoice={MOCK_INVOICE}
+                      shop={{
+                        businessName: formData.businessName || 'Your Business Name',
+                        description: 'Quality Products & Services',
+                        address: formData.address || 'Business Address, City, State',
+                        phone: formData.phone || '9999999999',
+                        email: formData.email || 'business@email.com',
+                        taxId: formData.taxId || '27AAAAA0000A1Z5',
+                        bankName: formData.bankName || 'Sample Bank Name',
+                        accountNum: formData.accountNum || '1234567890',
+                        ifscCode: formData.ifscCode || 'IFSC0001234',
+                        upiId: formData.upiId || 'upi@id',
+                        invoiceTemplate: formData.invoiceTemplate,
+                        showColHsn: formData.showColHsn,
+                        showColUnit: formData.showColUnit,
+                        showColRate: formData.showColRate,
+                        showColTaxable: formData.showColTaxable,
+                        showColGst: formData.showColGst,
+                        showBankDetails: formData.showBankDetails,
+                        showQrCode: formData.showQrCode,
+                        showPaymentTerms: formData.showPaymentTerms,
+                        showFooterMessage: formData.showFooterMessage,
+                        showLicense: formData.showLicense,
+                        showGst: formData.showGst
+                      }}
+                      customer={MOCK_CUSTOMER}
+                      items={MOCK_INVOICE.items}
+                      statusBadge={
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-black bg-green-50 text-green-700 border border-green-150">
+                          PAID
+                        </span>
+                      }
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

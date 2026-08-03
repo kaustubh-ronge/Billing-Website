@@ -49,6 +49,12 @@ export async function PUT(req) {
         showFooterMessage: body.showFooterMessage !== undefined ? !!body.showFooterMessage : user.shop.showFooterMessage,
         showLicense: body.showLicense !== undefined ? !!body.showLicense : user.shop.showLicense,
         showGst: body.showGst !== undefined ? !!body.showGst : user.shop.showGst,
+        invoiceTemplate: body.invoiceTemplate !== undefined ? body.invoiceTemplate : user.shop.invoiceTemplate,
+        showColHsn: body.showColHsn !== undefined ? !!body.showColHsn : user.shop.showColHsn,
+        showColUnit: body.showColUnit !== undefined ? !!body.showColUnit : user.shop.showColUnit,
+        showColRate: body.showColRate !== undefined ? !!body.showColRate : user.shop.showColRate,
+        showColTaxable: body.showColTaxable !== undefined ? !!body.showColTaxable : user.shop.showColTaxable,
+        showColGst: body.showColGst !== undefined ? !!body.showColGst : user.shop.showColGst,
       },
     });
 
