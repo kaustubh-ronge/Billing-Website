@@ -21,6 +21,20 @@ export async function approveRequest(requestId) {
 
   // Create the Shop and update User
   await db.$transaction(async (tx) => {
+    // Find or create default 1 Month Trial plan
+    let trialPlan = await tx.subscriptionPlan.findFirst({
+      where: { name: "1 Month Trial" }
+    });
+    if (!trialPlan) {
+      trialPlan = await tx.subscriptionPlan.create({
+        data: {
+          name: "1 Month Trial",
+          durationDays: 30,
+          price: 0,
+        }
+      });
+    }
+
     const shop = await tx.shop.create({
       data: {
         businessName: req.businessName,
@@ -30,6 +44,8 @@ export async function approveRequest(requestId) {
         ownerName: req.user.name,
         email: req.user.email,
         subscriptionPlan: "FREE",
+        planId: trialPlan.id,
+        planExpiresAt: null,
       },
     });
 

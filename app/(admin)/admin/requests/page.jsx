@@ -13,15 +13,30 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default async function RegistrationQueuePage() {
-  const requests = await db.registrationRequest.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { user: true },
-  });
+export default async function RegistrationQueuePage({ searchParams }) {
+  const params = await searchParams;
+  const page = parseInt(params?.page || "1");
+  const limit = 10;
+  const skip = (page - 1) * limit;
 
-  const pendingCount = requests.filter((r) => r.status === "PENDING").length;
-  const approvedCount = requests.filter((r) => r.status === "APPROVED").length;
-  const rejectedCount = requests.filter((r) => r.status === "REJECTED").length;
+  const [requests, total] = await Promise.all([
+    db.registrationRequest.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { user: true },
+      skip,
+      take: limit,
+    }),
+    db.registrationRequest.count(),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  // We can also count totals for badges separately
+  const [pendingCount, approvedCount, rejectedCount] = await Promise.all([
+    db.registrationRequest.count({ where: { status: "PENDING" } }),
+    db.registrationRequest.count({ where: { status: "APPROVED" } }),
+    db.registrationRequest.count({ where: { status: "REJECTED" } }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -118,6 +133,45 @@ export default async function RegistrationQueuePage() {
                 ))}
               </TableBody>
             </Table>
+          )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between p-4 border-t border-border">
+              <span className="text-[11px] text-muted-foreground font-sans">Page {page} of {totalPages}</span>
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  asChild={page > 1}
+                  className="rounded-xl px-3 text-xs gap-1 font-bold"
+                >
+                  {page > 1 ? (
+                    <Link href={`/admin/requests?page=${page - 1}`}>
+                      Prev
+                    </Link>
+                  ) : (
+                    <span>Prev</span>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= totalPages}
+                  asChild={page < totalPages}
+                  className="rounded-xl px-3 text-xs gap-1 font-bold"
+                >
+                  {page < totalPages ? (
+                    <Link href={`/admin/requests?page=${page + 1}`}>
+                      Next
+                    </Link>
+                  ) : (
+                    <span>Next</span>
+                  )}
+                </Button>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

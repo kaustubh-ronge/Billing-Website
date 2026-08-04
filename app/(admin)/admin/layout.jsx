@@ -1,7 +1,7 @@
 import { checkUser } from "@/lib/checkUser";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Users, Shield, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Shield, LogOut, CreditCard } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { Separator } from "@/components/ui/separator";
 
@@ -40,6 +40,13 @@ export default async function AdminLayout({ children }) {
             <Users className="h-4 w-4 text-muted-foreground" />
             Registration Queue
           </Link>
+          <Link
+            href="/admin/plans"
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+            Subscription Plans
+          </Link>
         </nav>
 
         {/* User section */}
@@ -69,6 +76,9 @@ export default async function AdminLayout({ children }) {
           </Link>
           <Link href="/admin/requests" className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
             Queue
+          </Link>
+          <Link href="/admin/plans" className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Plans
           </Link>
           <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-7 h-7" } }} />
         </div>
