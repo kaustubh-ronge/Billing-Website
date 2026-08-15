@@ -1,10 +1,17 @@
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Toaster } from "sonner";
 
-const inter = Inter({ subsets: ['latin'] });
+if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+  const orig = console.error;
+  console.error = (...args) => {
+    if (typeof args[0] === "string" && args[0].includes("Encountered a script tag")) return;
+    orig.apply(console, args);
+  };
+}
+
+const inter = { className: "font-sans antialiased" };
 
 export const metadata = {
   title: "SmartBill — Business Billing & Invoicing",

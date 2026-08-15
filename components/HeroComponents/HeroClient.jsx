@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function HeroClient({ systemRole }) {
+export default function HeroClient({ systemRole, totalBusinesses = 0, totalInvoices = 0 }) {
   return (
     <div className="w-full relative flex flex-col items-center justify-center z-20">
       
@@ -36,7 +36,7 @@ export default function HeroClient({ systemRole }) {
         </motion.p>
 
         {/* Standardized Button Sizes */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="flex flex-col items-center justify-center gap-6">
           <Link href={systemRole === "ADMIN" ? "/admin" : "/dashboard"} className="relative group">
             <div className="absolute -inset-0.5 bg-linear-to-r from-blue-500 to-purple-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
             <Button className="relative h-12 px-8 rounded-full text-sm font-semibold bg-gray-900 hover:bg-black text-white transition-all transform group-hover:-translate-y-0.5 shadow-md">
@@ -45,11 +45,26 @@ export default function HeroClient({ systemRole }) {
             </Button>
           </Link>
           
-          <a href="#features">
-            <Button variant="outline" className="h-12 px-8 rounded-full text-sm font-semibold border-gray-200 bg-white/60 backdrop-blur-sm text-gray-700 hover:bg-white hover:text-gray-900 shadow-sm transition-all">
-              See How it Works
-            </Button>
-          </a>
+          {/* Dynamic statistics section */}
+          <div className="mt-6 flex flex-col sm:flex-row items-center gap-6 sm:gap-12 bg-white/40 backdrop-blur-md border border-gray-200/80 px-8 py-4 rounded-3xl shadow-sm">
+            <div className="text-center sm:text-left">
+              <span className="block text-2xl font-black text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">
+                {totalBusinesses}+
+              </span>
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                Businesses Connected
+              </span>
+            </div>
+            <div className="hidden sm:block h-8 w-px bg-gray-255" />
+            <div className="text-center sm:text-left">
+              <span className="block text-2xl font-black text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">
+                {totalInvoices}+
+              </span>
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                Invoices Generated
+              </span>
+            </div>
+          </div>
         </motion.div>
 
       </div>

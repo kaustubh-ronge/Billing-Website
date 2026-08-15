@@ -1,11 +1,12 @@
 import HeroClient from "./HeroClient";
 import Features from "./Features";
 import HowItWorks from "./HowItWorks";
+import AboutAndContact from "./AboutAndContact";
 import CTA from "./CTA";
 
-export default function Hero({ systemRole }) {
+export default function Hero({ systemRole, totalBusinesses, totalInvoices }) {
   return (
-    <div className="w-full bg-white flex flex-col overflow-x-hidden">
+    <div className="w-full bg-white flex flex-col overflow-x-hidden" id="home">
       
       {/* ================= HERO SECTION ================= */}
       <section className="relative min-h-[100svh] flex items-center justify-center pt-32 pb-20 overflow-hidden bg-white">
@@ -17,7 +18,11 @@ export default function Hero({ systemRole }) {
         <div className="absolute top-0 inset-x-0 h-40 bg-linear-to-b from-white to-transparent z-10"></div>
 
         {/* The Animated Client Layer */}
-        <HeroClient systemRole={systemRole} />
+        <HeroClient 
+          systemRole={systemRole} 
+          totalBusinesses={totalBusinesses} 
+          totalInvoices={totalInvoices} 
+        />
         
       </section>
 
@@ -26,9 +31,14 @@ export default function Hero({ systemRole }) {
       <Features />
 
       {/* 3. Steps Flow */}
-      <HowItWorks />
+      <div id="how-to-use">
+        <HowItWorks />
+      </div>
 
-      {/* 4. Final Call to Action */}
+      {/* 4. About & Contact details */}
+      <AboutAndContact />
+
+      {/* 5. Final Call to Action */}
       <CTA />
 
     </div>

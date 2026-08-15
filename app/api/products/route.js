@@ -47,7 +47,11 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { name, price, taxRate, trackInventory, stockCount, lowStockAlert, category, unit, isService, description, imageBase64, hsnSac, actualValue } = body;
+    const { 
+      name, price, taxRate, trackInventory, stockCount, lowStockAlert, 
+      category, unit, isService, description, imageBase64, hsnSac, actualValue,
+      expiryDate, companyName, batchNumber, minOrderQty, bulkPrice 
+    } = body;
 
     if (!name || price === undefined) {
       return NextResponse.json({ error: 'Product name and price are required' }, { status: 400 });
@@ -68,6 +72,11 @@ export async function POST(req) {
         imageBase64: imageBase64 || null,
         hsnSac: hsnSac || null,
         actualValue: actualValue || null,
+        expiryDate: expiryDate || null,
+        companyName: companyName || null,
+        batchNumber: batchNumber || null,
+        minOrderQty: minOrderQty !== undefined && minOrderQty !== null && minOrderQty !== '' ? parseInt(minOrderQty) : null,
+        bulkPrice: bulkPrice !== undefined && bulkPrice !== null && bulkPrice !== '' ? parseFloat(bulkPrice) : null,
         shopId: user.shopId
       }
     });

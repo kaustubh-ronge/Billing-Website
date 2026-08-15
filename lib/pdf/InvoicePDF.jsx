@@ -558,13 +558,30 @@ function InvoicePDFClassic({ invoice, shop, customer, items, subtotal, discountA
             )}
             <Text style={[styles.th, { width: COL_W.total, textAlign: 'right' }]}>Total</Text>
           </View>
-
           {items.map((item, idx) => {
             const taxRate = item.product?.taxRate ?? 0;
             const lineTotal = item.quantity * item.unitPrice;
             const rateExcl = item.unitPrice / (1 + taxRate / 100);
             const taxableVal = item.quantity * rateExcl;
             const gstAmt = lineTotal - taxableVal;
+
+            const isAgro = shop?.businessType === 'Agro Store' || shop?.businessType?.toLowerCase().includes('agro') || shop?.businessType?.toLowerCase().includes('krishi');
+            const isMedical = shop?.businessType === 'Pharmacy / Medical' || shop?.businessType?.toLowerCase().includes('medical') || shop?.businessType?.toLowerCase().includes('pharmacy');
+            const isWholesale = shop?.businessType?.toLowerCase().includes('wholesale') || shop?.businessType?.toLowerCase().includes('distributor');
+
+            const metaParts = [];
+            if (isAgro) {
+              if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+              if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Co: ${item.product.companyName}`);
+            } else if (isMedical) {
+              if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+              if (shop?.showColBatch !== false && item.product?.batchNumber) metaParts.push(`Batch: ${item.product.batchNumber}`);
+              if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Mfg: ${item.product.companyName}`);
+            } else if (isWholesale) {
+              if (shop?.showColMinOrder !== false && item.product?.minOrderQty) metaParts.push(`MOQ: ${item.product.minOrderQty}`);
+              if (shop?.showColBulkPrice !== false && item.product?.bulkPrice) metaParts.push(`Bulk: Rs. ${item.product.bulkPrice}`);
+            }
+            const metaText = metaParts.join(" | ");
 
             return (
               <View key={item.id ?? idx} style={idx % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
@@ -574,6 +591,7 @@ function InvoicePDFClassic({ invoice, shop, customer, items, subtotal, discountA
                     {item.product?.name ?? 'Item'}{item.product?.actualValue ? ` (${item.product.actualValue}${item.product.unit || ''})` : ''}
                   </Text>
                   {item.product?.isService && <Text style={styles.serviceTag}>Service</Text>}
+                  {metaText ? <Text style={{ fontSize: 5.5, color: '#4b5563', marginTop: 1 }}>{metaText}</Text> : null}
                 </View>
                 {shop.showColHsn !== false && <Text style={[styles.tdCenter, styles.colHsnCell, { width: COL_W.hsn }]}>{item.product?.hsnSac || '—'}</Text>}
                 <Text style={[styles.tdCenter, styles.colQtyCell, { width: COL_W.qty }]}>{item.quantity}</Text>
@@ -871,6 +889,24 @@ function InvoicePDFRetail({ invoice, shop, customer, items, subtotal, discountAm
               const taxableVal = item.quantity * rateExcl;
               const gstAmt = lineTotal - taxableVal;
 
+              const isAgro = shop?.businessType === 'Agro Store' || shop?.businessType?.toLowerCase().includes('agro') || shop?.businessType?.toLowerCase().includes('krishi');
+              const isMedical = shop?.businessType === 'Pharmacy / Medical' || shop?.businessType?.toLowerCase().includes('medical') || shop?.businessType?.toLowerCase().includes('pharmacy');
+              const isWholesale = shop?.businessType?.toLowerCase().includes('wholesale') || shop?.businessType?.toLowerCase().includes('distributor');
+
+              const metaParts = [];
+              if (isAgro) {
+                if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Co: ${item.product.companyName}`);
+              } else if (isMedical) {
+                if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                if (shop?.showColBatch !== false && item.product?.batchNumber) metaParts.push(`Batch: ${item.product.batchNumber}`);
+                if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Mfg: ${item.product.companyName}`);
+              } else if (isWholesale) {
+                if (shop?.showColMinOrder !== false && item.product?.minOrderQty) metaParts.push(`MOQ: ${item.product.minOrderQty}`);
+                if (shop?.showColBulkPrice !== false && item.product?.bulkPrice) metaParts.push(`Bulk: Rs. ${item.product.bulkPrice}`);
+              }
+              const metaText = metaParts.join(" | ");
+
               return (
                 <View key={item.id ?? idx} style={rStyles.tr}>
                   <Text style={[rStyles.td, { width: COL_W.sr, textAlign: 'center' }]}>{idx + 1}</Text>
@@ -878,6 +914,7 @@ function InvoicePDFRetail({ invoice, shop, customer, items, subtotal, discountAm
                     <Text style={{ fontFamily: 'Helvetica-Bold' }}>
                       {item.product?.name ?? 'Item'}{item.product?.actualValue ? ` (${item.product.actualValue}${item.product.unit || ''})` : ''}
                     </Text>
+                    {metaText ? <Text style={{ fontSize: 5.5, color: '#4b5563', marginTop: 1 }}>{metaText}</Text> : null}
                   </View>
                   {shop.showColHsn !== false && <Text style={[rStyles.td, { width: COL_W.hsn, textAlign: 'center' }]}>{item.product?.hsnSac || '—'}</Text>}
                   <Text style={[rStyles.td, { width: COL_W.qty, textAlign: 'center' }]}>{item.quantity}</Text>
@@ -1075,12 +1112,33 @@ function InvoicePDFThermal({ invoice, shop, customer, items, subtotal, discountA
             const taxableVal = item.quantity * rateExcl;
             const gstAmt = lineTotal - taxableVal;
 
+            const isAgro = shop?.businessType === 'Agro Store' || shop?.businessType?.toLowerCase().includes('agro') || shop?.businessType?.toLowerCase().includes('krishi');
+            const isMedical = shop?.businessType === 'Pharmacy / Medical' || shop?.businessType?.toLowerCase().includes('medical') || shop?.businessType?.toLowerCase().includes('pharmacy');
+            const isWholesale = shop?.businessType?.toLowerCase().includes('wholesale') || shop?.businessType?.toLowerCase().includes('distributor');
+
+            const metaParts = [];
+            if (isAgro) {
+              if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+              if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Co: ${item.product.companyName}`);
+            } else if (isMedical) {
+              if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+              if (shop?.showColBatch !== false && item.product?.batchNumber) metaParts.push(`Batch: ${item.product.batchNumber}`);
+              if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Mfg: ${item.product.companyName}`);
+            } else if (isWholesale) {
+              if (shop?.showColMinOrder !== false && item.product?.minOrderQty) metaParts.push(`MOQ: ${item.product.minOrderQty}`);
+              if (shop?.showColBulkPrice !== false && item.product?.bulkPrice) metaParts.push(`Bulk: Rs. ${item.product.bulkPrice}`);
+            }
+            const metaText = metaParts.join(" | ");
+
             return (
               <View key={item.id ?? idx} style={tStyles.tableRow}>
                 <Text style={{ width: COL_W.sr, fontSize: 6.5, textAlign: 'center' }}>{idx + 1}</Text>
-                <Text style={{ width: COL_W.item, fontSize: 6.5, fontFamily: 'Helvetica-Bold' }}>
-                  {item.product?.name ?? 'Item'}{item.product?.actualValue ? ` (${item.product.actualValue}${item.product.unit || ''})` : ''}
-                </Text>
+                <View style={{ width: COL_W.item, flexDirection: 'column' }}>
+                  <Text style={{ fontSize: 6.5, fontFamily: 'Helvetica-Bold' }}>
+                    {item.product?.name ?? 'Item'}{item.product?.actualValue ? ` (${item.product.actualValue}${item.product.unit || ''})` : ''}
+                  </Text>
+                  {metaText ? <Text style={{ fontSize: 5, color: '#4b5563', marginTop: 1 }}>{metaText}</Text> : null}
+                </View>
                 {shop.showColHsn !== false && <Text style={{ width: COL_W.hsn, fontSize: 6.5, textAlign: 'center' }}>{item.product?.hsnSac || '—'}</Text>}
                 <Text style={{ width: COL_W.qty, fontSize: 6.5, textAlign: 'center' }}>{item.quantity}</Text>
                 {shop.showColUnit !== false && <Text style={{ width: COL_W.unit, fontSize: 6.5, textAlign: 'center' }}>{item.product?.unit || 'NOS'}</Text>}
@@ -1255,12 +1313,33 @@ function InvoicePDFMinimal({ invoice, shop, customer, items, subtotal, discountA
             const taxableVal = item.quantity * rateExcl;
             const gstAmt = lineTotal - taxableVal;
 
+            const isAgro = shop?.businessType === 'Agro Store' || shop?.businessType?.toLowerCase().includes('agro') || shop?.businessType?.toLowerCase().includes('krishi');
+            const isMedical = shop?.businessType === 'Pharmacy / Medical' || shop?.businessType?.toLowerCase().includes('medical') || shop?.businessType?.toLowerCase().includes('pharmacy');
+            const isWholesale = shop?.businessType?.toLowerCase().includes('wholesale') || shop?.businessType?.toLowerCase().includes('distributor');
+
+            const metaParts = [];
+            if (isAgro) {
+              if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+              if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Co: ${item.product.companyName}`);
+            } else if (isMedical) {
+              if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+              if (shop?.showColBatch !== false && item.product?.batchNumber) metaParts.push(`Batch: ${item.product.batchNumber}`);
+              if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Mfg: ${item.product.companyName}`);
+            } else if (isWholesale) {
+              if (shop?.showColMinOrder !== false && item.product?.minOrderQty) metaParts.push(`MOQ: ${item.product.minOrderQty}`);
+              if (shop?.showColBulkPrice !== false && item.product?.bulkPrice) metaParts.push(`Bulk: Rs. ${item.product.bulkPrice}`);
+            }
+            const metaText = metaParts.join(" | ");
+
             return (
               <View key={item.id ?? idx} style={mStyles.tableRow}>
                 <Text style={[mStyles.td, { width: COL_W.sr, textAlign: 'center' }]}>{idx + 1}</Text>
-                <Text style={[mStyles.td, { width: COL_W.item, fontFamily: 'Helvetica-Bold' }]}>
-                  {item.product?.name ?? 'Item'}{item.product?.actualValue ? ` (${item.product.actualValue}${item.product.unit || ''})` : ''}
-                </Text>
+                <View style={[mStyles.td, { width: COL_W.item, flexDirection: 'column' }]}>
+                  <Text style={{ fontFamily: 'Helvetica-Bold' }}>
+                    {item.product?.name ?? 'Item'}{item.product?.actualValue ? ` (${item.product.actualValue}${item.product.unit || ''})` : ''}
+                  </Text>
+                  {metaText ? <Text style={{ fontSize: 5.5, color: '#4b5563', marginTop: 1 }}>{metaText}</Text> : null}
+                </View>
                 {shop.showColHsn !== false && <Text style={[mStyles.td, { width: COL_W.hsn, textAlign: 'center' }]}>{item.product?.hsnSac || '—'}</Text>}
                 <Text style={[mStyles.td, { width: COL_W.qty, textAlign: 'center' }]}>{item.quantity}</Text>
                 {shop.showColUnit !== false && <Text style={[mStyles.td, { width: COL_W.unit, textAlign: 'center' }]}>{item.product?.unit || 'NOS'}</Text>}
@@ -1404,12 +1483,33 @@ function InvoicePDFLandscape({ invoice, shop, customer, items, subtotal, discoun
             const taxableVal = item.quantity * rateExcl;
             const gstAmt = lineTotal - taxableVal;
 
+            const isAgro = shop?.businessType === 'Agro Store' || shop?.businessType?.toLowerCase().includes('agro') || shop?.businessType?.toLowerCase().includes('krishi');
+            const isMedical = shop?.businessType === 'Pharmacy / Medical' || shop?.businessType?.toLowerCase().includes('medical') || shop?.businessType?.toLowerCase().includes('pharmacy');
+            const isWholesale = shop?.businessType?.toLowerCase().includes('wholesale') || shop?.businessType?.toLowerCase().includes('distributor');
+
+            const metaParts = [];
+            if (isAgro) {
+              if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+              if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Co: ${item.product.companyName}`);
+            } else if (isMedical) {
+              if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+              if (shop?.showColBatch !== false && item.product?.batchNumber) metaParts.push(`Batch: ${item.product.batchNumber}`);
+              if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Mfg: ${item.product.companyName}`);
+            } else if (isWholesale) {
+              if (shop?.showColMinOrder !== false && item.product?.minOrderQty) metaParts.push(`MOQ: ${item.product.minOrderQty}`);
+              if (shop?.showColBulkPrice !== false && item.product?.bulkPrice) metaParts.push(`Bulk: Rs. ${item.product.bulkPrice}`);
+            }
+            const metaText = metaParts.join(" | ");
+
             return (
               <View key={item.id ?? idx} style={idx % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
                 <Text style={[styles.tdCenter, styles.colSrCell, { width: COL_W.sr }]}>{idx + 1}</Text>
-                <Text style={[styles.tdBold, styles.colItemCell, { width: COL_W.item }]}>
-                  {item.product?.name ?? 'Item'}{item.product?.actualValue ? ` (${item.product.actualValue}${item.product.unit || ''})` : ''}
-                </Text>
+                <View style={[styles.colItemCell, { width: COL_W.item, flexDirection: 'column' }]}>
+                  <Text style={styles.tdBold}>
+                    {item.product?.name ?? 'Item'}{item.product?.actualValue ? ` (${item.product.actualValue}${item.product.unit || ''})` : ''}
+                  </Text>
+                  {metaText ? <Text style={{ fontSize: 5.5, color: '#4b5563', marginTop: 1 }}>{metaText}</Text> : null}
+                </View>
                 {shop.showColHsn !== false && <Text style={[styles.tdCenter, styles.colHsnCell, { width: COL_W.hsn }]}>{item.product?.hsnSac || '—'}</Text>}
                 <Text style={[styles.tdCenter, styles.colQtyCell, { width: COL_W.qty }]}>{item.quantity}</Text>
                 {shop.showColUnit !== false && <Text style={[styles.tdCenter, styles.colUnitCell, { width: COL_W.unit }]}>{item.product?.unit || 'NOS'}</Text>}

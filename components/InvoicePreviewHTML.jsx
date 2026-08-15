@@ -79,11 +79,33 @@ export default function InvoicePreviewHTML({ invoice, shop, customer, items, sta
                 const rateExclusive = item.unitPrice / (1 + itemTaxRate / 100);
                 const taxableValue = item.quantity * rateExclusive;
                 const gstAmount = lineTotal - taxableValue;
+
+                const isAgro = shop?.businessType === 'Agro Store' || shop?.businessType?.toLowerCase().includes('agro') || shop?.businessType?.toLowerCase().includes('krishi');
+                const isMedical = shop?.businessType === 'Pharmacy / Medical' || shop?.businessType?.toLowerCase().includes('medical') || shop?.businessType?.toLowerCase().includes('pharmacy');
+                const isWholesale = shop?.businessType?.toLowerCase().includes('wholesale') || shop?.businessType?.toLowerCase().includes('distributor');
+
+                const metaParts = [];
+                if (isAgro) {
+                  if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                  if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Co: ${item.product.companyName}`);
+                } else if (isMedical) {
+                  if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                  if (shop?.showColBatch !== false && item.product?.batchNumber) metaParts.push(`Batch: ${item.product.batchNumber}`);
+                  if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Mfg: ${item.product.companyName}`);
+                } else if (isWholesale) {
+                  if (shop?.showColMinOrder !== false && item.product?.minOrderQty) metaParts.push(`MOQ: ${item.product.minOrderQty}`);
+                  if (shop?.showColBulkPrice !== false && item.product?.bulkPrice) metaParts.push(`Bulk: ₹${item.product.bulkPrice}`);
+                }
+                const metaText = metaParts.join(" · ");
+
                 return (
                   <tr key={idx} className="py-1">
                     <td className="py-1 text-center">{idx + 1}</td>
-                    <td className="py-1 font-bold">
-                      {item.product?.name} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}
+                    <td className="py-1 font-bold text-left">
+                      <div>
+                        <span>{item.product?.name} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}</span>
+                        {metaText && <p className="text-[7px] text-gray-500 font-normal mt-0.5">{metaText}</p>}
+                      </div>
                     </td>
                     {shop?.showColHsn !== false && <td className="py-1 text-center">{item.product?.hsnSac || '—'}</td>}
                     <td className="py-1 text-center font-bold">{item.quantity}</td>
@@ -199,10 +221,34 @@ export default function InvoicePreviewHTML({ invoice, shop, customer, items, sta
                     const rateExclusive = item.unitPrice / (1 + itemTaxRate / 100);
                     const taxableValue = item.quantity * rateExclusive;
                     const gstAmount = lineTotal - taxableValue;
+
+                    const isAgro = shop?.businessType === 'Agro Store' || shop?.businessType?.toLowerCase().includes('agro') || shop?.businessType?.toLowerCase().includes('krishi');
+                    const isMedical = shop?.businessType === 'Pharmacy / Medical' || shop?.businessType?.toLowerCase().includes('medical') || shop?.businessType?.toLowerCase().includes('pharmacy');
+                    const isWholesale = shop?.businessType?.toLowerCase().includes('wholesale') || shop?.businessType?.toLowerCase().includes('distributor');
+
+                    const metaParts = [];
+                    if (isAgro) {
+                      if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                      if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Co: ${item.product.companyName}`);
+                    } else if (isMedical) {
+                      if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                      if (shop?.showColBatch !== false && item.product?.batchNumber) metaParts.push(`Batch: ${item.product.batchNumber}`);
+                      if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Mfg: ${item.product.companyName}`);
+                    } else if (isWholesale) {
+                      if (shop?.showColMinOrder !== false && item.product?.minOrderQty) metaParts.push(`MOQ: ${item.product.minOrderQty}`);
+                      if (shop?.showColBulkPrice !== false && item.product?.bulkPrice) metaParts.push(`Bulk: ₹${item.product.bulkPrice}`);
+                    }
+                    const metaText = metaParts.join(" · ");
+
                     return (
                       <tr key={idx} className="text-center align-middle">
                         <td className="border-r border-black py-2 px-1">{idx + 1}</td>
-                        <td className="border-r border-black py-2 px-2 text-left font-bold">{item.product?.name} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}</td>
+                        <td className="border-r border-black py-2 px-2 text-left font-bold">
+                          <div>
+                            <span>{item.product?.name} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}</span>
+                            {metaText && <p className="text-[8px] text-gray-500 font-normal mt-0.5">{metaText}</p>}
+                          </div>
+                        </td>
                         {shop?.showColHsn !== false && <td className="border-r border-black py-2 px-1">{item.product?.hsnSac || '—'}</td>}
                         <td className="border-r border-black py-2 px-1 font-bold">{item.quantity}</td>
                         {shop?.showColUnit !== false && <td className="border-r border-black py-2 px-1">{item.product?.unit || 'NOS'}</td>}
@@ -343,10 +389,34 @@ export default function InvoicePreviewHTML({ invoice, shop, customer, items, sta
                 const rateExclusive = item.unitPrice / (1 + itemTaxRate / 100);
                 const taxableValue = item.quantity * rateExclusive;
                 const gstAmount = lineTotal - taxableValue;
+
+                const isAgro = shop?.businessType === 'Agro Store' || shop?.businessType?.toLowerCase().includes('agro') || shop?.businessType?.toLowerCase().includes('krishi');
+                const isMedical = shop?.businessType === 'Pharmacy / Medical' || shop?.businessType?.toLowerCase().includes('medical') || shop?.businessType?.toLowerCase().includes('pharmacy');
+                const isWholesale = shop?.businessType?.toLowerCase().includes('wholesale') || shop?.businessType?.toLowerCase().includes('distributor');
+
+                const metaParts = [];
+                if (isAgro) {
+                  if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                  if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Co: ${item.product.companyName}`);
+                } else if (isMedical) {
+                  if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                  if (shop?.showColBatch !== false && item.product?.batchNumber) metaParts.push(`Batch: ${item.product.batchNumber}`);
+                  if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Mfg: ${item.product.companyName}`);
+                } else if (isWholesale) {
+                  if (shop?.showColMinOrder !== false && item.product?.minOrderQty) metaParts.push(`MOQ: ${item.product.minOrderQty}`);
+                  if (shop?.showColBulkPrice !== false && item.product?.bulkPrice) metaParts.push(`Bulk: ₹${item.product.bulkPrice}`);
+                }
+                const metaText = metaParts.join(" · ");
+
                 return (
                   <tr key={idx} className="text-center">
                     <td className="py-2.5 px-1 text-slate-400">{idx + 1}</td>
-                    <td className="py-2.5 px-2 text-left font-black text-slate-950">{item.product?.name} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}</td>
+                    <td className="py-2.5 px-2 text-left font-black text-slate-950 font-bold">
+                      <div>
+                        <span>{item.product?.name} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}</span>
+                        {metaText && <p className="text-[8px] text-slate-500 font-normal mt-0.5">{metaText}</p>}
+                      </div>
+                    </td>
                     {shop?.showColHsn !== false && <td className="py-2.5 px-1">{item.product?.hsnSac || '—'}</td>}
                     <td className="py-2.5 px-1 font-bold text-slate-900">{item.quantity}</td>
                     {shop?.showColUnit !== false && <td className="py-2.5 px-1 text-slate-500">{item.product?.unit || 'NOS'}</td>}
@@ -446,10 +516,34 @@ export default function InvoicePreviewHTML({ invoice, shop, customer, items, sta
                   const rateExclusive = item.unitPrice / (1 + itemTaxRate / 100);
                   const taxableValue = item.quantity * rateExclusive;
                   const gstAmount = lineTotal - taxableValue;
+
+                  const isAgro = shop?.businessType === 'Agro Store' || shop?.businessType?.toLowerCase().includes('agro') || shop?.businessType?.toLowerCase().includes('krishi');
+                  const isMedical = shop?.businessType === 'Pharmacy / Medical' || shop?.businessType?.toLowerCase().includes('medical') || shop?.businessType?.toLowerCase().includes('pharmacy');
+                  const isWholesale = shop?.businessType?.toLowerCase().includes('wholesale') || shop?.businessType?.toLowerCase().includes('distributor');
+
+                  const metaParts = [];
+                  if (isAgro) {
+                    if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                    if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Co: ${item.product.companyName}`);
+                  } else if (isMedical) {
+                    if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                    if (shop?.showColBatch !== false && item.product?.batchNumber) metaParts.push(`Batch: ${item.product.batchNumber}`);
+                    if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Mfg: ${item.product.companyName}`);
+                  } else if (isWholesale) {
+                    if (shop?.showColMinOrder !== false && item.product?.minOrderQty) metaParts.push(`MOQ: ${item.product.minOrderQty}`);
+                    if (shop?.showColBulkPrice !== false && item.product?.bulkPrice) metaParts.push(`Bulk: ₹${item.product.bulkPrice}`);
+                  }
+                  const metaText = metaParts.join(" · ");
+
                   return (
                     <tr key={idx} className="text-center">
                       <td className="py-1 px-1 border-r border-gray-200">{idx + 1}</td>
-                      <td className="py-1 px-2 text-left border-r border-gray-200 font-bold">{item.product?.name} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}</td>
+                      <td className="py-1 px-2 text-left border-r border-gray-200 font-bold">
+                        <div>
+                          <span>{item.product?.name} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}</span>
+                          {metaText && <p className="text-[7px] text-gray-500 font-normal mt-0.5">{metaText}</p>}
+                        </div>
+                      </td>
                       {shop?.showColHsn !== false && <td className="py-1 px-1 border-r border-gray-200">{item.product?.hsnSac || '—'}</td>}
                       <td className="py-1 px-1 border-r border-gray-200 font-bold">{item.quantity}</td>
                       {shop?.showColUnit !== false && <td className="py-1 px-1 border-r border-gray-200">{item.product?.unit || 'NOS'}</td>}
@@ -590,15 +684,36 @@ export default function InvoicePreviewHTML({ invoice, shop, customer, items, sta
                   const rateExclusive = item.unitPrice / (1 + itemTaxRate / 100);
                   const taxableValue = item.quantity * rateExclusive;
                   const gstAmount = lineTotal - taxableValue;
+
+                  const isAgro = shop?.businessType === 'Agro Store' || shop?.businessType?.toLowerCase().includes('agro') || shop?.businessType?.toLowerCase().includes('krishi');
+                  const isMedical = shop?.businessType === 'Pharmacy / Medical' || shop?.businessType?.toLowerCase().includes('medical') || shop?.businessType?.toLowerCase().includes('pharmacy');
+                  const isWholesale = shop?.businessType?.toLowerCase().includes('wholesale') || shop?.businessType?.toLowerCase().includes('distributor');
+
+                  const metaParts = [];
+                  if (isAgro) {
+                    if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                    if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Co: ${item.product.companyName}`);
+                  } else if (isMedical) {
+                    if (shop?.showColExpiry !== false && item.product?.expiryDate) metaParts.push(`Exp: ${item.product.expiryDate}`);
+                    if (shop?.showColBatch !== false && item.product?.batchNumber) metaParts.push(`Batch: ${item.product.batchNumber}`);
+                    if (shop?.showColCompany !== false && item.product?.companyName) metaParts.push(`Mfg: ${item.product.companyName}`);
+                  } else if (isWholesale) {
+                    if (shop?.showColMinOrder !== false && item.product?.minOrderQty) metaParts.push(`MOQ: ${item.product.minOrderQty}`);
+                    if (shop?.showColBulkPrice !== false && item.product?.bulkPrice) metaParts.push(`Bulk: ₹${item.product.bulkPrice}`);
+                  }
+                  const metaText = metaParts.join(" · ");
                   
                   return (
                     <tr key={idx} className="hover:bg-gray-50/20 text-center font-sans">
                       <td className="border-r border-gray-300 py-2 px-1 font-medium">{idx + 1}</td>
                       <td className="border-r border-gray-300 py-2 px-2 text-left font-bold text-gray-900">
-                        {item.product?.name || "Unnamed Item"} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}
-                        {item.product?.isService && (
-                          <span className="ml-1.5 text-[8px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-500 font-normal">Service</span>
-                        )}
+                        <div>
+                          <span>{item.product?.name || "Unnamed Item"} {item.product?.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}</span>
+                          {item.product?.isService && (
+                            <span className="ml-1.5 text-[8px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-500 font-normal">Service</span>
+                          )}
+                          {metaText && <p className="text-[8px] text-gray-500 font-normal mt-0.5">{metaText}</p>}
+                        </div>
                       </td>
                       {shop?.showColHsn !== false && <td className="border-r border-gray-300 py-2 px-1 text-gray-650">{item.product?.hsnSac || '—'}</td>}
                       <td className="border-r border-gray-300 py-2 px-1 font-bold text-gray-900">{item.quantity}</td>

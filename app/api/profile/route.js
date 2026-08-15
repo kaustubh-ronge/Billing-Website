@@ -55,6 +55,11 @@ export async function PUT(req) {
         showColRate: body.showColRate !== undefined ? !!body.showColRate : user.shop.showColRate,
         showColTaxable: body.showColTaxable !== undefined ? !!body.showColTaxable : user.shop.showColTaxable,
         showColGst: body.showColGst !== undefined ? !!body.showColGst : user.shop.showColGst,
+        showColExpiry: body.showColExpiry !== undefined ? !!body.showColExpiry : user.shop.showColExpiry,
+        showColBatch: body.showColBatch !== undefined ? !!body.showColBatch : user.shop.showColBatch,
+        showColCompany: body.showColCompany !== undefined ? !!body.showColCompany : user.shop.showColCompany,
+        showColMinOrder: body.showColMinOrder !== undefined ? !!body.showColMinOrder : user.shop.showColMinOrder,
+        showColBulkPrice: body.showColBulkPrice !== undefined ? !!body.showColBulkPrice : user.shop.showColBulkPrice,
       },
     });
 

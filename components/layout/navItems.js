@@ -5,6 +5,7 @@ import {
   Package,
   Building2,
   Settings,
+  NotebookPen,
 } from "lucide-react";
 
 /**
@@ -17,6 +18,7 @@ export const NAV_ITEMS = [
   { label: "Invoices", href: "/invoices", icon: FileText, perm: "invoices:view" },
   { label: "Customers", href: "/customers", icon: Users, perm: "customers:view" },
   { label: "Products", href: "/products", icon: Package, perm: "products:view" },
+  { label: "Notes", href: "/notes", icon: NotebookPen, perm: "dashboard:view" },
   {
     label: "Organization",
     href: "/organization",

@@ -100,6 +100,11 @@ model Shop {
   showColRate       Boolean @default(true)
   showColTaxable    Boolean @default(true)
   showColGst        Boolean @default(true)
+  showColExpiry     Boolean @default(true)
+  showColBatch      Boolean @default(true)
+  showColCompany    Boolean @default(true)
+  showColMinOrder   Boolean @default(true)
+  showColBulkPrice  Boolean @default(true)
   isActive          Boolean @default(true)
   planId            String?
   planExpiresAt     DateTime?
@@ -119,6 +124,7 @@ model Shop {
   roles        Role[]
   invitations  Invitation[]
   activityLogs ActivityLog[]
+  purchaseNotes PurchaseNote[]
 }
 
 // --- ORGANIZATION HIERARCHY ---
@@ -373,6 +379,11 @@ model Product {
   costPrice   Float?
   hsnSac      String?
   actualValue String?
+  expiryDate  String?
+  companyName String?
+  batchNumber String?
+  minOrderQty Int?
+  bulkPrice   Float?
 
   shopId String
   shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
@@ -449,4 +460,26 @@ model SubscriptionPlan {
   updatedAt    DateTime @updatedAt
 
   shops        Shop[]
+}
+
+model PurchaseNote {
+  id              String   @id @default(cuid())
+  companyName     String
+  productsBought  String   @db.Text
+  quantityBought  String?
+  totalAmount     Float    @default(0)
+  amountPaid      Float    @default(0)
+  amountRemaining Float    @default(0)
+  noteDate        DateTime @default(now())
+  remarks         String?  @db.Text
+
+  // Toggle between General note and Purchase ledger note
+  isPurchase      Boolean  @default(true)
+  title           String?
+
+  shopId          String
+  shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

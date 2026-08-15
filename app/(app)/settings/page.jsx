@@ -126,7 +126,16 @@ export default function SettingsPage() {
     showColRate: true,
     showColTaxable: true,
     showColGst: true,
+    showColExpiry: true,
+    showColBatch: true,
+    showColCompany: true,
+    showColMinOrder: true,
+    showColBulkPrice: true,
   });
+
+  const isAgro = formData.businessType === 'Agro Store' || formData.businessType?.toLowerCase().includes('agro') || formData.businessType?.toLowerCase().includes('krishi');
+  const isMedical = formData.businessType === 'Pharmacy / Medical' || formData.businessType?.toLowerCase().includes('medical') || formData.businessType?.toLowerCase().includes('pharmacy');
+  const isWholesale = formData.businessType?.toLowerCase().includes('wholesale') || formData.businessType?.toLowerCase().includes('distributor');
 
   useEffect(() => { if (allowed) fetchProfile(); else setLoading(false); }, [allowed]);
 
@@ -413,6 +422,7 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground mt-0.5">Toggle visibility of specific item columns in the main table.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Standard columns relevant to all (like HSN and Unit) */}
                 <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
                   <input
                     type="checkbox"
@@ -439,44 +449,155 @@ export default function SettingsPage() {
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={formData.showColRate}
-                    onChange={(e) => setFormData(p => ({ ...p, showColRate: e.target.checked }))}
-                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
-                  />
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-foreground">Show Rate (Excl.) Column</span>
-                    <p className="text-[10px] text-muted-foreground">Display base unit price excluding tax</p>
-                  </div>
-                </label>
+                {/* Agro Specific columns */}
+                {isAgro && (
+                  <>
+                    <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.showColExpiry}
+                        onChange={(e) => setFormData(p => ({ ...p, showColExpiry: e.target.checked }))}
+                        className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                      />
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-foreground">Show Expiry Date Column</span>
+                        <p className="text-[10px] text-muted-foreground">Display item expiry date warning</p>
+                      </div>
+                    </label>
 
-                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={formData.showColTaxable}
-                    onChange={(e) => setFormData(p => ({ ...p, showColTaxable: e.target.checked }))}
-                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
-                  />
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-foreground">Show Taxable Value Column</span>
-                    <p className="text-[10px] text-muted-foreground">Display line subtotal before GST</p>
-                  </div>
-                </label>
+                    <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.showColCompany}
+                        onChange={(e) => setFormData(p => ({ ...p, showColCompany: e.target.checked }))}
+                        className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                      />
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-foreground">Show Company Name Column</span>
+                        <p className="text-[10px] text-muted-foreground">Display brand manufacturer name</p>
+                      </div>
+                    </label>
+                  </>
+                )}
 
-                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={formData.showColGst}
-                    onChange={(e) => setFormData(p => ({ ...p, showColGst: e.target.checked }))}
-                    className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
-                  />
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-foreground">Show GST Column (% & Amt)</span>
-                    <p className="text-[10px] text-muted-foreground">Display line tax percentage and split amount</p>
-                  </div>
-                </label>
+                {/* Medical Specific columns */}
+                {isMedical && (
+                  <>
+                    <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.showColExpiry}
+                        onChange={(e) => setFormData(p => ({ ...p, showColExpiry: e.target.checked }))}
+                        className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                      />
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-foreground">Show Expiry Date Column</span>
+                        <p className="text-[10px] text-muted-foreground">Display medicine expiry warning</p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.showColBatch}
+                        onChange={(e) => setFormData(p => ({ ...p, showColBatch: e.target.checked }))}
+                        className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                      />
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-foreground">Show Batch Number Column</span>
+                        <p className="text-[10px] text-muted-foreground">Display drug batch allocation number</p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.showColCompany}
+                        onChange={(e) => setFormData(p => ({ ...p, showColCompany: e.target.checked }))}
+                        className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                      />
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-foreground">Show Manufacturer Column</span>
+                        <p className="text-[10px] text-muted-foreground">Display pharmaceutical firm details</p>
+                      </div>
+                    </label>
+                  </>
+                )}
+
+                {/* Wholesale Specific columns */}
+                {isWholesale && (
+                  <>
+                    <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.showColMinOrder}
+                        onChange={(e) => setFormData(p => ({ ...p, showColMinOrder: e.target.checked }))}
+                        className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                      />
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-foreground">Show Min Order Qty Column</span>
+                        <p className="text-[10px] text-muted-foreground">Display minimum package quantity requirement</p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.showColBulkPrice}
+                        onChange={(e) => setFormData(p => ({ ...p, showColBulkPrice: e.target.checked }))}
+                        className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                      />
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-foreground">Show Bulk Price Column</span>
+                        <p className="text-[10px] text-muted-foreground">Display reduced pricing for wholesalers</p>
+                      </div>
+                    </label>
+                  </>
+                )}
+
+                {/* General / default Specific columns */}
+                {!isAgro && !isMedical && !isWholesale && (
+                  <>
+                    <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.showColRate}
+                        onChange={(e) => setFormData(p => ({ ...p, showColRate: e.target.checked }))}
+                        className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                      />
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-foreground">Show Rate (Excl.) Column</span>
+                        <p className="text-[10px] text-muted-foreground">Display base unit price excluding tax</p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.showColTaxable}
+                        onChange={(e) => setFormData(p => ({ ...p, showColTaxable: e.target.checked }))}
+                        className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                      />
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-foreground">Show Taxable Value Column</span>
+                        <p className="text-[10px] text-muted-foreground">Display line subtotal before GST</p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.showColGst}
+                        onChange={(e) => setFormData(p => ({ ...p, showColGst: e.target.checked }))}
+                        className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500/30"
+                      />
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-foreground">Show GST Column (% & Amt)</span>
+                        <p className="text-[10px] text-muted-foreground">Display line tax percentage and split amount</p>
+                      </div>
+                    </label>
+                  </>
+                )}
               </div>
             </div>
 

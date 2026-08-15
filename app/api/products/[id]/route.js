@@ -11,7 +11,11 @@ export async function PUT(req, { params }) {
   try {
     const { id } = await params;
     const body = await req.json();
-    const { name, price, taxRate, trackInventory, stockCount, lowStockAlert, category, unit, isService, description, imageBase64, hsnSac, actualValue } = body;
+    const { 
+      name, price, taxRate, trackInventory, stockCount, lowStockAlert, 
+      category, unit, isService, description, imageBase64, hsnSac, actualValue,
+      expiryDate, companyName, batchNumber, minOrderQty, bulkPrice 
+    } = body;
 
     if (!name || price === undefined) {
       return NextResponse.json({ error: 'Product name and price are required' }, { status: 400 });
@@ -42,6 +46,11 @@ export async function PUT(req, { params }) {
         imageBase64: imageBase64 !== undefined ? imageBase64 : existing.imageBase64,
         hsnSac: hsnSac !== undefined ? hsnSac : existing.hsnSac,
         actualValue: actualValue !== undefined ? actualValue : existing.actualValue,
+        expiryDate: expiryDate !== undefined ? expiryDate : existing.expiryDate,
+        companyName: companyName !== undefined ? companyName : existing.companyName,
+        batchNumber: batchNumber !== undefined ? batchNumber : existing.batchNumber,
+        minOrderQty: minOrderQty !== undefined ? (minOrderQty === null || minOrderQty === '' ? null : parseInt(minOrderQty)) : existing.minOrderQty,
+        bulkPrice: bulkPrice !== undefined ? (bulkPrice === null || bulkPrice === '' ? null : parseFloat(bulkPrice)) : existing.bulkPrice,
       }
     });
 

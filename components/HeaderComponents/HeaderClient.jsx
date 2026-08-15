@@ -4,9 +4,11 @@ import Link from "next/link";
 // Removed SignedIn and SignedOut to fix Turbopack error
 import { UserButton, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { Menu, X } from "lucide-react";
 
 export default function HeaderClient({ user }) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -55,8 +57,11 @@ export default function HeaderClient({ user }) {
             )
           ) : (
             <>
+              <a href="#home" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Home</a>
               <a href="#features" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Features</a>
-              <a href="#how-it-works" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Workflow</a>
+              <a href="#about" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">About</a>
+              <a href="#contact" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">Contact</a>
+              <a href="#how-to-use" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">How to use</a>
             </>
           )}
         </nav>
@@ -96,9 +101,44 @@ export default function HeaderClient({ user }) {
               />
             </>
           )}
+
+          {/* Hamburger Toggle Button */}
+          <button 
+            onClick={() => setIsOpen(!isOpen)} 
+            className="flex md:hidden items-center justify-center p-2 rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm text-gray-700 hover:text-black transition-colors"
+          >
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
 
       </header>
+
+      {/* Mobile Menu Dropdown */}
+      {isOpen && (
+        <div className="absolute top-20 left-4 right-4 z-45 md:hidden bg-white/95 backdrop-blur-2xl border border-gray-200 shadow-2xl rounded-2xl p-6 flex flex-col gap-4 animate-in fade-in slide-in-from-top-5 duration-300">
+          {user ? (
+            user.systemRole === "ADMIN" ? (
+              <Link href="/admin" onClick={() => setIsOpen(false)} className="text-sm font-bold text-gray-600 hover:text-black py-2 border-b border-gray-100 transition-colors">Admin Console</Link>
+            ) : (
+              <>
+                <Link href="/dashboard" onClick={() => setIsOpen(false)} className="text-sm font-bold text-gray-600 hover:text-black py-2 border-b border-gray-100 transition-colors">Dashboard</Link>
+                <Link href="/invoices" onClick={() => setIsOpen(false)} className="text-sm font-bold text-gray-600 hover:text-black py-2 border-b border-gray-100 transition-colors">Invoices</Link>
+                <Link href="/customers" onClick={() => setIsOpen(false)} className="text-sm font-bold text-gray-600 hover:text-black py-2 border-b border-gray-100 transition-colors">Customers</Link>
+                <Link href="/products" onClick={() => setIsOpen(false)} className="text-sm font-bold text-gray-600 hover:text-black py-2 border-b border-gray-100 transition-colors">Products</Link>
+                <Link href="/settings" onClick={() => setIsOpen(false)} className="text-sm font-bold text-gray-600 hover:text-black py-2 transition-colors">Settings</Link>
+              </>
+            )
+          ) : (
+            <>
+              <a href="#home" onClick={() => setIsOpen(false)} className="text-sm font-bold text-gray-600 hover:text-black py-2 border-b border-gray-100 transition-colors">Home</a>
+              <a href="#features" onClick={() => setIsOpen(false)} className="text-sm font-bold text-gray-600 hover:text-black py-2 border-b border-gray-100 transition-colors">Features</a>
+              <a href="#about" onClick={() => setIsOpen(false)} className="text-sm font-bold text-gray-600 hover:text-black py-2 border-b border-gray-100 transition-colors">About</a>
+              <a href="#contact" onClick={() => setIsOpen(false)} className="text-sm font-bold text-gray-600 hover:text-black py-2 border-b border-gray-100 transition-colors">Contact</a>
+              <a href="#how-to-use" onClick={() => setIsOpen(false)} className="text-sm font-bold text-gray-600 hover:text-black py-2 transition-colors">How to use</a>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -76,12 +76,16 @@ export default function TopBar({ shopName, userName, roleName, onMobileMenuToggl
       </DropdownMenu>
 
       {/* User button */}
-      <UserButton
-        afterSignOutUrl="/"
-        appearance={{
-          elements: { avatarBox: "w-8 h-8 border border-border" },
-        }}
-      />
+      {mounted ? (
+        <UserButton
+          afterSignOutUrl="/"
+          appearance={{
+            elements: { avatarBox: "w-8 h-8 border border-border" },
+          }}
+        />
+      ) : (
+        <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse border border-border" />
+      )}
     </header>
   );
 }

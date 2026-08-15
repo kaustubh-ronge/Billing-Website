@@ -152,12 +152,23 @@ export default function ProductsPage() {
     unit: 'pcs',
     isService: false,
     description: '',
-    imageBase64: ''
+    imageBase64: '',
+    hsnSac: '',
+    actualValue: '',
+    expiryDate: '',
+    companyName: '',
+    batchNumber: '',
+    minOrderQty: '',
+    bulkPrice: ''
   });
 
   const [customCategory, setCustomCategory] = useState('');
   const [customUnit, setCustomUnit] = useState('');
   const [vendorShop, setVendorShop] = useState(null);
+
+  const isAgro = vendorShop?.businessType === 'Agro Store' || vendorShop?.businessType?.toLowerCase().includes('agro') || vendorShop?.businessType?.toLowerCase().includes('krishi');
+  const isMedical = vendorShop?.businessType === 'Pharmacy / Medical' || vendorShop?.businessType?.toLowerCase().includes('medical') || vendorShop?.businessType?.toLowerCase().includes('pharmacy');
+  const isWholesale = vendorShop?.businessType?.toLowerCase().includes('wholesale') || vendorShop?.businessType?.toLowerCase().includes('distributor');
 
   useEffect(() => {
     fetchVendorConfig();
@@ -222,7 +233,12 @@ export default function ProductsPage() {
       description: '',
       imageBase64: '',
       hsnSac: '',
-      actualValue: ''
+      actualValue: '',
+      expiryDate: '',
+      companyName: '',
+      batchNumber: '',
+      minOrderQty: '',
+      bulkPrice: ''
     });
     setCustomCategory('');
     setCustomUnit('');
@@ -257,15 +273,20 @@ export default function ProductsPage() {
       price: item.price.toString(),
       taxRate: item.taxRate.toString(),
       trackInventory: item.trackInventory,
-      stockCount: item.stockCount !== null ? item.stockCount.toString() : '',
-      lowStockAlert: item.lowStockAlert !== null ? item.lowStockAlert.toString() : '',
+      stockCount: item.stockCount != null ? item.stockCount.toString() : '',
+      lowStockAlert: item.lowStockAlert != null ? item.lowStockAlert.toString() : '',
       category: categoryVal,
       unit: unitVal,
       isService: item.isService,
       description: item.description || '',
       imageBase64: item.imageBase64 || '',
       hsnSac: item.hsnSac || '',
-      actualValue: item.actualValue || ''
+      actualValue: item.actualValue || '',
+      expiryDate: item.expiryDate || '',
+      companyName: item.companyName || '',
+      batchNumber: item.batchNumber || '',
+      minOrderQty: item.minOrderQty != null ? item.minOrderQty.toString() : '',
+      bulkPrice: item.bulkPrice != null ? item.bulkPrice.toString() : ''
     });
     setIsDialogOpen(true);
   };
@@ -286,7 +307,12 @@ export default function ProductsPage() {
       stockCount: (activeTab === 'services' || !formData.trackInventory) ? null : parseInt(formData.stockCount || '0'),
       lowStockAlert: (activeTab === 'services' || !formData.trackInventory) ? null : parseInt(formData.lowStockAlert || '0'),
       category: formData.category === 'Other' ? customCategory : formData.category,
-      unit: activeTab === 'services' ? null : (formData.unit === 'Other' ? customUnit : formData.unit)
+      unit: activeTab === 'services' ? null : (formData.unit === 'Other' ? customUnit : formData.unit),
+      expiryDate: formData.expiryDate || null,
+      companyName: formData.companyName || null,
+      batchNumber: formData.batchNumber || null,
+      minOrderQty: formData.minOrderQty ? parseInt(formData.minOrderQty) : null,
+      bulkPrice: formData.bulkPrice ? parseFloat(formData.bulkPrice) : null,
     };
 
     try {
@@ -713,7 +739,7 @@ export default function ProductsPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4 py-2">
+            <div className="space-y-4 py-2 overflow-y-auto max-h-[65vh] pr-2">
               <div className="space-y-1.5">
                 <Label htmlFor="name">Name</Label>
                 <Input
@@ -756,76 +782,343 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(val) => setFormData(prev => ({ ...prev, category: val }))}
-                  >
-                    <SelectTrigger className="rounded-xl border-gray-200 bg-background">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-72">
-                      {getFilteredCategories().groups.map(group => (
-                        <React.Fragment key={group.name}>
-                          <div className={`px-2 py-1 text-[10px] font-black uppercase tracking-wider ${group.color || 'text-gray-400'} mt-1`}>— {group.name} —</div>
-                          {group.items.map(cat => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              {/* Dynamic Form Sections based on Business Type */}
+              {isAgro && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="category">Category</Label>
+                      <Select
+                        value={formData.category}
+                        onValueChange={(val) => setFormData(prev => ({ ...prev, category: val }))}
+                      >
+                        <SelectTrigger className="rounded-xl border-gray-200 bg-background">
+                          <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          {getFilteredCategories().groups.map(group => (
+                            <React.Fragment key={group.name}>
+                              <div className={`px-2 py-1 text-[10px] font-black uppercase tracking-wider ${group.color || 'text-gray-400'} mt-1`}>— {group.name} —</div>
+                              {group.items.map(cat => (
+                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                              ))}
+                            </React.Fragment>
                           ))}
-                        </React.Fragment>
-                      ))}
-                      <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 mt-1">— Other —</div>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                {activeTab === 'products' && (
-                  <div className="space-y-1.5">
-                    <Label htmlFor="unit">Unit Measure</Label>
-                    <Select
-                      value={formData.unit}
-                      onValueChange={(val) => setFormData(prev => ({ ...prev, unit: val }))}
-                    >
-                      <SelectTrigger className="rounded-xl border-gray-200 bg-background">
-                        <SelectValue placeholder="Unit" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        {['pcs', 'kg', 'g', 'ltr', 'ml', 'box', 'nos', 'bag', 'mtr', 'doz', 'pac', 'Other'].map(u => (
-                          <SelectItem key={u} value={u}>{u}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="unit">Unit Measure</Label>
+                      <Select
+                        value={formData.unit}
+                        onValueChange={(val) => setFormData(prev => ({ ...prev, unit: val }))}
+                      >
+                        <SelectTrigger className="rounded-xl border-gray-200 bg-background">
+                          <SelectValue placeholder="Unit" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60">
+                          {['pcs', 'kg', 'g', 'ltr', 'ml', 'box', 'nos', 'bag', 'mtr', 'doz', 'pac', 'Other'].map(u => (
+                            <SelectItem key={u} value={u}>{u}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                )}
-              </div>
 
-              {/* HSN/SAC and Actual Value Row */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="hsnSac">HSN / SAC (Optional)</Label>
-                  <Input
-                    id="hsnSac"
-                    value={formData.hsnSac || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, hsnSac: e.target.value }))}
-                    placeholder="e.g. 3101, 3808"
-                    className="rounded-xl border-gray-200"
-                  />
-                </div>
-                {activeTab === 'products' && (
-                  <div className="space-y-1.5">
-                    <Label htmlFor="actualValue">Actual Value (Optional)</Label>
-                    <Input
-                      id="actualValue"
-                      value={formData.actualValue || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, actualValue: e.target.value }))}
-                      placeholder={formData.unit && formData.unit !== 'Other' ? `e.g. 250 (displays as 250${formData.unit})` : 'e.g. 250'}
-                      className="rounded-xl border-gray-200"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="actualValue">Actual Value</Label>
+                      <Input
+                        id="actualValue"
+                        value={formData.actualValue || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, actualValue: e.target.value }))}
+                        placeholder={formData.unit && formData.unit !== 'Other' ? `e.g. 250${formData.unit} or 500${formData.unit}` : 'e.g. 250'}
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="hsnSac">HSN / SAC</Label>
+                      <Input
+                        id="hsnSac"
+                        value={formData.hsnSac || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, hsnSac: e.target.value }))}
+                        placeholder="e.g. 3101"
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
                   </div>
-                )}
-              </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="expiryDate">Expiry Date</Label>
+                      <Input
+                        id="expiryDate"
+                        type="date"
+                        value={formData.expiryDate || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, expiryDate: e.target.value }))}
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="companyName">Company Name</Label>
+                      <Input
+                        id="companyName"
+                        value={formData.companyName || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
+                        placeholder="e.g. Bayer, Syngenta"
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {isMedical && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="category">Category</Label>
+                      <Select
+                        value={formData.category}
+                        onValueChange={(val) => setFormData(prev => ({ ...prev, category: val }))}
+                      >
+                        <SelectTrigger className="rounded-xl border-gray-200 bg-background">
+                          <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          <SelectItem value="Tablets">Tablets</SelectItem>
+                          <SelectItem value="Syrups">Syrups</SelectItem>
+                          <SelectItem value="Capsules">Capsules</SelectItem>
+                          <SelectItem value="Injections">Injections</SelectItem>
+                          <SelectItem value="Ointments">Ointments</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="unit">Unit Measure</Label>
+                      <Select
+                        value={formData.unit}
+                        onValueChange={(val) => setFormData(prev => ({ ...prev, unit: val }))}
+                      >
+                        <SelectTrigger className="rounded-xl border-gray-200 bg-background">
+                          <SelectValue placeholder="Unit" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60">
+                          {['strips', 'tab', 'bottle', 'box', 'nos', 'Other'].map(u => (
+                            <SelectItem key={u} value={u}>{u}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="hsnSac">HSN / SAC</Label>
+                      <Input
+                        id="hsnSac"
+                        value={formData.hsnSac || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, hsnSac: e.target.value }))}
+                        placeholder="e.g. 3004"
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="batchNumber">Batch Number</Label>
+                      <Input
+                        id="batchNumber"
+                        value={formData.batchNumber || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, batchNumber: e.target.value }))}
+                        placeholder="e.g. BATCH-991A"
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="expiryDate">Expiry Date</Label>
+                      <Input
+                        id="expiryDate"
+                        type="date"
+                        value={formData.expiryDate || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, expiryDate: e.target.value }))}
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="companyName">Manufacturer / Company</Label>
+                      <Input
+                        id="companyName"
+                        value={formData.companyName || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
+                        placeholder="e.g. Cipla, Sun Pharma"
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {isWholesale && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="category">Category</Label>
+                      <Select
+                        value={formData.category}
+                        onValueChange={(val) => setFormData(prev => ({ ...prev, category: val }))}
+                      >
+                        <SelectTrigger className="rounded-xl border-gray-200 bg-background">
+                          <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          <SelectItem value="Bulk Goods">Bulk Goods</SelectItem>
+                          <SelectItem value="Raw Materials">Raw Materials</SelectItem>
+                          <SelectItem value="Finished Goods">Finished Goods</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="unit">Unit Measure</Label>
+                      <Select
+                        value={formData.unit}
+                        onValueChange={(val) => setFormData(prev => ({ ...prev, unit: val }))}
+                      >
+                        <SelectTrigger className="rounded-xl border-gray-200 bg-background">
+                          <SelectValue placeholder="Unit" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60">
+                          {['box', 'bag', 'kg', 'ltr', 'mtr', 'nos', 'Other'].map(u => (
+                            <SelectItem key={u} value={u}>{u}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="hsnSac">HSN / SAC</Label>
+                      <Input
+                        id="hsnSac"
+                        value={formData.hsnSac || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, hsnSac: e.target.value }))}
+                        placeholder="e.g. 8471"
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="minOrderQty">Min Order Qty</Label>
+                      <Input
+                        id="minOrderQty"
+                        type="number"
+                        min="1"
+                        value={formData.minOrderQty || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, minOrderQty: e.target.value }))}
+                        placeholder="e.g. 50"
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="bulkPrice">Bulk Price (per unit)</Label>
+                      <Input
+                        id="bulkPrice"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.bulkPrice || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, bulkPrice: e.target.value }))}
+                        placeholder="e.g. 120.00"
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Default / Retail Form fields */}
+              {!isAgro && !isMedical && !isWholesale && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="category">Category</Label>
+                      <Select
+                        value={formData.category}
+                        onValueChange={(val) => setFormData(prev => ({ ...prev, category: val }))}
+                      >
+                        <SelectTrigger className="rounded-xl border-gray-200 bg-background">
+                          <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          {getFilteredCategories().groups.map(group => (
+                            <React.Fragment key={group.name}>
+                              <div className={`px-2 py-1 text-[10px] font-black uppercase tracking-wider ${group.color || 'text-gray-400'} mt-1`}>— {group.name} —</div>
+                              {group.items.map(cat => (
+                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                              ))}
+                            </React.Fragment>
+                          ))}
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {activeTab === 'products' && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="unit">Unit Measure</Label>
+                        <Select
+                          value={formData.unit}
+                          onValueChange={(val) => setFormData(prev => ({ ...prev, unit: val }))}
+                        >
+                          <SelectTrigger className="rounded-xl border-gray-200 bg-background">
+                            <SelectValue placeholder="Unit" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-60">
+                            {['pcs', 'kg', 'g', 'ltr', 'ml', 'box', 'nos', 'bag', 'mtr', 'doz', 'pac', 'Other'].map(u => (
+                              <SelectItem key={u} value={u}>{u}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="hsnSac">HSN / SAC (Optional)</Label>
+                      <Input
+                        id="hsnSac"
+                        value={formData.hsnSac || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, hsnSac: e.target.value }))}
+                        placeholder="e.g. 3101"
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                    {activeTab === 'products' && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="actualValue">Actual Value (Optional)</Label>
+                        <Input
+                          id="actualValue"
+                          value={formData.actualValue || ''}
+                          onChange={(e) => setFormData(prev => ({ ...prev, actualValue: e.target.value }))}
+                          placeholder="e.g. 250"
+                          className="rounded-xl border-gray-200"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
 
               {/* Custom Category and Custom Unit text boxes */}
               {(formData.category === 'Other' || (activeTab === 'products' && formData.unit === 'Other')) && (
