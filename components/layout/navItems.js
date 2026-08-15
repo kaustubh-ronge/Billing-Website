@@ -6,6 +6,7 @@ import {
   Building2,
   Settings,
   NotebookPen,
+  FileSpreadsheet,
 } from "lucide-react";
 
 /**
@@ -19,6 +20,7 @@ export const NAV_ITEMS = [
   { label: "Customers", href: "/customers", icon: Users, perm: "customers:view" },
   { label: "Products", href: "/products", icon: Package, perm: "products:view" },
   { label: "Notes", href: "/notes", icon: NotebookPen, perm: "dashboard:view" },
+  { label: "CA Reports", href: "/ca-reports", icon: FileSpreadsheet, perm: "dashboard:view" },
   {
     label: "Organization",
     href: "/organization",
