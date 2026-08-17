@@ -22,7 +22,7 @@ export default function AboutAndContact() {
               </div>
               <h3 className="text-2xl font-black">Our Commitment</h3>
               <p className="text-sm text-slate-300 leading-relaxed">
-                SmartBill is built by ADVIKS Software Solutions to provide retail, wholesale, and agro-businesses with robust billing infrastructure. We eliminate software complexity so you can focus on scale.
+                VyaparStock is built by ADVIKS Software Solutions to provide retail, wholesale, and agro-businesses with robust billing infrastructure. We eliminate software complexity so you can focus on scale.
               </p>
               <div className="space-y-3 pt-2">
                 <div className="flex items-center gap-2.5 text-xs text-slate-200">
@@ -49,7 +49,7 @@ export default function AboutAndContact() {
                 Designed for high growth business owners.
               </h2>
               <p className="text-base text-gray-500 leading-relaxed">
-                We believe software should work for you, not the other way around. SmartBill offers instant business insights, customizable layouts, item stock tracking, and user privilege controls under a single unified dashboard.
+                We believe software should work for you, not the other way around. VyaparStock offers instant business insights, customizable layouts, item stock tracking, and user privilege controls under a single unified dashboard.
               </p>
               <p className="text-sm text-gray-400 leading-relaxed">
                 Developed and supported locally by ADVIKS Software Solutions, we ensure platform reliability, quick feature releases, and secure cloud storage.

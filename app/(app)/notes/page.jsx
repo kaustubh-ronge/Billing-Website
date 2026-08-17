@@ -60,6 +60,8 @@ const renderProductsBought = (text) => {
   // Dialog State
   const [isOpen, setIsOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [originalPaid, setOriginalPaid] = useState(0);
+  const [settleAmount, setSettleAmount] = useState("");
 
   // Form State
   const [formData, setFormData] = useState({
@@ -149,6 +151,8 @@ const renderProductsBought = (text) => {
     });
     setFormProducts([{ name: "", qty: "", amount: "" }]);
     setEditingItem(null);
+    setOriginalPaid(0);
+    setSettleAmount("");
   };
 
   const openAddDialog = () => {
@@ -170,6 +174,8 @@ const renderProductsBought = (text) => {
       isPurchase: item.isPurchase,
       title: item.title || ""
     });
+    setOriginalPaid(item.amountPaid || 0);
+    setSettleAmount("");
 
     let parsed = [{ name: "", qty: "", amount: "" }];
     try {
@@ -196,6 +202,31 @@ const renderProductsBought = (text) => {
       amountPaid: paidVal,
       amountRemaining: (total - paid).toFixed(2)
     }));
+    setSettleAmount(""); // Clear quick settlement input on manual override
+  };
+
+  const handleSettleAmountChange = (val) => {
+    setSettleAmount(val);
+    const parsedVal = parseFloat(val || "0");
+    const total = parseFloat(formData.totalAmount || "0");
+    const newPaid = originalPaid + parsedVal;
+    setFormData(prev => ({
+      ...prev,
+      amountPaid: newPaid.toFixed(2),
+      amountRemaining: (total - newPaid).toFixed(2)
+    }));
+  };
+
+  const handleSettleFull = () => {
+    const total = parseFloat(formData.totalAmount || "0");
+    const remaining = total - originalPaid;
+    setSettleAmount(remaining.toFixed(2));
+    setFormData(prev => ({
+      ...prev,
+      amountPaid: total.toFixed(2),
+      amountRemaining: "0.00"
+    }));
+    toast.success("Outstanding balance marked for full settlement!");
   };
 
   const handleProductChange = (index, field, value) => {
@@ -774,6 +805,42 @@ const renderProductsBought = (text) => {
                         />
                       </div>
                     </div>
+
+                    {editingItem && (parseFloat(editingItem.totalAmount || 0) - parseFloat(originalPaid || 0)) > 0 && (
+                      <div className="bg-emerald-50/50 border border-emerald-200/80 rounded-2xl p-4 space-y-3 mt-1">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <span className="block text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Settle Outstanding Balance</span>
+                            <span className="block text-[10px] text-emerald-600/80 mt-0.5">Original Paid: ₹{parseFloat(originalPaid).toFixed(2)}</span>
+                          </div>
+                          <span className="text-sm font-black text-rose-600 font-mono">
+                            Dues: ₹{(parseFloat(formData.totalAmount || 0) - parseFloat(originalPaid || 0)).toFixed(2)}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <div className="relative flex-1">
+                            <span className="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">₹</span>
+                            <Input
+                              type="number"
+                              step="any"
+                              min="0"
+                              placeholder="Enter amount paid now..."
+                              value={settleAmount}
+                              onChange={(e) => handleSettleAmountChange(e.target.value)}
+                              className="rounded-xl border-gray-200 bg-white h-10 pl-7 shadow-3xs font-semibold text-emerald-700 text-xs"
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            onClick={handleSettleFull}
+                            className="h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 shadow-sm"
+                          >
+                            Settle Full
+                          </Button>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="space-y-1.5">
                       <Label htmlFor="remarks" className="text-gray-600 font-bold">Remarks / Payment reference</Label>

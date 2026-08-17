@@ -14,7 +14,7 @@ if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
 const inter = { className: "font-sans antialiased" };
 
 export const metadata = {
-  title: "SmartBill — Business Billing & Invoicing",
+  title: "VyaparStock — Business Billing & Invoicing",
   description: "Complete billing and invoicing platform for Indian businesses",
 };
 

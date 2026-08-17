@@ -15,11 +15,9 @@ export default function AppSidebar() {
     <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-border bg-sidebar h-screen sticky top-0 overflow-y-auto">
       {/* Brand */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-border">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground text-background font-black text-sm shrink-0">
-          SB
-        </div>
+        <img src="/logo.png" alt="Logo" className="h-8 w-8 object-cover rounded-lg shrink-0 border border-slate-200/50 shadow-3xs" />
         <span className="text-base font-black tracking-tight text-sidebar-foreground">
-          SmartBill
+          VyaparStock
         </span>
       </div>
 

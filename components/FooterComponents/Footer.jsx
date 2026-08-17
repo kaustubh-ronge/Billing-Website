@@ -10,11 +10,9 @@ export default function Footer() {
           {/* Brand Info */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 font-bold shadow-lg">
-                SB
-              </div>
+              <img src="/logo.png" alt="Logo" className="h-10 w-10 object-cover rounded-xl shadow-lg bg-white p-0.5 border border-slate-800" />
               <span className="text-xl font-black tracking-tight text-white">
-                SmartBill
+                VyaparStock
               </span>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed max-w-sm">

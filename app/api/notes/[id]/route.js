@@ -8,7 +8,7 @@ export async function PUT(req, { params }) {
   const ctx = await requireAuth();
   if (ctx instanceof NextResponse) return ctx;
   const { user } = ctx;
-  const { id } = params;
+  const { id } = await params;
 
   try {
     const existing = await db.purchaseNote.findFirst({
@@ -60,7 +60,7 @@ export async function DELETE(req, { params }) {
   const ctx = await requireAuth();
   if (ctx instanceof NextResponse) return ctx;
   const { user } = ctx;
-  const { id } = params;
+  const { id } = await params;
 
   try {
     const existing = await db.purchaseNote.findFirst({

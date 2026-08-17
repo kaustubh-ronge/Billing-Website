@@ -40,11 +40,9 @@ export default function MobileSidebar({ open, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground text-background font-black text-sm">
-              SB
-            </div>
+            <img src="/logo.png" alt="Logo" className="h-8 w-8 object-cover rounded-lg border border-slate-200/50 shadow-3xs" />
             <span className="text-base font-black tracking-tight text-sidebar-foreground">
-              SmartBill
+              VyaparStock
             </span>
           </div>
           <button

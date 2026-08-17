@@ -33,11 +33,9 @@ export default function HeaderClient({ user }) {
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group relative">
           <div className="absolute -inset-2 bg-linear-to-r from-blue-600 to-purple-600 rounded-full blur opacity-0 group-hover:opacity-40 transition duration-500"></div>
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-gray-900 to-black text-white font-bold shadow-lg">
-            SB
-          </div>
+          <img src="/logo.png" alt="Logo" className="relative h-10 w-10 object-cover rounded-xl shadow-lg border border-gray-100/30" />
           <span className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-br from-gray-900 to-gray-600">
-            SmartBill
+            VyaparStock
           </span>
         </Link>
 
