@@ -312,12 +312,12 @@ ${vendorShop.businessName}`;
               });
               downloadCSV(rows, 'customers');
             }}
-            className="rounded-full border-gray-200 font-bold text-sm flex items-center gap-1.5"
+            className="rounded-lg border-gray-200 font-bold text-sm flex items-center gap-1.5"
           >
             <Download className="h-4 w-4" /> Export CSV
           </Button>
           {can('customers:create') && (
-          <Button onClick={openAddDialog} className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6 flex items-center gap-2">
+          <Button onClick={openAddDialog} className="font-bold bg-black hover:bg-gray-900 text-white rounded-lg px-6 flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add Customer
           </Button>
@@ -427,7 +427,7 @@ ${vendorShop.businessName}`;
                     </CardDescription>
                   </div>
                   <div className="flex flex-wrap gap-2 print:hidden">
-                    <Button variant="outline" size="sm" onClick={handlePrintLedger} className="rounded-full border-gray-200 font-bold flex items-center gap-1 text-xs px-3">
+                    <Button variant="outline" size="sm" onClick={handlePrintLedger} className="rounded-lg border-gray-200 font-bold flex items-center gap-1 text-xs px-3">
                       <Printer className="h-3.5 w-3.5" />
                       Print / PDF
                     </Button>
@@ -710,10 +710,10 @@ ${vendorShop.businessName}`;
             </div>
 
             <DialogFooter className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-full border-gray-200 px-6 font-bold">
+              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-lg border-gray-200 px-6 font-bold">
                 Cancel
               </Button>
-              <Button type="submit" className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6">
+              <Button type="submit" className="font-bold bg-black hover:bg-gray-900 text-white rounded-lg px-6">
                 Save Customer
               </Button>
             </DialogFooter>
@@ -822,10 +822,10 @@ ${vendorShop.businessName}`;
             )}
 
             <DialogFooter className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsSettleDialogOpen(false)} className="rounded-full border-gray-200 px-6 font-bold">
+              <Button type="button" variant="outline" onClick={() => setIsSettleDialogOpen(false)} className="rounded-lg border-gray-200 px-6 font-bold">
                 Cancel
               </Button>
-              <Button type="submit" disabled={settlingPayment} className="font-bold bg-green-600 hover:bg-green-700 text-white rounded-full px-6 gap-1.5">
+              <Button type="submit" disabled={settlingPayment} className="font-bold bg-green-600 hover:bg-green-700 text-white rounded-lg px-6 gap-1.5">
                 {settlingPayment ? (
                   <>
                     <RefreshCw className="h-4 w-4 animate-spin" />

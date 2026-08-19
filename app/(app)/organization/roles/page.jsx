@@ -54,7 +54,7 @@ export default function RolesPage() {
           <h2 className="text-lg font-bold text-foreground">Roles</h2>
           <p className="text-sm text-muted-foreground">Reusable permission templates — assign them to employees as a starting point.</p>
         </div>
-        <Button onClick={() => setEditing({})} className="rounded-full bg-foreground text-background hover:opacity-90 font-bold gap-2">
+        <Button onClick={() => setEditing({})} className="rounded-lg bg-foreground text-background hover:opacity-90 font-bold gap-2">
           <Plus className="h-4 w-4" /> Create Role
         </Button>
       </div>
@@ -82,9 +82,9 @@ export default function RolesPage() {
               {role.isSystem && <span className="px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold">Starter</span>}
             </div>
             <div className="flex items-center gap-1 mt-4 pt-3 border-t border-border">
-              <Button variant="ghost" size="sm" onClick={() => setEditing(role)} className="rounded-full gap-1.5 text-xs"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
-              <Button variant="ghost" size="sm" onClick={() => clone(role)} className="rounded-full gap-1.5 text-xs"><Copy className="h-3.5 w-3.5" /> Clone</Button>
-              <Button variant="ghost" size="sm" onClick={() => remove(role)} className="rounded-full gap-1.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 ml-auto">
+              <Button variant="ghost" size="sm" onClick={() => setEditing(role)} className="rounded-md gap-1.5 text-xs"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
+              <Button variant="ghost" size="sm" onClick={() => clone(role)} className="rounded-md gap-1.5 text-xs"><Copy className="h-3.5 w-3.5" /> Clone</Button>
+              <Button variant="ghost" size="sm" onClick={() => remove(role)} className="rounded-md gap-1.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 ml-auto">
                 <Trash2 className="h-3.5 w-3.5" /> {role.isSystem ? 'Archive' : 'Delete'}
               </Button>
             </div>
@@ -154,8 +154,8 @@ function RoleEditor({ role, onClose, onDone }) {
         </div>
 
         <DialogFooter className="border-t border-border pt-4 gap-2">
-          <Button variant="outline" onClick={onClose} className="rounded-full border-border">Cancel</Button>
-          <Button onClick={save} disabled={saving} className="rounded-full bg-foreground text-background font-bold px-6 gap-2">
+          <Button variant="outline" onClick={onClose} className="rounded-lg border-border">Cancel</Button>
+          <Button onClick={save} disabled={saving} className="rounded-lg bg-foreground text-background font-bold px-6 gap-2">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} {isNew ? 'Create' : 'Save'}
           </Button>
         </DialogFooter>

@@ -40,7 +40,7 @@ export default function BranchesPage() {
           <h2 className="text-lg font-bold text-foreground">Branches</h2>
           <p className="text-sm text-muted-foreground">Physical locations — head office, warehouses, retail outlets.</p>
         </div>
-        <Button onClick={() => setEditing({})} className="rounded-full bg-foreground text-background hover:opacity-90 font-bold gap-2">
+        <Button onClick={() => setEditing({})} className="rounded-lg bg-foreground text-background hover:opacity-90 font-bold gap-2">
           <Plus className="h-4 w-4" /> Add Branch
         </Button>
       </div>
@@ -69,8 +69,8 @@ export default function BranchesPage() {
                 {b.phone && <span>· {b.phone}</span>}
               </div>
               <div className="flex items-center gap-1 mt-4 pt-3 border-t border-border">
-                <Button variant="ghost" size="sm" onClick={() => setEditing(b)} className="rounded-full gap-1.5 text-xs"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
-                <Button variant="ghost" size="sm" onClick={() => remove(b)} className="rounded-full gap-1.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 ml-auto"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
+                <Button variant="ghost" size="sm" onClick={() => setEditing(b)} className="rounded-md gap-1.5 text-xs"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
+                <Button variant="ghost" size="sm" onClick={() => remove(b)} className="rounded-md gap-1.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 ml-auto"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
               </div>
             </div>
           ))}
@@ -117,8 +117,8 @@ function BranchEditor({ branch, onClose, onDone }) {
           </label>
         </div>
         <DialogFooter className="border-t border-border pt-4 gap-2">
-          <Button variant="outline" onClick={onClose} className="rounded-full border-border">Cancel</Button>
-          <Button onClick={save} disabled={saving} className="rounded-full bg-foreground text-background font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save</Button>
+          <Button variant="outline" onClick={onClose} className="rounded-lg border-border">Cancel</Button>
+          <Button onClick={save} disabled={saving} className="rounded-lg bg-foreground text-background font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

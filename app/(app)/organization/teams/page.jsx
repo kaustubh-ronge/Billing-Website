@@ -46,7 +46,7 @@ export default function TeamsPage() {
           <h2 className="text-lg font-bold text-foreground">Teams</h2>
           <p className="text-sm text-muted-foreground">Working groups like Billing Team, Collection Team, Warehouse Team.</p>
         </div>
-        <Button onClick={() => setEditing({})} className="rounded-full bg-foreground text-background hover:opacity-90 font-bold gap-2">
+        <Button onClick={() => setEditing({})} className="rounded-lg bg-foreground text-background hover:opacity-90 font-bold gap-2">
           <Plus className="h-4 w-4" /> Add Team
         </Button>
       </div>
@@ -71,8 +71,8 @@ export default function TeamsPage() {
                 <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {t._count?.users ?? 0} members</span>
               </div>
               <div className="flex items-center gap-1 mt-4 pt-3 border-t border-border">
-                <Button variant="ghost" size="sm" onClick={() => setEditing(t)} className="rounded-full gap-1.5 text-xs"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
-                <Button variant="ghost" size="sm" onClick={() => remove(t)} className="rounded-full gap-1.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 ml-auto"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
+                <Button variant="ghost" size="sm" onClick={() => setEditing(t)} className="rounded-md gap-1.5 text-xs"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
+                <Button variant="ghost" size="sm" onClick={() => remove(t)} className="rounded-md gap-1.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 ml-auto"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
               </div>
             </div>
           ))}
@@ -122,8 +122,8 @@ function TeamEditor({ team, departments, onClose, onDone }) {
           </div>
         </div>
         <DialogFooter className="border-t border-border pt-4 gap-2">
-          <Button variant="outline" onClick={onClose} className="rounded-full border-border">Cancel</Button>
-          <Button onClick={save} disabled={saving} className="rounded-full bg-foreground text-background font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save</Button>
+          <Button variant="outline" onClick={onClose} className="rounded-lg border-border">Cancel</Button>
+          <Button onClick={save} disabled={saving} className="rounded-lg bg-foreground text-background font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

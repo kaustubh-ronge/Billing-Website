@@ -18,7 +18,7 @@ export default function HeroClient({ systemRole, totalBusinesses = 0, totalInvoi
         
         {/* Sleek Badge */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mb-8 flex justify-center">
-          <div className="group relative inline-flex items-center gap-2 rounded-full border border-gray-200/80 bg-white/50 backdrop-blur-md px-4 py-1.5 text-xs font-semibold text-gray-700 shadow-sm cursor-default">
+          <div className="group relative inline-flex items-center gap-2 rounded-md border border-gray-200/80 bg-white/50 backdrop-blur-md px-4 py-1.5 text-xs font-semibold text-gray-700 shadow-sm cursor-default">
             <Sparkles className="h-3.5 w-3.5 text-blue-500" />
             <span>The New Standard for B2B SaaS</span>
           </div>
@@ -38,15 +38,15 @@ export default function HeroClient({ systemRole, totalBusinesses = 0, totalInvoi
         {/* Standardized Button Sizes */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="flex flex-col items-center justify-center gap-6">
           <Link href={systemRole === "ADMIN" ? "/admin" : "/dashboard"} className="relative group">
-            <div className="absolute -inset-0.5 bg-linear-to-r from-blue-500 to-purple-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
-            <Button className="relative h-12 px-8 rounded-full text-sm font-semibold bg-gray-900 hover:bg-black text-white transition-all transform group-hover:-translate-y-0.5 shadow-md">
+            <div className="absolute -inset-0.5 bg-linear-to-r from-blue-500 to-purple-500 rounded-lg blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+            <Button className="relative h-12 px-8 rounded-lg text-sm font-semibold bg-gray-900 hover:bg-black text-white transition-all transform group-hover:-translate-y-0.5 shadow-md">
               {systemRole === "ADMIN" ? "Enter Admin Console" : "Enter Dashboard"}
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
           
           {/* Dynamic statistics section */}
-          <div className="mt-6 flex flex-col sm:flex-row items-center gap-6 sm:gap-12 bg-white/40 backdrop-blur-md border border-gray-200/80 px-8 py-4 rounded-3xl shadow-sm">
+          <div className="mt-6 flex flex-col sm:flex-row items-center gap-6 sm:gap-12 bg-white/40 backdrop-blur-md border border-gray-200/80 px-8 py-4 rounded-xl shadow-sm">
             <div className="text-center sm:text-left">
               <span className="block text-2xl font-black text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">
                 {totalBusinesses}+

@@ -46,7 +46,7 @@ export default function DepartmentsPage() {
           <h2 className="text-lg font-bold text-foreground">Departments</h2>
           <p className="text-sm text-muted-foreground">Functional groups like Billing, Inventory, Accounts, Sales.</p>
         </div>
-        <Button onClick={() => setEditing({})} className="rounded-full bg-foreground text-background hover:opacity-90 font-bold gap-2">
+        <Button onClick={() => setEditing({})} className="rounded-lg bg-foreground text-background hover:opacity-90 font-bold gap-2">
           <Plus className="h-4 w-4" /> Add Department
         </Button>
       </div>
@@ -72,8 +72,8 @@ export default function DepartmentsPage() {
                 <span className="inline-flex items-center gap-1"><UsersRound className="h-3 w-3" /> {d._count?.teams ?? 0} teams</span>
               </div>
               <div className="flex items-center gap-1 mt-4 pt-3 border-t border-border">
-                <Button variant="ghost" size="sm" onClick={() => setEditing(d)} className="rounded-full gap-1.5 text-xs"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
-                <Button variant="ghost" size="sm" onClick={() => remove(d)} className="rounded-full gap-1.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 ml-auto"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
+                <Button variant="ghost" size="sm" onClick={() => setEditing(d)} className="rounded-md gap-1.5 text-xs"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
+                <Button variant="ghost" size="sm" onClick={() => remove(d)} className="rounded-md gap-1.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 ml-auto"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
               </div>
             </div>
           ))}
@@ -123,8 +123,8 @@ function DeptEditor({ dept, branches, onClose, onDone }) {
           </div>
         </div>
         <DialogFooter className="border-t border-border pt-4 gap-2">
-          <Button variant="outline" onClick={onClose} className="rounded-full border-border">Cancel</Button>
-          <Button onClick={save} disabled={saving} className="rounded-full bg-foreground text-background font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save</Button>
+          <Button variant="outline" onClick={onClose} className="rounded-lg border-border">Cancel</Button>
+          <Button onClick={save} disabled={saving} className="rounded-lg bg-foreground text-background font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -49,7 +49,7 @@ export default function ActivityPage() {
           <h2 className="text-lg font-bold text-foreground">Activity Log</h2>
           <p className="text-sm text-muted-foreground">Who did what across your organization.</p>
         </div>
-        <Button variant="outline" size="icon" onClick={fetchLogs} className="rounded-full border-border"><RefreshCw className="h-4 w-4" /></Button>
+        <Button variant="outline" size="icon" onClick={fetchLogs} className="rounded-lg border-border"><RefreshCw className="h-4 w-4" /></Button>
       </div>
 
       {loading ? (

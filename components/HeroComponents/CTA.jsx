@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ export default function CTA() {
         </p>
         
         <Link href={ctaData.buttonLink}>
-          <Button className="h-12 px-8 rounded-full text-sm font-semibold bg-white text-blue-700 hover:bg-gray-50 hover:text-blue-800 shadow-lg transition-transform transform hover:-translate-y-0.5">
+          <Button className="h-12 px-8 rounded-lg text-sm font-semibold bg-white text-blue-700 hover:bg-gray-50 hover:text-blue-800 shadow-lg transition-transform transform hover:-translate-y-0.5">
             {ctaData.buttonText}
           </Button>
         </Link>

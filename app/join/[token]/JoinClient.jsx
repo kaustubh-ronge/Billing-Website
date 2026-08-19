@@ -35,8 +35,8 @@ export default function JoinClient({
 
   const Shell = ({ icon: Icon, iconClass, bgClass, title, children }) => (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md bg-white border border-gray-150 rounded-3xl shadow-sm p-8 text-center space-y-5">
-        <div className={`inline-flex h-16 w-16 items-center justify-center rounded-2xl ${bgClass}`}>
+      <div className="w-full max-w-md bg-white border border-gray-150 rounded-xl shadow-sm p-8 text-center space-y-5">
+        <div className={`inline-flex h-16 w-16 items-center justify-center rounded-lg ${bgClass}`}>
           <Icon className={`h-8 w-8 ${iconClass}`} />
         </div>
         <h1 className="text-xl font-black text-gray-900">{title}</h1>
@@ -68,7 +68,7 @@ export default function JoinClient({
           You've been invited to join <strong className="text-gray-900">{orgName}</strong>
           {isOwnerInvite ? ' as an Owner' : roleName ? <> as <strong className="text-gray-900">{roleName}</strong></> : ''}.
         </p>
-        <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full px-3 py-1 mt-2">
+        <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-100 rounded-md px-3 py-1 mt-2">
           <Mail className="h-3 w-3" /> {inviteEmail}
         </div>
       </div>
@@ -78,7 +78,7 @@ export default function JoinClient({
           <p className="text-xs text-gray-400">Create your account using the email above to join automatically.</p>
           <Link
             href={`/sign-up?redirect_url=${encodeURIComponent(`/join/${token}`)}`}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gray-900 text-white font-bold px-6 py-2.5 text-sm hover:bg-gray-800"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gray-900 text-white font-bold px-6 py-2.5 text-sm hover:bg-gray-800"
           >
             Sign up to accept <ArrowRight className="h-4 w-4" />
           </Link>
@@ -95,7 +95,7 @@ export default function JoinClient({
         <button
           onClick={accept}
           disabled={accepting}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-600 text-white font-bold px-6 py-2.5 text-sm hover:bg-emerald-700 disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 text-white font-bold px-6 py-2.5 text-sm hover:bg-emerald-700 disabled:opacity-60"
         >
           {accepting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
           Accept & join

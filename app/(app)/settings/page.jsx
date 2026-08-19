@@ -284,7 +284,7 @@ export default function SettingsPage() {
             </div>
             <FieldGroup label="Business Address"><Textarea value={formData.address} onChange={set('address')} placeholder="123 Main Street, Mumbai, Maharashtra 400001" className="rounded-xl border-border min-h-[80px]" /></FieldGroup>
             <div className="flex justify-end pt-2 border-t border-border">
-              <Button type="submit" disabled={saving} className="rounded-full bg-foreground text-background hover:opacity-90 font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save Profile</Button>
+              <Button type="submit" disabled={saving} className="rounded-lg bg-foreground text-background hover:opacity-90 font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save Profile</Button>
             </div>
           </div>
         )}
@@ -299,7 +299,7 @@ export default function SettingsPage() {
               <FieldGroup label="UPI ID (VPA)" hint="Used to generate Scan & Pay QR codes on invoices."><Input value={formData.upiId} onChange={set('upiId')} placeholder="shopname@okaxis" className="rounded-xl border-border font-mono" /></FieldGroup>
             </div>
             <div className="flex justify-end pt-2 border-t border-border">
-              <Button type="submit" disabled={saving} className="rounded-full bg-foreground text-background hover:opacity-90 font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save Banking Details</Button>
+              <Button type="submit" disabled={saving} className="rounded-lg bg-foreground text-background hover:opacity-90 font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save Banking Details</Button>
             </div>
           </div>
         )}
@@ -650,7 +650,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="flex justify-end pt-2 border-t border-border">
-              <Button type="submit" disabled={saving} className="rounded-full bg-foreground text-background hover:opacity-90 font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save Invoice Config</Button>
+              <Button type="submit" disabled={saving} className="rounded-lg bg-foreground text-background hover:opacity-90 font-bold px-6 gap-2">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save Invoice Config</Button>
             </div>
           </div>
         )}

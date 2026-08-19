@@ -77,7 +77,7 @@ export default function EmployeesPage() {
           <p className="text-sm text-muted-foreground">{members.length} member{members.length !== 1 ? 's' : ''}{pending.length > 0 ? ` · ${pending.length} pending` : ''}</p>
         </div>
         {canInvite && (
-          <Button onClick={() => setInviteOpen(true)} className="rounded-full bg-foreground text-background hover:opacity-90 font-bold gap-2">
+          <Button onClick={() => setInviteOpen(true)} className="rounded-lg bg-foreground text-background hover:opacity-90 font-bold gap-2">
             <UserPlus className="h-4 w-4" /> Invite Employee
           </Button>
         )}
@@ -151,7 +151,7 @@ export default function EmployeesPage() {
                     <StatusIcon className="h-3 w-3" /> {st.label}
                   </span>
                   {canManage && (
-                    <Button variant="outline" size="sm" onClick={() => setEditing(m)} className="rounded-full border-border gap-1.5">
+                    <Button variant="outline" size="sm" onClick={() => setEditing(m)} className="rounded-lg border-border gap-1.5">
                       <Settings2 className="h-3.5 w-3.5" /> Manage
                     </Button>
                   )}
@@ -260,7 +260,7 @@ function InviteWizard({ org, allowOwner, onClose, onDone }) {
               <code className="flex-1 text-xs font-mono truncate">{`${typeof window !== 'undefined' ? window.location.origin : ''}/join/${createdToken}`}</code>
               <Button size="sm" variant="ghost" onClick={copyLink} className="h-7 rounded-lg"><Copy className="h-3.5 w-3.5" /></Button>
             </div>
-            <Button onClick={onDone} className="rounded-full bg-foreground text-background font-bold px-8">Done</Button>
+            <Button onClick={onDone} className="rounded-lg bg-foreground text-background font-bold px-8">Done</Button>
           </div>
         ) : (
           <>
@@ -361,13 +361,13 @@ function InviteWizard({ org, allowOwner, onClose, onDone }) {
             <DialogFooter className="flex items-center justify-between sm:justify-between gap-2 border-t border-border pt-4">
               <div>
                 {step > 0 && (
-                  <Button variant="ghost" onClick={() => setStep((s) => s - 1)} className="rounded-full gap-1"><ChevronLeft className="h-4 w-4" /> Back</Button>
+                  <Button variant="ghost" onClick={() => setStep((s) => s - 1)} className="rounded-lg gap-1"><ChevronLeft className="h-4 w-4" /> Back</Button>
                 )}
               </div>
               {step < STEPS.length - 1 ? (
-                <Button onClick={next} className="rounded-full bg-foreground text-background font-bold px-6 gap-1">Next <ChevronRight className="h-4 w-4" /></Button>
+                <Button onClick={next} className="rounded-lg bg-foreground text-background font-bold px-6 gap-1">Next <ChevronRight className="h-4 w-4" /></Button>
               ) : (
-                <Button onClick={submit} disabled={saving} className="rounded-full bg-foreground text-background font-bold px-6 gap-2">
+                <Button onClick={submit} disabled={saving} className="rounded-lg bg-foreground text-background font-bold px-6 gap-2">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />} Generate Invite
                 </Button>
               )}
@@ -520,12 +520,12 @@ function MemberEditor({ member, org, allowOwner, isSelf, onClose, onDone }) {
         </div>
 
         <DialogFooter className="flex items-center justify-between sm:justify-between gap-2 border-t border-border pt-4">
-          <Button variant="ghost" onClick={remove} disabled={isSelf} className="rounded-full text-rose-600 hover:bg-rose-50 hover:text-rose-700 gap-1.5">
+          <Button variant="ghost" onClick={remove} disabled={isSelf} className="rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 gap-1.5">
             <Trash2 className="h-4 w-4" /> Remove
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose} className="rounded-full border-border">Cancel</Button>
-            <Button onClick={save} disabled={saving} className="rounded-full bg-foreground text-background font-bold px-6 gap-2">
+            <Button variant="outline" onClick={onClose} className="rounded-lg border-border">Cancel</Button>
+            <Button onClick={save} disabled={saving} className="rounded-lg bg-foreground text-background font-bold px-6 gap-2">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save
             </Button>
           </div>

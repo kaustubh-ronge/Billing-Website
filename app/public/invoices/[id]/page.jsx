@@ -76,7 +76,7 @@ export default async function PublicInvoicePage({ params }) {
           <a
             href={`/api/public/invoices/${id}/pdf`}
             download={`Invoice-${invoice.invoiceNum}.pdf`}
-            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-black text-white hover:opacity-90 font-bold px-4 py-2 text-xs shadow-md transition-all duration-200"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-black text-white hover:opacity-90 font-bold px-4 py-2 text-xs shadow-md transition-all duration-200"
           >
             <FileDown className="h-3.5 w-3.5" /> Download PDF
           </a>

@@ -294,12 +294,12 @@ ${vendorShop.businessName}`;
                 toast.error('Failed to export invoices');
               }
             }}
-            className="rounded-full border-gray-200 font-bold text-sm flex items-center gap-1.5"
+            className="rounded-lg border-gray-200 font-bold text-sm flex items-center gap-1.5"
           >
             <Download className="h-4 w-4" /> Export CSV
           </Button>
           {can('invoices:create') && (
-            <Link href="/invoices/new" className="font-bold bg-black text-white hover:bg-gray-900 rounded-full px-6 py-2.5 text-sm flex items-center gap-2">
+            <Link href="/invoices/new" className="font-bold bg-black text-white hover:bg-gray-900 rounded-lg px-6 py-2.5 text-sm flex items-center gap-2">
               <Plus className="h-4 w-4" /> Create Bill
             </Link>
           )}
@@ -663,10 +663,10 @@ ${vendorShop.businessName}`;
             )}
 
             <DialogFooter className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsPaymentDialogOpen(false)} className="rounded-full border-gray-200 px-6 font-bold">
+              <Button type="button" variant="outline" onClick={() => setIsPaymentDialogOpen(false)} className="rounded-lg border-gray-200 px-6 font-bold">
                 Cancel
               </Button>
-              <Button type="submit" disabled={recordingPayment} className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6 flex items-center gap-1">
+              <Button type="submit" disabled={recordingPayment} className="font-bold bg-black hover:bg-gray-900 text-white rounded-lg px-6 flex items-center gap-1">
                 {recordingPayment && <RefreshCw className="h-4 w-4 animate-spin" />}
                 Log Payment
               </Button>

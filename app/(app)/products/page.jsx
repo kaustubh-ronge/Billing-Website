@@ -384,12 +384,12 @@ export default function ProductsPage() {
               }));
               downloadCSV(rows, 'products');
             }}
-            className="rounded-full border-gray-200 font-bold text-sm flex items-center gap-1.5"
+            className="rounded-lg border-gray-200 font-bold text-sm flex items-center gap-1.5"
           >
             <Download className="h-4 w-4" /> Export CSV
           </Button>
           {can('products:create') && (
-          <Button onClick={openAddDialog} className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6 flex items-center gap-2">
+          <Button onClick={openAddDialog} className="font-bold bg-black hover:bg-gray-900 text-white rounded-lg px-6 flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add Item
           </Button>
@@ -1211,10 +1211,10 @@ export default function ProductsPage() {
             </div>
 
             <DialogFooter className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-full border-gray-200 px-6 font-bold">
+              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-lg border-gray-200 px-6 font-bold">
                 Cancel
               </Button>
-              <Button type="submit" className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6">
+              <Button type="submit" className="font-bold bg-black hover:bg-gray-900 text-white rounded-lg px-6">
                 Save Item
               </Button>
             </DialogFooter>

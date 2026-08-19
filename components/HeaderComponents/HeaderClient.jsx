@@ -22,7 +22,7 @@ export default function HeaderClient({ user }) {
 
   const navClasses = `mx-auto flex items-center justify-between transition-all duration-500 ease-in-out ${
     isScrolled 
-      ? "h-16 max-w-5xl rounded-full bg-white/70 backdrop-blur-2xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] px-6" 
+      ? "h-16 max-w-5xl rounded-xl bg-white/70 backdrop-blur-2xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] px-6" 
       : "h-24 max-w-7xl bg-transparent px-0"
   }`;
 
@@ -32,7 +32,7 @@ export default function HeaderClient({ user }) {
         
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group relative">
-          <div className="absolute -inset-2 bg-linear-to-r from-blue-600 to-purple-600 rounded-full blur opacity-0 group-hover:opacity-40 transition duration-500"></div>
+          <div className="absolute -inset-2 bg-linear-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-0 group-hover:opacity-40 transition duration-500"></div>
           <img src="/logo.png" alt="Logo" className="relative h-10 w-10 object-cover rounded-xl shadow-lg border border-gray-100/30" />
           <span className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-br from-gray-900 to-gray-600">
             VyaparStock
@@ -70,14 +70,14 @@ export default function HeaderClient({ user }) {
           {!user ? (
             <>
               <SignInButton mode="modal">
-                <Button variant="ghost" className="font-bold text-gray-600 hover:text-black rounded-full px-5 hidden sm:flex">
+                <Button variant="ghost" className="font-bold text-gray-600 hover:text-black rounded-lg px-5 hidden sm:flex">
                   Log in
                 </Button>
               </SignInButton>
               <SignUpButton mode="modal">
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-linear-to-r from-blue-500 to-purple-600 rounded-full blur opacity-40 group-hover:opacity-70 transition duration-500"></div>
-                  <Button className="relative font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6 transition-all">
+                  <div className="absolute -inset-0.5 bg-linear-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-40 group-hover:opacity-70 transition duration-500"></div>
+                  <Button className="relative font-bold bg-black hover:bg-gray-900 text-white rounded-lg px-6 transition-all">
                     Get Started
                   </Button>
                 </div>
@@ -87,7 +87,7 @@ export default function HeaderClient({ user }) {
             /* LOGGED IN STATE */
             <>
               {user.systemRole !== "ADMIN" && (
-                <div className="hidden lg:flex items-center mr-2 px-4 py-1.5 bg-gray-100/80 backdrop-blur-sm border border-gray-200 rounded-full">
+                <div className="hidden lg:flex items-center mr-2 px-4 py-1.5 bg-gray-100/80 backdrop-blur-sm border border-gray-200 rounded-md">
                   <span className="text-xs font-black text-gray-800 uppercase tracking-wider">
                     {user.shopName || "PENDING"}
                   </span>
