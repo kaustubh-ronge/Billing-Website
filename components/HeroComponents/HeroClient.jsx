@@ -3,15 +3,57 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Hyperspeed from "@/components/ui/Hyperspeed";
+
+const hyperspeedOptions = {
+  distortion: "turbulentDistortion",
+  length: 400,
+  roadWidth: 10,
+  islandWidth: 2,
+  lanesPerRoad: 4,
+  fov: 90,
+  fovSpeedUp: 150,
+  speedUp: 2,
+  carLightsFade: 0.4,
+  totalSideLightSticks: 20,
+  lightPairsPerRoadWay: 40,
+  shoulderLinesWidthPercentage: 0.05,
+  brokenLinesWidthPercentage: 0.1,
+  brokenLinesLengthPercentage: 0.5,
+  lightStickWidth: [0.12, 0.5],
+  lightStickHeight: [1.3, 1.7],
+  movingAwaySpeed: [60, 80],
+  movingCloserSpeed: [-120, -160],
+  carLightsLength: [12, 80],
+  carLightsRadius: [0.05, 0.14],
+  carWidthPercentage: [0.3, 0.5],
+  carShiftX: [-0.8, 0.8],
+  carFloorSeparation: [0, 5],
+  colors: {
+    roadColor: 0x080c14,
+    islandColor: 0x0f172a,
+    background: 0x020617,
+    shoulderLines: 0x38bdf8,
+    brokenLines: 0x818cf8,
+    leftCars: [0x3b82f6, 0x60a5fa, 0x1d4ed8],
+    rightCars: [0x8b5cf6, 0xa855f7, 0x6366f1],
+    sticks: 0x06b6d4,
+  }
+};
 
 export default function HeroClient({ systemRole, totalBusinesses = 0, totalInvoices = 0 }) {
   return (
-    <div className="w-full relative flex flex-col items-center justify-center z-20">
+    <div className="w-full relative flex flex-col items-center justify-center z-20 min-h-[85vh]">
       
-      {/* Animated Aurora Background */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[500px] pointer-events-none opacity-50">
-        <motion.div animate={{ x: [0, 50, -30, 0], y: [0, -30, 30, 0], scale: [1, 1.05, 0.95, 1] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 left-20 w-[400px] h-[400px] bg-blue-400/30 rounded-full mix-blend-multiply filter blur-[100px]" />
-        <motion.div animate={{ x: [0, -50, 30, 0], y: [0, 30, -30, 0], scale: [1, 0.95, 1.05, 1] }} transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }} className="absolute top-10 right-20 w-[350px] h-[350px] bg-purple-400/30 rounded-full mix-blend-multiply filter blur-[100px]" />
+      {/* 3D Hyperspeed WebGL Backdrop */}
+      <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
+        <Hyperspeed effectOptions={hyperspeedOptions} />
+      </div>
+
+      {/* Animated Glow Overlay */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[500px] pointer-events-none opacity-40 z-1">
+        <motion.div animate={{ x: [0, 50, -30, 0], y: [0, -30, 30, 0], scale: [1, 1.05, 0.95, 1] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 left-20 w-[400px] h-[400px] bg-blue-500/30 rounded-full mix-blend-multiply filter blur-[100px]" />
+        <motion.div animate={{ x: [0, -50, 30, 0], y: [0, 30, -30, 0], scale: [1, 0.95, 1.05, 1] }} transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }} className="absolute top-10 right-20 w-[350px] h-[350px] bg-purple-500/30 rounded-full mix-blend-multiply filter blur-[100px]" />
       </div>
 
       <div className="container relative mx-auto px-6 text-center z-30 pt-10">
