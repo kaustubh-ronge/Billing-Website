@@ -642,8 +642,8 @@ const renderProductsBought = (text) => {
 
       {/* Dialog overlay for Add / Edit */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent style={{ maxWidth: "672px", width: "95vw" }} className="rounded-2xl bg-white font-sans p-6">
-          <form onSubmit={handleSave} className="w-full flex flex-col">
+        <DialogContent style={{ maxWidth: "672px", width: "95vw" }} className="rounded-2xl bg-white font-sans p-6 overflow-hidden">
+          <form onSubmit={handleSave} className="w-full max-w-full min-w-0 flex flex-col">
             <DialogHeader>
               <DialogTitle className="text-sm font-black text-gray-900">
                 {editingItem ? "Edit Note / Record" : "Add New Note / Record"}
@@ -653,7 +653,7 @@ const renderProductsBought = (text) => {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-5 py-4 text-xs overflow-y-auto max-h-[68vh] pr-2">
+            <div className="space-y-5 py-4 text-xs overflow-y-auto overflow-x-hidden max-h-[68vh] pr-2 w-full max-w-full min-w-0">
               
               {/* Type Select Toggle & Date Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
