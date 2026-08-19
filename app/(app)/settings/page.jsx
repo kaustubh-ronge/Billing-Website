@@ -639,7 +639,7 @@ export default function SettingsPage() {
                       customer={MOCK_CUSTOMER}
                       items={MOCK_INVOICE.items}
                       statusBadge={
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-black bg-green-50 text-green-700 border border-green-150">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                           PAID
                         </span>
                       }

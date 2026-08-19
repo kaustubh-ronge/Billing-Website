@@ -247,31 +247,31 @@ export default function AdminDashboardPage() {
 
       {/* Subscription Expiration Alerts */}
       {alerts.length > 0 && (
-        <Card className="border border-amber-200 bg-amber-50/20 rounded-2xl overflow-hidden shadow-sm">
-          <CardHeader className="bg-amber-50/50 py-3.5 border-b border-amber-100 flex flex-row items-center gap-2">
-            <ShieldAlert className="h-4.5 w-4.5 text-amber-600 animate-pulse" />
+        <Card className="border border-amber-200 dark:border-amber-900 bg-amber-50/20 dark:bg-amber-950/20 rounded-2xl overflow-hidden shadow-sm">
+          <CardHeader className="bg-amber-50/50 dark:bg-amber-950/40 py-3.5 border-b border-amber-100 dark:border-amber-900 flex flex-row items-center gap-2">
+            <ShieldAlert className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400 animate-pulse" />
             <div>
-              <CardTitle className="text-sm font-black text-amber-900">Critical Expiration Alerts</CardTitle>
-              <CardDescription className="text-[10px] text-amber-700">The following businesses have 10 days or less remaining on their membership plans.</CardDescription>
+              <CardTitle className="text-sm font-black text-amber-900 dark:text-amber-200">Critical Expiration Alerts</CardTitle>
+              <CardDescription className="text-[10px] text-amber-700 dark:text-amber-300">The following businesses have 10 days or less remaining on their membership plans.</CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="p-0 divide-y divide-amber-100/50">
+          <CardContent className="p-0 divide-y divide-amber-100/50 dark:divide-amber-900/40">
             {alerts.map((alert) => {
               const days = getDaysRemaining(alert.planExpiresAt);
               return (
                 <div key={alert.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                   <div className="space-y-1">
-                    <h4 className="font-bold text-gray-900 text-sm">{alert.businessName}</h4>
-                    <p className="text-gray-500 flex items-center gap-1.5">
-                      <span className="font-semibold text-gray-700">{alert.ownerName || 'Unknown Owner'}</span>
+                    <h4 className="font-bold text-foreground text-sm">{alert.businessName}</h4>
+                    <p className="text-muted-foreground flex items-center gap-1.5">
+                      <span className="font-semibold text-foreground">{alert.ownerName || 'Unknown Owner'}</span>
                       {alert.phone && <span className="flex items-center gap-0.5"><Phone className="h-3 w-3" /> {alert.phone}</span>}
                       {alert.email && <span className="flex items-center gap-0.5"><Mail className="h-3 w-3" /> {alert.email}</span>}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <p className="font-black text-amber-700">{days <= 0 ? 'Expired' : `${days} Days Remaining`}</p>
-                      <p className="text-[10px] text-gray-500">Plan: {alert.plan?.name || 'Standard'}</p>
+                      <p className="font-black text-amber-700 dark:text-amber-400">{days <= 0 ? 'Expired' : `${days} Days Remaining`}</p>
+                      <p className="text-[10px] text-muted-foreground">Plan: {alert.plan?.name || 'Standard'}</p>
                     </div>
                     <Button size="sm" onClick={() => handleOpenEdit(alert)} className="rounded-full bg-amber-600 text-white hover:bg-amber-700 font-bold px-4 gap-1">
                       <Edit2 className="h-3 w-3" /> Renew Plan
@@ -336,7 +336,7 @@ export default function AdminDashboardPage() {
                         </div>
                       </td>
                       <td className="p-4">
-                        <span className="font-bold text-gray-700">{shop.plan?.name || '1 Month Trial (Default)'}</span>
+                        <span className="font-bold text-foreground">{shop.plan?.name || '1 Month Trial (Default)'}</span>
                       </td>
                       <td className="p-4 text-muted-foreground">
                         {shop.planExpiresAt ? new Date(shop.planExpiresAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Never'}
@@ -394,11 +394,11 @@ export default function AdminDashboardPage() {
 
       {/* Subscription Update Modal */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="rounded-2xl max-w-sm bg-white font-sans">
+        <DialogContent className="rounded-2xl max-w-sm bg-card text-card-foreground border border-border font-sans">
           <form onSubmit={handleUpdatePlan}>
             <DialogHeader>
-              <DialogTitle className="text-md font-bold text-gray-900">Manage Shop Subscription</DialogTitle>
-              <DialogDescription className="text-xs">
+              <DialogTitle className="text-md font-bold text-foreground">Manage Shop Subscription</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
                 Update subscription plan or manually override expiration for {selectedShop?.businessName}.
               </DialogDescription>
             </DialogHeader>
@@ -406,7 +406,7 @@ export default function AdminDashboardPage() {
               <div className="space-y-1.5">
                 <Label htmlFor="planSelect">Select Membership Tier</Label>
                 <Select value={selectedPlanId} onValueChange={handlePlanChange}>
-                  <SelectTrigger id="planSelect" className="rounded-xl border-gray-250 bg-background text-xs">
+                  <SelectTrigger id="planSelect" className="rounded-xl border-border bg-background text-xs text-foreground">
                     <SelectValue placeholder="Select Plan" />
                   </SelectTrigger>
                   <SelectContent>
@@ -426,13 +426,13 @@ export default function AdminDashboardPage() {
                   type="date"
                   value={customExpiry}
                   onChange={(e) => setCustomExpiry(e.target.value)}
-                  className="rounded-xl border-gray-250 text-xs"
+                  className="rounded-xl border-border text-xs"
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="shopActiveSelect">Account Status</Label>
                 <Select value={shopActive ? "active" : "inactive"} onValueChange={(val) => setShopActive(val === "active")}>
-                  <SelectTrigger id="shopActiveSelect" className="rounded-xl border-gray-250 bg-background text-xs">
+                  <SelectTrigger id="shopActiveSelect" className="rounded-xl border-border bg-background text-xs text-foreground">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -442,11 +442,11 @@ export default function AdminDashboardPage() {
                 </Select>
               </div>
             </div>
-            <DialogFooter className="gap-2 pt-2 border-t border-gray-100">
-              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)} className="rounded-full px-5 text-xs font-bold border-gray-200">
+            <DialogFooter className="gap-2 pt-2 border-t border-border">
+              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)} className="rounded-full px-5 text-xs font-bold border-border">
                 Cancel
               </Button>
-              <Button type="submit" disabled={updating} className="rounded-full px-5 text-xs font-bold bg-black text-white hover:bg-gray-900">
+              <Button type="submit" disabled={updating} className="rounded-full px-5 text-xs font-bold bg-foreground text-background hover:opacity-90">
                 {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Subscription'}
               </Button>
             </DialogFooter>

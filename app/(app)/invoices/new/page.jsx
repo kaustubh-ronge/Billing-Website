@@ -331,46 +331,46 @@ ${vendorShop.businessName}`;
     <div className="mx-auto max-w-5xl px-4 py-0 sm:px-6 lg:px-8">
       {/* Wizard Header Progress */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2 text-sm text-gray-500 font-bold">
-          <Link href="/invoices" className="hover:text-black flex items-center gap-1">
+        <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground font-bold">
+          <Link href="/invoices" className="hover:text-foreground flex items-center gap-1">
             <ArrowLeft className="h-3.5 w-3.5" /> Invoices
           </Link>
           <ChevronRight className="h-3 w-3" />
           <span>New Invoice</span>
         </div>
-        <h1 className="text-3xl font-black tracking-tight text-gray-900">Create Invoice</h1>
+        <h1 className="text-3xl font-black tracking-tight text-foreground">Create Invoice</h1>
       </div>
 
       {/* Progress Steps Indicators */}
-      <div className="grid grid-cols-4 gap-2 mb-8 text-center text-xs font-bold text-gray-400">
-        <div className={`pb-2 border-b-2 ${step >= 1 ? 'text-blue-600 border-blue-600' : 'border-gray-200'}`}>1. Customer</div>
-        <div className={`pb-2 border-b-2 ${step >= 2 ? 'text-blue-600 border-blue-600' : 'border-gray-200'}`}>2. Items</div>
-        <div className={`pb-2 border-b-2 ${step >= 3 ? 'text-blue-600 border-blue-600' : 'border-gray-200'}`}>3. Payments</div>
-        <div className={`pb-2 border-b-2 ${step >= 4 ? 'text-blue-600 border-blue-600' : 'border-gray-200'}`}>4. Dispatch</div>
+      <div className="grid grid-cols-4 gap-2 mb-8 text-center text-xs font-bold text-muted-foreground">
+        <div className={`pb-2 border-b-2 ${step >= 1 ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400' : 'border-border'}`}>1. Customer</div>
+        <div className={`pb-2 border-b-2 ${step >= 2 ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400' : 'border-border'}`}>2. Items</div>
+        <div className={`pb-2 border-b-2 ${step >= 3 ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400' : 'border-border'}`}>3. Payments</div>
+        <div className={`pb-2 border-b-2 ${step >= 4 ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400' : 'border-border'}`}>4. Dispatch</div>
       </div>
 
       {/* Step 1: Select Customer */}
       {step === 1 && (
-        <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden p-6 space-y-6">
+        <Card className="border border-border shadow-sm rounded-2xl bg-card text-card-foreground overflow-hidden p-6 space-y-6">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search customers..."
                 value={customerSearch}
                 onChange={handleCustomerSearchChange}
-                className="pl-9 rounded-full border-gray-200 bg-white"
+                className="pl-9 rounded-full border-border bg-background text-foreground"
               />
             </div>
-            <Button onClick={() => setIsCustomerModalOpen(true)} className="w-full sm:w-auto font-bold bg-black text-white hover:bg-gray-900 rounded-full px-5 flex items-center gap-1">
+            <Button onClick={() => setIsCustomerModalOpen(true)} className="w-full sm:w-auto font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-5 flex items-center gap-1 shadow-sm">
               <Plus className="h-4 w-4" /> Quick Add Customer
             </Button>
           </div>
 
-          <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-100">
+          <div className="border border-border rounded-xl overflow-hidden divide-y divide-border bg-card">
             {customers.length === 0 ? (
-              <div className="p-8 text-center text-gray-400">
+              <div className="p-8 text-center text-muted-foreground">
                 No customers found matching that search. Click Quick Add to create one.
               </div>
             ) : (
@@ -378,18 +378,18 @@ ${vendorShop.businessName}`;
                 <div
                   key={c.id}
                   onClick={() => selectCustomer(c)}
-                  className="p-4 hover:bg-gray-50/50 cursor-pointer flex items-center justify-between transition-colors"
+                  className="p-4 hover:bg-muted/40 cursor-pointer flex items-center justify-between transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600 font-bold text-xs">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-bold text-xs">
                       {c.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h4 className="font-semibold text-sm text-gray-900">{c.name}</h4>
-                      <p className="text-xs text-gray-500">{c.phone}</p>
+                      <h4 className="font-semibold text-sm text-foreground">{c.name}</h4>
+                      <p className="text-xs text-muted-foreground">{c.phone}</p>
                     </div>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </div>
               ))
             )}
@@ -402,22 +402,22 @@ ${vendorShop.businessName}`;
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Item picker */}
           <div className="lg:col-span-4 space-y-6">
-            <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden p-4 space-y-4">
-              <h3 className="font-bold text-sm text-gray-700">Add Products/Services</h3>
+            <Card className="border border-border shadow-sm rounded-2xl bg-card text-card-foreground overflow-hidden p-4 space-y-4">
+              <h3 className="font-bold text-sm text-foreground">Add Products/Services</h3>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder="Filter inventory..."
                   value={productSearch}
                   onChange={handleProductSearchChange}
-                  className="pl-9 rounded-full border-gray-200"
+                  className="pl-9 rounded-full border-border bg-background text-foreground"
                 />
               </div>
 
-              <div className="divide-y divide-gray-100 max-h-87.5 overflow-y-auto pr-1">
+              <div className="divide-y divide-border max-h-87.5 overflow-y-auto pr-1">
                 {products.length === 0 ? (
-                  <div className="p-4 text-center text-xs text-gray-400">
+                  <div className="p-4 text-center text-xs text-muted-foreground">
                     No matching items in catalog.
                   </div>
                 ) : (
@@ -428,10 +428,10 @@ ${vendorShop.businessName}`;
                       className="py-2.5 flex items-center justify-between cursor-pointer group"
                     >
                       <div className="pr-2">
-                        <h4 className="font-semibold text-xs text-gray-900 group-hover:text-blue-600 transition-colors">{p.name} {p.actualValue ? `(${p.actualValue}${p.unit || ''})` : ''}</h4>
-                        <p className="text-[10px] text-gray-500 mt-0.5">{"\u20B9"}{p.price.toFixed(2)} | Tax: {p.taxRate}%</p>
+                        <h4 className="font-semibold text-xs text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{p.name} {p.actualValue ? `(${p.actualValue}${p.unit || ''})` : ''}</h4>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{"\u20B9"}{p.price.toFixed(2)} | Tax: {p.taxRate}%</p>
                       </div>
-                      <Plus className="h-3.5 w-3.5 text-gray-400 group-hover:text-blue-600" />
+                      <Plus className="h-3.5 w-3.5 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400" />
                     </div>
                   ))
                 )}
@@ -439,14 +439,14 @@ ${vendorShop.businessName}`;
             </Card>
 
             {selectedCustomer && (
-              <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden p-4">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Selected Customer</h4>
+              <Card className="border border-border shadow-sm rounded-2xl bg-card text-card-foreground overflow-hidden p-4">
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Selected Customer</h4>
                 <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-gray-500" />
-                  <span className="font-semibold text-sm text-gray-900">{selectedCustomer.name}</span>
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-semibold text-sm text-foreground">{selectedCustomer.name}</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{selectedCustomer.phone}</p>
-                <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="mt-3 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50/50 p-0 h-auto font-bold">
+                <p className="text-xs text-muted-foreground mt-1">{selectedCustomer.phone}</p>
+                <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="mt-3 text-xs text-blue-600 dark:text-blue-400 hover:underline p-0 h-auto font-bold">
                   Change Customer
                 </Button>
               </Card>
@@ -455,22 +455,22 @@ ${vendorShop.businessName}`;
 
           {/* Cart Table */}
           <div className="lg:col-span-8 space-y-6">
-            <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-x-auto">
+            <Card className="border border-border shadow-sm rounded-2xl bg-card text-card-foreground overflow-x-auto">
               <Table className="min-w-[500px]">
-                <TableHeader className="bg-gray-50/50">
+                <TableHeader className="bg-muted/50">
                   <TableRow>
-                    <TableHead className="font-bold text-xs">Item Name</TableHead>
-                    <TableHead className="font-bold text-xs text-center w-24">Price ({"\u20B9"})</TableHead>
-                    <TableHead className="font-bold text-xs text-center w-20">Qty</TableHead>
-                    <TableHead className="font-bold text-xs text-center">Tax %</TableHead>
-                    <TableHead className="font-bold text-xs text-right">Total</TableHead>
-                    <TableHead className="font-bold text-xs text-right w-10"></TableHead>
+                    <TableHead className="font-bold text-xs text-muted-foreground">Item Name</TableHead>
+                    <TableHead className="font-bold text-xs text-center w-24 text-muted-foreground">Price ({"\u20B9"})</TableHead>
+                    <TableHead className="font-bold text-xs text-center w-20 text-muted-foreground">Qty</TableHead>
+                    <TableHead className="font-bold text-xs text-center text-muted-foreground">Tax %</TableHead>
+                    <TableHead className="font-bold text-xs text-right text-muted-foreground">Total</TableHead>
+                    <TableHead className="font-bold text-xs text-right w-10 text-muted-foreground"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {invoiceItems.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12 text-gray-400 text-sm">
+                      <TableCell colSpan={6} className="text-center py-12 text-muted-foreground text-sm">
                         Invoice is empty. Select products from the left to populate the bill.
                       </TableCell>
                     </TableRow>
@@ -479,17 +479,17 @@ ${vendorShop.businessName}`;
                       const qty = parseFloat(item.quantity) || 0;
                       const totalLine = qty * item.unitPrice;
                       return (
-                        <TableRow key={idx}>
-                          <TableCell className="font-semibold text-gray-900 text-xs">
+                        <TableRow key={idx} className="hover:bg-muted/40 transition-colors">
+                          <TableCell className="font-semibold text-foreground text-xs">
                             {item.product.name} {item.product.actualValue ? `(${item.product.actualValue}${item.product.unit || ''})` : ''}
-                            {item.product.isService && <span className="ml-1.5 inline-block text-[9px] px-1 py-0.2 bg-indigo-50 text-indigo-600 rounded">Service</span>}
+                            {item.product.isService && <span className="ml-1.5 inline-block text-[9px] px-1 py-0.2 bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300 rounded">Service</span>}
                           </TableCell>
                           <TableCell className="text-center">
                             <Input
                               type="number"
                               value={item.unitPrice}
                               onChange={(e) => updateItemPrice(item.product.id, e.target.value)}
-                              className="h-8 text-center rounded-lg border-gray-200 text-xs px-1"
+                              className="h-8 text-center rounded-lg border-border bg-background text-foreground text-xs px-1"
                             />
                           </TableCell>
                           <TableCell className="text-center">
@@ -498,13 +498,13 @@ ${vendorShop.businessName}`;
                               min="1"
                               value={item.quantity}
                               onChange={(e) => updateItemQty(item.product.id, e.target.value)}
-                              className="h-8 text-center rounded-lg border-gray-200 text-xs px-1"
+                              className="h-8 text-center rounded-lg border-border bg-background text-foreground text-xs px-1"
                             />
                           </TableCell>
-                          <TableCell className="text-center text-xs font-semibold text-gray-600">{item.product.taxRate}%</TableCell>
-                          <TableCell className="text-right font-bold text-gray-900 text-xs">{"\u20B9"}{totalLine.toFixed(2)}</TableCell>
+                          <TableCell className="text-center text-xs font-semibold text-muted-foreground">{item.product.taxRate}%</TableCell>
+                          <TableCell className="text-right font-bold text-foreground text-xs">{"\u20B9"}{totalLine.toFixed(2)}</TableCell>
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="icon" onClick={() => removeItem(item.product.id)} className="h-7 w-7 rounded-full hover:bg-rose-50 text-gray-400 hover:text-rose-600">
+                            <Button variant="ghost" size="icon" onClick={() => removeItem(item.product.id)} className="h-7 w-7 rounded-full hover:bg-rose-500/10 text-muted-foreground hover:text-rose-600 dark:hover:text-rose-400">
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </TableCell>
@@ -517,11 +517,11 @@ ${vendorShop.businessName}`;
             </Card>
 
             {invoiceItems.length > 0 && (
-              <div className="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                <div className="text-sm font-semibold text-gray-700">
+              <div className="flex justify-between items-center bg-muted/50 p-4 rounded-2xl border border-border">
+                <div className="text-sm font-semibold text-foreground">
                   Total Items: {invoiceItems.reduce((acc, item) => acc + (parseFloat(item.quantity) || 0), 0)}
                 </div>
-                <Button onClick={() => setStep(3)} className="font-bold bg-black text-white hover:bg-gray-900 rounded-full px-6 flex items-center gap-1.5">
+                <Button onClick={() => setStep(3)} className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 flex items-center gap-1.5 shadow-sm">
                   Next: Financials <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -535,11 +535,11 @@ ${vendorShop.businessName}`;
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Bill summary and discount settings */}
           <div className="md:col-span-7 space-y-6">
-            <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden p-6 space-y-6">
-              <h3 className="font-bold text-lg text-gray-900">Tax & Discounts</h3>
+            <Card className="border border-border shadow-sm rounded-2xl bg-card text-card-foreground overflow-hidden p-6 space-y-6">
+              <h3 className="font-bold text-lg text-foreground">Tax & Discounts</h3>
 
               <div className="space-y-2">
-                <Label htmlFor="discountPercentage">Discount Percentage (%)</Label>
+                <Label htmlFor="discountPercentage" className="text-foreground">Discount Percentage (%)</Label>
                 <Input
                   id="discountPercentage"
                   type="number"
@@ -547,16 +547,16 @@ ${vendorShop.businessName}`;
                   max="100"
                   value={discountPercentage}
                   onChange={(e) => setDiscountPercentage(e.target.value)}
-                  className="rounded-xl border-gray-200"
+                  className="rounded-xl border-border bg-background text-foreground"
                 />
               </div>
 
-              <div className="space-y-3 pt-4 border-t border-gray-150">
-                <h4 className="font-bold text-sm text-gray-700">Payment Terms</h4>
+              <div className="space-y-3 pt-4 border-t border-border">
+                <h4 className="font-bold text-sm text-foreground">Payment Terms</h4>
                 <div className="space-y-1.5">
-                  <Label htmlFor="paymentTerms">Due Date Terms</Label>
+                  <Label htmlFor="paymentTerms" className="text-foreground">Due Date Terms</Label>
                   <Select value={paymentTerms} onValueChange={setPaymentTerms}>
-                    <SelectTrigger id="paymentTerms" className="rounded-xl border-gray-200">
+                    <SelectTrigger id="paymentTerms" className="rounded-xl border-border bg-background text-foreground">
                       <SelectValue placeholder="Select terms" />
                     </SelectTrigger>
                     <SelectContent>
@@ -571,7 +571,7 @@ ${vendorShop.businessName}`;
                 </div>
                 {paymentTerms === 'CUSTOM' && (
                   <div className="space-y-1.5">
-                    <Label htmlFor="customDueDays">Due in (days)</Label>
+                    <Label htmlFor="customDueDays" className="text-foreground">Due in (days)</Label>
                     <Input
                       id="customDueDays"
                       type="number"
@@ -579,18 +579,18 @@ ${vendorShop.businessName}`;
                       max="365"
                       value={customDueDays}
                       onChange={(e) => setCustomDueDays(e.target.value)}
-                      className="rounded-xl border-gray-200"
+                      className="rounded-xl border-border bg-background text-foreground"
                       placeholder="e.g. 60"
                     />
                   </div>
                 )}
               </div>
 
-              <div className="space-y-4 pt-4 border-t border-gray-150">
-                <h4 className="font-bold text-sm text-gray-700">Record Initial Payment</h4>
+              <div className="space-y-4 pt-4 border-t border-border">
+                <h4 className="font-bold text-sm text-foreground">Record Initial Payment</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="amountPaid">Amount Collected Today ({"\u20B9"})</Label>
+                    <Label htmlFor="amountPaid" className="text-foreground">Amount Collected Today ({"\u20B9"})</Label>
                     <Input
                       id="amountPaid"
                       type="number"
@@ -598,21 +598,21 @@ ${vendorShop.businessName}`;
                       max={totals.grandTotal}
                       value={amountPaid}
                       onChange={(e) => setAmountPaid(e.target.value)}
-                      className="rounded-xl border-gray-200 font-bold"
+                      className="rounded-xl border-border bg-background text-foreground font-bold"
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       onClick={() => setAmountPaid(totals.grandTotal.toString())}
-                      className="text-[10px] text-blue-600 hover:bg-blue-50/50 p-0 h-auto font-black flex items-center gap-0.5"
+                      className="text-[10px] text-blue-600 dark:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/50 p-0 h-auto font-black flex items-center gap-0.5"
                     >
                       Collect Full Amount
                     </Button>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="paymentMethod">Payment Method</Label>
+                    <Label htmlFor="paymentMethod" className="text-foreground">Payment Method</Label>
                     <Select value={paymentMethod} onValueChange={(val) => setPaymentMethod(val)}>
-                      <SelectTrigger id="paymentMethod" className="rounded-xl border-gray-200">
+                      <SelectTrigger id="paymentMethod" className="rounded-xl border-border bg-background text-foreground">
                         <SelectValue placeholder="Payment Method" />
                       </SelectTrigger>
                       <SelectContent>
@@ -625,20 +625,20 @@ ${vendorShop.businessName}`;
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="notes">Payment Notes</Label>
+                  <Label htmlFor="notes" className="text-foreground">Payment Notes</Label>
                   <Input
                     id="notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Reference num, invoice note..."
-                    className="rounded-xl border-gray-200"
+                    className="rounded-xl border-border bg-background text-foreground"
                   />
                 </div>
               </div>
             </Card>
 
             <div className="flex gap-4">
-              <Button variant="outline" onClick={() => setStep(2)} className="rounded-full border-gray-200 px-6 font-bold flex items-center gap-1.5">
+              <Button variant="outline" onClick={() => setStep(2)} className="rounded-full border-border px-6 font-bold flex items-center gap-1.5 text-foreground hover:bg-muted">
                 <ArrowLeft className="h-4 w-4" /> Back to Items
               </Button>
             </div>
@@ -646,36 +646,36 @@ ${vendorShop.businessName}`;
 
           {/* Checkout Totals Card */}
           <div className="md:col-span-5 space-y-6">
-            <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden p-6 space-y-4">
-              <h3 className="font-bold text-gray-700 text-sm uppercase tracking-wider pb-2 border-b border-gray-100">Bill Breakdown</h3>
+            <Card className="border border-border shadow-sm rounded-2xl bg-card text-card-foreground overflow-hidden p-6 space-y-4">
+              <h3 className="font-bold text-muted-foreground text-sm uppercase tracking-wider pb-2 border-b border-border">Bill Breakdown</h3>
 
               <div className="space-y-2">
-                <div className="flex justify-between text-sm text-gray-500">
+                <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Subtotal</span>
-                  <span>{"\u20B9"}{totals.subtotal.toFixed(2)}</span>
+                  <span className="text-foreground">{"\u20B9"}{totals.subtotal.toFixed(2)}</span>
                 </div>
                 {totals.totalDiscount > 0 && (
-                  <div className="flex justify-between text-sm text-rose-600 font-medium">
+                  <div className="flex justify-between text-sm text-rose-600 dark:text-rose-400 font-medium">
                     <span>Discount ({discountPercentage}%)</span>
                     <span>-{"\u20B9"}{totals.totalDiscount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm text-gray-500">
+                <div className="flex justify-between text-sm text-muted-foreground">
                   <span>GST Taxes</span>
-                  <span>{"\u20B9"}{totals.totalTax.toFixed(2)}</span>
+                  <span className="text-foreground">{"\u20B9"}{totals.totalTax.toFixed(2)}</span>
                 </div>
-                <div className="pt-2 border-t border-gray-150 flex justify-between font-black text-gray-900 text-lg">
+                <div className="pt-2 border-t border-border flex justify-between font-black text-foreground text-lg">
                   <span>Grand Total</span>
                   <span>{"\u20B9"}{totals.grandTotal.toFixed(2)}</span>
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl space-y-2 text-xs">
-                <div className="flex justify-between font-semibold text-blue-800">
+              <div className="bg-blue-50 border border-blue-100 dark:bg-blue-950/40 dark:border-blue-900 p-4 rounded-xl space-y-2 text-xs">
+                <div className="flex justify-between font-semibold text-blue-800 dark:text-blue-200">
                   <span>Amount Paid:</span>
                   <span>&#8377;{parseFloat(amountPaid || 0).toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between font-bold text-blue-900 border-t border-blue-200/50 pt-1.5">
+                <div className="flex justify-between font-bold text-blue-900 dark:text-blue-100 border-t border-blue-200/50 dark:border-blue-800/50 pt-1.5">
                   <span>Balance Outstanding:</span>
                   <span>&#8377;{(totals.grandTotal - parseFloat(amountPaid || 0)).toFixed(2)}</span>
                 </div>
@@ -688,7 +688,7 @@ ${vendorShop.businessName}`;
                 const overLimit = newCreditUsed > selectedCustomer.creditLimit;
                 if (!overLimit) return null;
                 return (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
+                  <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-900 rounded-xl p-3 text-xs text-amber-800 dark:text-amber-200">
                     <p className="font-bold">⚠ Credit Limit Warning</p>
                     <p className="mt-0.5">
                       This sale puts {selectedCustomer.name} at &#8377;{newCreditUsed.toFixed(0)} credit used,
@@ -702,7 +702,7 @@ ${vendorShop.businessName}`;
               <Button
                 onClick={handleSaveInvoice}
                 disabled={loading}
-                className="w-full font-bold bg-black text-white hover:bg-gray-900 rounded-full py-6 flex items-center justify-center gap-2"
+                className="w-full font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full py-6 flex items-center justify-center gap-2 shadow-sm"
               >
                 {loading ? <RefreshCw className="h-5 w-5 animate-spin" /> : <FileText className="h-5 w-5" />}
                 Generate & Save Bill
@@ -714,60 +714,60 @@ ${vendorShop.businessName}`;
 
       {/* Step 4: Dispatch Actions (Print, Share, WhatsApp, QR Code) */}
       {step === 4 && savedInvoice && (
-        <Card className="border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden p-8 space-y-8">
+        <Card className="border border-border shadow-sm rounded-2xl bg-card text-card-foreground overflow-hidden p-8 space-y-8">
           <div className="text-center space-y-2 max-w-md mx-auto">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-green-50 text-green-600 border border-green-100 mb-2">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800 mb-2">
               <Check className="h-6 w-6" />
             </div>
-            <h2 className="text-2xl font-black text-gray-900">Invoice {savedInvoice.invoiceNum} Saved!</h2>
-            <p className="text-sm text-gray-500">The invoice has been logged. Use the options below to share it or collect payments.</p>
+            <h2 className="text-2xl font-black text-foreground">Invoice {savedInvoice.invoiceNum} Saved!</h2>
+            <p className="text-sm text-muted-foreground">The invoice has been logged. Use the options below to share it or collect payments.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-border">
             {/* WhatsApp sending */}
-            <Card className="border border-gray-100 shadow-none rounded-xl p-6 text-center space-y-4 hover:border-green-300 transition-colors">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600">
+            <Card className="border border-border shadow-none rounded-xl p-6 text-center space-y-4 hover:border-emerald-500/50 bg-card text-card-foreground transition-colors">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
                 <MessageSquare className="h-5 w-5" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-gray-900">Send Invoice via WhatsApp</h4>
-                <p className="text-xs text-gray-500 mt-1">Open WhatsApp Web to send a templated message to {selectedCustomer.name}.</p>
+                <h4 className="font-bold text-sm text-foreground">Send Invoice via WhatsApp</h4>
+                <p className="text-xs text-muted-foreground mt-1">Open WhatsApp Web to send a templated message to {selectedCustomer.name}.</p>
               </div>
               <a
                 href={getWhatsAppLink()}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex w-full items-center justify-center font-bold bg-green-600 hover:bg-green-700 text-white rounded-full h-10 text-sm gap-1.5 transition-colors"
+                className="inline-flex w-full items-center justify-center font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-full h-10 text-sm gap-1.5 transition-colors shadow-sm"
               >
                 Send WhatsApp
               </a>
             </Card>
 
             {/* Print and Save */}
-            <Card className="border border-gray-100 shadow-none rounded-xl p-6 text-center space-y-4 hover:border-blue-300 transition-colors">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <Card className="border border-border shadow-none rounded-xl p-6 text-center space-y-4 hover:border-blue-500/50 bg-card text-card-foreground transition-colors">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
                 <Printer className="h-5 w-5" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-gray-900">Print or Download PDF</h4>
-                <p className="text-xs text-gray-500 mt-1">Open a printable browser view of the bill statement to save it as a PDF or print it.</p>
+                <h4 className="font-bold text-sm text-foreground">Print or Download PDF</h4>
+                <p className="text-xs text-muted-foreground mt-1">Open a printable browser view of the bill statement to save it as a PDF or print it.</p>
               </div>
               <Button
                 onClick={() => window.print()}
-                className="w-full font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-full h-10 text-sm gap-1.5"
+                className="w-full font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-full h-10 text-sm gap-1.5 shadow-sm"
               >
                 Print Invoice
               </Button>
             </Card>
 
             {/* QR Code Scan and Pay */}
-            <Card className="border border-gray-100 shadow-none rounded-xl p-6 text-center space-y-4 hover:border-purple-300 transition-colors">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+            <Card className="border border-border shadow-none rounded-xl p-6 text-center space-y-4 hover:border-purple-500/50 bg-card text-card-foreground transition-colors">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
                 <QrCode className="h-5 w-5" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-gray-900">UPI Scan & Pay QR</h4>
-                <p className="text-xs text-gray-500 mt-1">Generate a quick QR code for this bill to let the customer scan and pay with any UPI app.</p>
+                <h4 className="font-bold text-sm text-foreground">UPI Scan & Pay QR</h4>
+                <p className="text-xs text-muted-foreground mt-1">Generate a quick QR code for this bill to let the customer scan and pay with any UPI app.</p>
               </div>
               {vendorShop?.upiId ? (
                 savedInvoice.grandTotal - savedInvoice.amountPaid > 0 ? (
@@ -777,29 +777,29 @@ ${vendorShop.businessName}`;
                         Show QR Code
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="rounded-2xl max-w-xs text-center p-6 bg-white">
+                    <DialogContent className="rounded-2xl max-w-xs text-center p-6 bg-card text-card-foreground border border-border">
                       <DialogHeader>
-                        <DialogTitle className="text-lg font-bold text-gray-900">Scan & Pay</DialogTitle>
-                        <DialogDescription className="text-xs">
+                        <DialogTitle className="text-lg font-bold text-foreground">Scan & Pay</DialogTitle>
+                        <DialogDescription className="text-xs text-muted-foreground">
                           Scan using GPay, PhonePe, Paytm, etc.
                         </DialogDescription>
                       </DialogHeader>
                       <div className="my-4 flex justify-center">
                         {qrCodeUrl && <img src={qrCodeUrl} alt="UPI Payment QR Code" className="h-44 w-44 object-contain" />}
                       </div>
-                      <div className="bg-purple-50 p-2.5 rounded-xl border border-purple-100">
-                        <p className="text-xs font-bold text-purple-900">Outstanding: {"\u20B9"}{(savedInvoice.grandTotal - savedInvoice.amountPaid).toFixed(2)}</p>
-                        <p className="text-[10px] text-purple-600 mt-0.5">UPI: {vendorShop.upiId}</p>
+                      <div className="bg-purple-50 dark:bg-purple-950/60 p-2.5 rounded-xl border border-purple-100 dark:border-purple-800">
+                        <p className="text-xs font-bold text-purple-900 dark:text-purple-200">Outstanding: {"\u20B9"}{(savedInvoice.grandTotal - savedInvoice.amountPaid).toFixed(2)}</p>
+                        <p className="text-[10px] text-purple-600 dark:text-purple-400 mt-0.5">UPI: {vendorShop.upiId}</p>
                       </div>
                     </DialogContent>
                   </Dialog>
                 ) : (
-                  <span className="text-xs text-green-600 font-bold bg-green-50 px-3 py-2 rounded-full border border-green-100 block">Bill Fully Settled</span>
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-3 py-2 rounded-full border border-emerald-200 dark:border-emerald-800 block">Bill Fully Settled</span>
                 )
               ) : (
                 <div className="space-y-2">
-                  <p className="text-[10px] text-amber-600">Add UPI ID in Settings to enable QR.</p>
-                  <Link href="/settings" className="inline-flex w-full items-center justify-center font-bold border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-full h-10 text-sm">
+                  <p className="text-[10px] text-amber-600 dark:text-amber-400">Add UPI ID in Settings to enable QR.</p>
+                  <Link href="/settings" className="inline-flex w-full items-center justify-center font-bold border border-border text-foreground hover:bg-muted rounded-full h-10 text-sm">
                     Configure UPI
                   </Link>
                 </div>
@@ -807,11 +807,11 @@ ${vendorShop.businessName}`;
             </Card>
           </div>
 
-          <div className="flex justify-between pt-6 border-t border-gray-100">
-            <Link href="/invoices" className="font-bold border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full px-6 py-2.5 text-sm flex items-center gap-1.5">
+          <div className="flex justify-between pt-6 border-t border-border">
+            <Link href="/invoices" className="font-bold border border-border hover:bg-muted text-foreground rounded-full px-6 py-2.5 text-sm flex items-center gap-1.5">
               <ArrowLeft className="h-4 w-4" /> Go to Invoices List
             </Link>
-            <Button onClick={() => { setStep(1); resetForm(); setInvoiceItems([]); setSavedInvoice(null); setDiscountPercentage('0'); setAmountPaid('0'); }} className="font-bold bg-black text-white hover:bg-gray-900 rounded-full px-6 py-2.5 text-sm">
+            <Button onClick={() => { setStep(1); resetForm(); setInvoiceItems([]); setSavedInvoice(null); setDiscountPercentage('0'); setAmountPaid('0'); }} className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 py-2.5 text-sm shadow-sm">
               Create Another Invoice
             </Button>
           </div>
@@ -833,64 +833,64 @@ ${vendorShop.businessName}`;
 
       {/* Inline Quick Add Customer Dialog */}
       <Dialog open={isCustomerModalOpen} onOpenChange={setIsCustomerModalOpen}>
-        <DialogContent className="rounded-2xl sm:max-w-100 bg-white">
+        <DialogContent className="rounded-2xl sm:max-w-100 bg-card text-card-foreground border border-border">
           <form onSubmit={handleCreateCustomer}>
             <DialogHeader>
-              <DialogTitle className="text-lg font-bold text-gray-900">Add Customer Inline</DialogTitle>
-              <DialogDescription className="text-xs">
+              <DialogTitle className="text-lg font-bold text-foreground">Add Customer Inline</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
                 Create a quick profile to link to this invoice.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-3">
               <div className="space-y-1.5">
-                <Label htmlFor="custName">Customer Name</Label>
+                <Label htmlFor="custName" className="text-foreground">Customer Name</Label>
                 <Input
                   id="custName"
                   value={newCustomerForm.name}
                   onChange={(e) => setNewCustomerForm(prev => ({ ...prev, name: e.target.value }))}
                   required
                   placeholder="e.g. Rahul Sharma"
-                  className="rounded-xl border-gray-200"
+                  className="rounded-xl border-border bg-background text-foreground"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="custPhone">Mobile Number</Label>
+                <Label htmlFor="custPhone" className="text-foreground">Mobile Number</Label>
                 <Input
                   id="custPhone"
                   value={newCustomerForm.phone}
                   onChange={(e) => setNewCustomerForm(prev => ({ ...prev, phone: e.target.value }))}
                   required
                   placeholder="e.g. 9876543210"
-                  className="rounded-xl border-gray-200"
+                  className="rounded-xl border-border bg-background text-foreground"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="custEmail">Email Address (Optional)</Label>
+                <Label htmlFor="custEmail" className="text-foreground">Email Address (Optional)</Label>
                 <Input
                   id="custEmail"
                   type="email"
                   value={newCustomerForm.email}
                   onChange={(e) => setNewCustomerForm(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="e.g. rahul@gmail.com"
-                  className="rounded-xl border-gray-200"
+                  className="rounded-xl border-border bg-background text-foreground"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="custAddress">Address (Optional)</Label>
+                <Label htmlFor="custAddress" className="text-foreground">Address (Optional)</Label>
                 <Input
                   id="custAddress"
                   value={newCustomerForm.address}
                   onChange={(e) => setNewCustomerForm(prev => ({ ...prev, address: e.target.value }))}
                   placeholder="e.g. Vashi, Mumbai"
-                  className="rounded-xl border-gray-200"
+                  className="rounded-xl border-border bg-background text-foreground"
                 />
               </div>
             </div>
-            <DialogFooter className="mt-4 gap-2 pt-3 border-t border-gray-100">
-              <Button type="button" variant="outline" onClick={() => setIsCustomerModalOpen(false)} className="rounded-full border-gray-200 px-5 font-bold">
+            <DialogFooter className="mt-4 gap-2 pt-3 border-t border-border">
+              <Button type="button" variant="outline" onClick={() => setIsCustomerModalOpen(false)} className="rounded-full border-border px-5 font-bold text-foreground hover:bg-muted">
                 Cancel
               </Button>
-              <Button type="submit" className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-5">
+              <Button type="submit" className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-5 shadow-sm">
                 Create Customer
               </Button>
             </DialogFooter>

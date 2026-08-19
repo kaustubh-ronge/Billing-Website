@@ -8,14 +8,14 @@ import {
 } from 'lucide-react';
 
 function iconFor(action) {
-  if (action.startsWith('invoice')) return { Icon: FileText, cls: 'bg-blue-50 text-blue-600' };
-  if (action.startsWith('payment')) return { Icon: CreditCard, cls: 'bg-emerald-50 text-emerald-600' };
-  if (action.startsWith('customer')) return { Icon: Users, cls: 'bg-violet-50 text-violet-600' };
-  if (action.startsWith('product')) return { Icon: Package, cls: 'bg-amber-50 text-amber-600' };
-  if (action.startsWith('role')) return { Icon: ShieldCheck, cls: 'bg-indigo-50 text-indigo-600' };
-  if (action.startsWith('employee') || action.startsWith('invitation')) return { Icon: UserPlus, cls: 'bg-teal-50 text-teal-600' };
-  if (action.startsWith('branch') || action.startsWith('department') || action.startsWith('team')) return { Icon: Building, cls: 'bg-orange-50 text-orange-600' };
-  return { Icon: Activity, cls: 'bg-gray-100 text-gray-600' };
+  if (action.startsWith('invoice')) return { Icon: FileText, cls: 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400' };
+  if (action.startsWith('payment')) return { Icon: CreditCard, cls: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400' };
+  if (action.startsWith('customer')) return { Icon: Users, cls: 'bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400' };
+  if (action.startsWith('product')) return { Icon: Package, cls: 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400' };
+  if (action.startsWith('role')) return { Icon: ShieldCheck, cls: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400' };
+  if (action.startsWith('employee') || action.startsWith('invitation')) return { Icon: UserPlus, cls: 'bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400' };
+  if (action.startsWith('branch') || action.startsWith('department') || action.startsWith('team')) return { Icon: Building, cls: 'bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400' };
+  return { Icon: Activity, cls: 'bg-muted text-muted-foreground' };
 }
 
 function timeAgo(date) {

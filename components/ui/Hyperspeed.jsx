@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { useTheme } from 'next-themes';
 
 export default function Hyperspeed({
   effectOptions = {},
@@ -8,8 +9,34 @@ export default function Hyperspeed({
   onSlowDown = () => {},
 }) {
   const containerRef = useRef(null);
+  const { resolvedTheme } = useTheme();
 
-  // Merge default options with user options & updated tailored billing website colors
+  // Dark & Light Mode Preset Palettes
+  const darkColors = {
+    roadColor: 0x080808,
+    islandColor: 0x0a0a0a,
+    background: 0x000000,
+    shoulderLines: 0xFFFFFF,
+    brokenLines: 0xFFFFFF,
+    leftCars: [0xD856BF, 0x6750A2, 0xC247AC],
+    rightCars: [0x03B3C3, 0x0E5EA5, 0x324555],
+    sticks: 0x03B3C3,
+  };
+
+  const lightColors = {
+    roadColor: 0xf1f5f9,
+    islandColor: 0xe2e8f0,
+    background: 0xffffff,
+    shoulderLines: 0x0284c7,
+    brokenLines: 0x4f46e5,
+    leftCars: [0xdb2777, 0x9333ea, 0xc026d3],
+    rightCars: [0x0284c7, 0x2563eb, 0x0d9488],
+    sticks: 0x0284c7,
+  };
+
+  const currentThemeColors = resolvedTheme === 'light' ? lightColors : darkColors;
+
+  // Exact configuration options as requested
   const options = {
     distortion: 'turbulentDistortion',
     length: 400,
@@ -34,27 +61,9 @@ export default function Hyperspeed({
     carWidthPercentage: [0.3, 0.5],
     carShiftX: [-0.8, 0.8],
     carFloorSeparation: [0, 5],
-    colors: {
-      roadColor: 0x080c14,
-      islandColor: 0x0f172a,
-      background: 0x020617,
-      shoulderLines: 0x38bdf8,
-      brokenLines: 0x818cf8,
-      leftCars: [0x3b82f6, 0x60a5fa, 0x1d4ed8],
-      rightCars: [0x8b5cf6, 0xa855f7, 0x6366f1],
-      sticks: 0x06b6d4,
-    },
     ...effectOptions,
-    // Deep merge colors if provided partially
     colors: {
-      roadColor: 0x080c14,
-      islandColor: 0x0f172a,
-      background: 0x020617,
-      shoulderLines: 0x38bdf8,
-      brokenLines: 0x818cf8,
-      leftCars: [0x3b82f6, 0x60a5fa, 0x1d4ed8],
-      rightCars: [0x8b5cf6, 0xa855f7, 0x6366f1],
-      sticks: 0x06b6d4,
+      ...currentThemeColors,
       ...(effectOptions.colors || {}),
     },
   };
@@ -66,26 +75,25 @@ export default function Hyperspeed({
     const width = container.clientWidth || window.innerWidth;
     const height = container.clientHeight || window.innerHeight;
 
-    // Scene Setup
+    // Scene & Fog Setup
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(options.colors.background, 0.0025);
     scene.background = new THREE.Color(options.colors.background);
 
-    // Camera
+    // Camera Setup
     const camera = new THREE.PerspectiveCamera(options.fov, width / height, 0.1, options.length);
     camera.position.set(0, 3, 10);
 
-    // Renderer
+    // WebGL Renderer Setup
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    // Group for objects
     const roadGroup = new THREE.Group();
     scene.add(roadGroup);
 
-    // Road Surface Geometry
+    // 1. Main Road Mesh
     const roadGeo = new THREE.PlaneGeometry(options.roadWidth * 2 + options.islandWidth, options.length, 30, 100);
     const roadMat = new THREE.MeshBasicMaterial({
       color: options.colors.roadColor,
@@ -96,7 +104,7 @@ export default function Hyperspeed({
     roadMesh.position.z = -options.length / 2;
     roadGroup.add(roadMesh);
 
-    // Island Divider in Center
+    // 2. Island Divider (Center)
     const islandGeo = new THREE.PlaneGeometry(options.islandWidth, options.length);
     const islandMat = new THREE.MeshBasicMaterial({
       color: options.colors.islandColor,
@@ -108,21 +116,23 @@ export default function Hyperspeed({
     islandMesh.position.z = -options.length / 2;
     roadGroup.add(islandMesh);
 
-    // Light Trails Creation Helper
+    // 3. Moving Car Lights Creation
     const createCarLights = (isLeft) => {
       const lightsGroup = new THREE.Group();
       const count = options.lightPairsPerRoadWay;
-      const colors = isLeft ? options.colors.leftCars : options.colors.rightCars;
+      const colorsList = isLeft ? options.colors.leftCars : options.colors.rightCars;
       const speedRange = isLeft ? options.movingAwaySpeed : options.movingCloserSpeed;
-      const posXOffset = isLeft ? -(options.islandWidth / 2 + options.roadWidth / 2) : (options.islandWidth / 2 + options.roadWidth / 2);
+      const posXOffset = isLeft 
+        ? -(options.islandWidth / 2 + options.roadWidth / 2) 
+        : (options.islandWidth / 2 + options.roadWidth / 2);
 
       const items = [];
 
       for (let i = 0; i < count; i++) {
-        const lightColor = colors[Math.floor(Math.random() * colors.length)];
+        const lightColor = colorsList[Math.floor(Math.random() * colorsList.length)];
         const length = THREE.MathUtils.randFloat(options.carLightsLength[0], options.carLightsLength[1]);
         const radius = THREE.MathUtils.randFloat(options.carLightsRadius[0], options.carLightsRadius[1]);
-        
+
         const geo = new THREE.CylinderGeometry(radius, radius, length, 8);
         geo.rotateX(Math.PI / 2);
 
@@ -143,7 +153,7 @@ export default function Hyperspeed({
         mesh.position.set(x, y, z);
         lightsGroup.add(mesh);
 
-        items.push({ mesh, speed, length, initialZ: z });
+        items.push({ mesh, speed, initialZ: z });
       }
 
       return { group: lightsGroup, items };
@@ -154,11 +164,15 @@ export default function Hyperspeed({
     roadGroup.add(leftLights.group);
     roadGroup.add(rightLights.group);
 
-    // Side Light Sticks
+    // 4. Side Light Sticks
     const createSideSticks = () => {
       const sticksGroup = new THREE.Group();
       const count = options.totalSideLightSticks;
-      const stickMat = new THREE.MeshBasicMaterial({ color: options.colors.sticks, transparent: true, opacity: 0.8 });
+      const stickMat = new THREE.MeshBasicMaterial({ 
+        color: options.colors.sticks, 
+        transparent: true, 
+        opacity: 0.8 
+      });
 
       for (let i = 0; i < count; i++) {
         const h = THREE.MathUtils.randFloat(options.lightStickHeight[0], options.lightStickHeight[1]);
@@ -179,22 +193,19 @@ export default function Hyperspeed({
 
     roadGroup.add(createSideSticks());
 
-    // Mouse Interaction / Speed Up Effect
-    let isMouseDown = false;
+    // Interactive Speed-Up Handlers
     let targetFov = options.fov;
     let currentFov = options.fov;
     let currentSpeedMult = 1;
     let targetSpeedMult = 1;
 
     const handleMouseDown = () => {
-      isMouseDown = true;
       targetFov = options.fovSpeedUp;
       targetSpeedMult = options.speedUp;
       onSpeedUp();
     };
 
     const handleMouseUp = () => {
-      isMouseDown = false;
       targetFov = options.fov;
       targetSpeedMult = 1;
       onSlowDown();
@@ -205,7 +216,7 @@ export default function Hyperspeed({
     window.addEventListener('touchstart', handleMouseDown);
     window.addEventListener('touchend', handleMouseUp);
 
-    // Window Resize Handler
+    // Resize Handler
     const handleResize = () => {
       if (!container) return;
       const w = container.clientWidth || window.innerWidth;
@@ -217,21 +228,21 @@ export default function Hyperspeed({
 
     window.addEventListener('resize', handleResize);
 
-    // Animation Loop
+    // Render Animation Loop
     let animationFrameId;
     const clock = new THREE.Clock();
 
     const animate = () => {
       const delta = clock.getDelta();
 
-      // Smooth FOV Transition on Speed Up
+      // Smooth FOV interpolation on click & hold
       currentFov += (targetFov - currentFov) * 0.1;
       camera.fov = currentFov;
       camera.updateProjectionMatrix();
 
       currentSpeedMult += (targetSpeedMult - currentSpeedMult) * 0.1;
 
-      // Move Left Car Lights (Away)
+      // Animate Left Car Lights
       leftLights.items.forEach(({ mesh, speed }) => {
         mesh.position.z -= speed * delta * currentSpeedMult;
         if (mesh.position.z < -options.length) {
@@ -239,7 +250,7 @@ export default function Hyperspeed({
         }
       });
 
-      // Move Right Car Lights (Closer)
+      // Animate Right Car Lights
       rightLights.items.forEach(({ mesh, speed }) => {
         mesh.position.z -= speed * delta * currentSpeedMult;
         if (mesh.position.z > 0) {
@@ -247,7 +258,7 @@ export default function Hyperspeed({
         }
       });
 
-      // Gentle Camera Float
+      // Camera Floating Effect
       const time = clock.getElapsedTime();
       camera.position.x = Math.sin(time * 0.5) * 0.5;
       camera.position.y = 3 + Math.cos(time * 0.7) * 0.2;
@@ -258,7 +269,7 @@ export default function Hyperspeed({
 
     animate();
 
-    // Cleanup on Unmount
+    // Cleanup
     return () => {
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
@@ -272,12 +283,12 @@ export default function Hyperspeed({
       }
       renderer.dispose();
     };
-  }, []);
+  }, [resolvedTheme]);
 
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 w-full h-full overflow-hidden pointer-events-auto"
+      className="absolute inset-0 w-full h-full overflow-hidden pointer-events-auto z-0"
       style={{ minHeight: '100%' }}
     />
   );

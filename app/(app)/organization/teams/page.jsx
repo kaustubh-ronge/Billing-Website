@@ -61,7 +61,7 @@ export default function TeamsPage() {
           {teams.map((t) => (
             <div key={t.id} className="bg-card border border-border rounded-2xl p-5">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 shrink-0"><UsersRound className="h-4 w-4" /></div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 shrink-0"><UsersRound className="h-4 w-4" /></div>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-foreground truncate">{t.name}</p>
                   <p className="text-[11px] text-muted-foreground truncate">{t.department?.name || 'No department'}</p>
@@ -72,7 +72,7 @@ export default function TeamsPage() {
               </div>
               <div className="flex items-center gap-1 mt-4 pt-3 border-t border-border">
                 <Button variant="ghost" size="sm" onClick={() => setEditing(t)} className="rounded-md gap-1.5 text-xs"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
-                <Button variant="ghost" size="sm" onClick={() => remove(t)} className="rounded-md gap-1.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 ml-auto"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
+                <Button variant="ghost" size="sm" onClick={() => remove(t)} className="rounded-md gap-1.5 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/60 ml-auto"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
               </div>
             </div>
           ))}

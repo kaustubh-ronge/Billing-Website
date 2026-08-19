@@ -17,10 +17,10 @@ import OverrideEditor from '@/components/organization/OverrideEditor';
 const NONE = '__none__';
 
 const STATUS_META = {
-  ACTIVE: { label: 'Active', cls: 'bg-emerald-100 text-emerald-700', icon: CircleCheck },
-  SUSPENDED: { label: 'Suspended', cls: 'bg-amber-100 text-amber-700', icon: CircleSlash },
-  DISABLED: { label: 'Disabled', cls: 'bg-rose-100 text-rose-700', icon: Ban },
-  PENDING: { label: 'Pending', cls: 'bg-blue-100 text-blue-700', icon: Clock },
+  ACTIVE: { label: 'Active', cls: 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800', icon: CircleCheck },
+  SUSPENDED: { label: 'Suspended', cls: 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800', icon: CircleSlash },
+  DISABLED: { label: 'Disabled', cls: 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800', icon: Ban },
+  PENDING: { label: 'Pending', cls: 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800', icon: Clock },
 };
 
 function Avatar({ name }) {
@@ -128,7 +128,7 @@ export default function EmployeesPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-sm text-foreground truncate">{m.name}</span>
                       {m.isOwner && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300">
                           <Crown className="h-2.5 w-2.5" /> Owner
                         </span>
                       )}

@@ -220,7 +220,7 @@ export default function SubscriptionPlansPage() {
                               type="number" 
                               value={editPriceValue} 
                               onChange={(e) => setEditPriceValue(e.target.value)} 
-                              className="h-7 w-20 text-xs px-2 rounded-lg border-border font-bold text-gray-900"
+                              className="h-7 w-20 text-xs px-2 rounded-lg border-border font-bold text-foreground bg-background"
                               min="0"
                             />
                             <Button 

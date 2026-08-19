@@ -53,11 +53,11 @@ export default function BranchesPage() {
             <div key={b.id} className="bg-card border border-border rounded-2xl p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-orange-600 shrink-0"><Building className="h-4 w-4" /></div>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 shrink-0"><Building className="h-4 w-4" /></div>
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-foreground truncate flex items-center gap-1.5">
                       {b.name}
-                      {b.isHeadquarters && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700">HQ</span>}
+                      {b.isHeadquarters && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800">HQ</span>}
                     </p>
                     {b.address && <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1"><MapPin className="h-2.5 w-2.5" /> {b.address}</p>}
                   </div>
@@ -70,7 +70,7 @@ export default function BranchesPage() {
               </div>
               <div className="flex items-center gap-1 mt-4 pt-3 border-t border-border">
                 <Button variant="ghost" size="sm" onClick={() => setEditing(b)} className="rounded-md gap-1.5 text-xs"><Pencil className="h-3.5 w-3.5" /> Edit</Button>
-                <Button variant="ghost" size="sm" onClick={() => remove(b)} className="rounded-md gap-1.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 ml-auto"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
+                <Button variant="ghost" size="sm" onClick={() => remove(b)} className="rounded-md gap-1.5 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/60 ml-auto"><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
               </div>
             </div>
           ))}

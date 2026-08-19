@@ -232,19 +232,19 @@ ${vendorShop.businessName}`;
     switch (status) {
       case 'PAID':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-green-50 text-green-700 border border-green-100">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
             <CheckCircle className="h-3 w-3" /> PAID
           </span>
         );
       case 'PARTIAL':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-50 text-amber-700 border border-amber-100">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800">
             <AlertCircle className="h-3 w-3" /> PARTIAL
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-50 text-rose-700 border border-rose-100">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800">
             <HelpCircle className="h-3 w-3" /> UNPAID
           </span>
         );
@@ -294,12 +294,12 @@ ${vendorShop.businessName}`;
                 toast.error('Failed to export invoices');
               }
             }}
-            className="rounded-lg border-gray-200 font-bold text-sm flex items-center gap-1.5"
+            className="rounded-lg border-border font-bold text-sm flex items-center gap-1.5 bg-background text-foreground hover:bg-muted"
           >
             <Download className="h-4 w-4" /> Export CSV
           </Button>
           {can('invoices:create') && (
-            <Link href="/invoices/new" className="font-bold bg-black text-white hover:bg-gray-900 rounded-lg px-6 py-2.5 text-sm flex items-center gap-2">
+            <Link href="/invoices/new" className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-2.5 text-sm flex items-center gap-2 shadow-sm">
               <Plus className="h-4 w-4" /> Create Bill
             </Link>
           )}
@@ -353,60 +353,60 @@ ${vendorShop.businessName}`;
         {/* Mobile card list (hidden on md+) */}
         <div className="md:hidden space-y-3">
           {loading ? (
-            <div className="text-center py-10 text-gray-500">
-              <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-gray-400" />
+            <div className="text-center py-10 text-muted-foreground">
+              <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-muted-foreground" />
               Loading invoices...
             </div>
           ) : invoices.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
-              <FileText className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+            <div className="text-center py-12 text-muted-foreground">
+              <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
               No invoices found.
             </div>
           ) : (
             invoices.map((inv) => {
               const bal = inv.grandTotal - inv.amountPaid;
               return (
-                <div key={inv.id} className="bg-white rounded-2xl border border-gray-150 shadow-sm p-4 space-y-3">
+                <div key={inv.id} className="bg-card text-card-foreground rounded-2xl border border-border shadow-sm p-4 space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <div className="font-bold text-gray-900 text-sm">{inv.invoiceNum}</div>
-                      <div className="font-semibold text-gray-700 text-sm mt-0.5">{inv.customer.name}</div>
-                      <div className="text-xs text-gray-400">{inv.customer.phone}</div>
+                      <div className="font-bold text-foreground text-sm">{inv.invoiceNum}</div>
+                      <div className="font-semibold text-foreground text-sm mt-0.5">{inv.customer.name}</div>
+                      <div className="text-xs text-muted-foreground">{inv.customer.phone}</div>
                     </div>
                     <div className="flex flex-col items-end gap-1.5">
                       {getStatusBadge(inv.status)}
-                      <span className="text-xs text-gray-400">{new Date(inv.issuedAt).toLocaleDateString()}</span>
+                      <span className="text-xs text-muted-foreground">{new Date(inv.issuedAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 bg-gray-50 rounded-xl p-3 text-xs">
+                  <div className="grid grid-cols-3 gap-2 bg-muted/50 rounded-xl p-3 text-xs border border-border">
                     <div>
-                      <div className="text-gray-400 font-medium mb-0.5">Total</div>
-                      <div className="font-bold text-gray-900">{"\u20B9"}{inv.grandTotal.toFixed(2)}</div>
+                      <div className="text-muted-foreground font-medium mb-0.5">Total</div>
+                      <div className="font-bold text-foreground">{"\u20B9"}{inv.grandTotal.toFixed(2)}</div>
                     </div>
                     <div>
-                      <div className="text-gray-400 font-medium mb-0.5">Paid</div>
-                      <div className="font-bold text-green-600">{"\u20B9"}{inv.amountPaid.toFixed(2)}</div>
+                      <div className="text-muted-foreground font-medium mb-0.5">Paid</div>
+                      <div className="font-bold text-emerald-600 dark:text-emerald-400">{"\u20B9"}{inv.amountPaid.toFixed(2)}</div>
                     </div>
                     <div>
-                      <div className="text-gray-400 font-medium mb-0.5">Due</div>
-                      <div className={`font-bold ${bal > 0 ? 'text-rose-600' : 'text-green-600'}`}>{"\u20B9"}{bal.toFixed(2)}</div>
+                      <div className="text-muted-foreground font-medium mb-0.5">Due</div>
+                      <div className={`font-bold ${bal > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>{"\u20B9"}{bal.toFixed(2)}</div>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 pt-1">
                     {bal > 0 && !inv.isDeleted && can('payments:record') && (
                       <Button size="sm" variant="outline" onClick={() => openPaymentDialog(inv)}
-                        className="h-7 rounded-full border-gray-200 font-bold text-xs flex items-center gap-1 px-2.5">
+                        className="h-7 rounded-full border-border font-bold text-xs flex items-center gap-1 px-2.5 text-foreground hover:bg-muted">
                         <DollarSign className="h-3 w-3" /> Record
                       </Button>
                     )}
                     {bal > 0 && !inv.isDeleted && can('reminders:send') && (
                       <a href={getReminderLink(inv)} target="_blank" rel="noreferrer"
-                        className="inline-flex h-7 items-center px-2.5 border border-amber-200 hover:bg-amber-50 text-amber-700 rounded-full font-bold text-xs gap-1">
+                        className="inline-flex h-7 items-center px-2.5 border border-amber-200 dark:border-amber-900 hover:bg-amber-50 dark:hover:bg-amber-950/50 text-amber-700 dark:text-amber-300 rounded-full font-bold text-xs gap-1">
                         <Bell className="h-3 w-3" /> Alert
                       </a>
                     )}
                     <a href={getWhatsAppShareLink(inv)} target="_blank" rel="noreferrer"
-                      className="inline-flex h-7 items-center px-2.5 border border-green-200 hover:bg-green-50 text-green-700 rounded-full font-bold text-xs gap-1">
+                      className="inline-flex h-7 items-center px-2.5 border border-emerald-200 dark:border-emerald-900 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 rounded-full font-bold text-xs gap-1">
                       <MessageSquare className="h-3 w-3" /> Share
                     </a>
                     <a href={`/api/invoices/${inv.id}/pdf`} target="_blank" rel="noreferrer"
@@ -419,7 +419,7 @@ ${vendorShop.businessName}`;
                     </a>
                     {can('invoices:delete') && !inv.isDeleted && (
                       <Button variant="ghost" size="icon" onClick={() => handleDeleteInvoice(inv.id)}
-                        className="h-7 w-7 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-full">
+                        className="h-7 w-7 text-muted-foreground hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 rounded-full">
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     )}
@@ -431,32 +431,32 @@ ${vendorShop.businessName}`;
         </div>
 
         {/* Desktop table (hidden on mobile) */}
-        <Card className="hidden md:block border border-gray-150 shadow-sm rounded-2xl bg-white overflow-hidden">
+        <Card className="hidden md:block border border-border shadow-sm rounded-2xl bg-card text-card-foreground overflow-hidden">
           <Table>
-            <TableHeader className="bg-gray-50/50">
+            <TableHeader className="bg-muted/50">
               <TableRow>
-                <TableHead className="font-bold">Invoice ID</TableHead>
-                <TableHead className="font-bold">Customer Detail</TableHead>
-                <TableHead className="font-bold"><span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> Date</span></TableHead>
-                <TableHead className="font-bold text-center">Status</TableHead>
-                <TableHead className="font-bold text-right">Total Billed</TableHead>
-                <TableHead className="font-bold text-right">Paid Amount</TableHead>
-                <TableHead className="font-bold text-right">Outstanding</TableHead>
-                <TableHead className="font-bold text-right">Actions</TableHead>
+                <TableHead className="font-bold text-muted-foreground">Invoice ID</TableHead>
+                <TableHead className="font-bold text-muted-foreground">Customer Detail</TableHead>
+                <TableHead className="font-bold text-muted-foreground"><span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> Date</span></TableHead>
+                <TableHead className="font-bold text-muted-foreground text-center">Status</TableHead>
+                <TableHead className="font-bold text-muted-foreground text-right">Total Billed</TableHead>
+                <TableHead className="font-bold text-muted-foreground text-right">Paid Amount</TableHead>
+                <TableHead className="font-bold text-muted-foreground text-right">Outstanding</TableHead>
+                <TableHead className="font-bold text-muted-foreground text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                    <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-gray-400" />
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-muted-foreground" />
                     Loading invoices...
                   </TableCell>
                 </TableRow>
               ) : invoices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-12 text-gray-400">
-                    <FileText className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     No invoices found.
                   </TableCell>
                 </TableRow>
@@ -464,21 +464,21 @@ ${vendorShop.businessName}`;
                 invoices.map((inv) => {
                   const bal = inv.grandTotal - inv.amountPaid;
                   return (
-                    <TableRow key={inv.id} className="hover:bg-gray-50/50 transition-colors">
-                      <TableCell className="font-semibold text-gray-900">{inv.invoiceNum}</TableCell>
+                    <TableRow key={inv.id} className="hover:bg-muted/40 transition-colors">
+                      <TableCell className="font-semibold text-foreground">{inv.invoiceNum}</TableCell>
                       <TableCell>
-                        <div className="font-semibold text-gray-900">{inv.customer.name}</div>
-                        <div className="text-xs text-gray-400 mt-0.5">{inv.customer.phone}</div>
+                        <div className="font-semibold text-foreground">{inv.customer.name}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{inv.customer.phone}</div>
                       </TableCell>
-                      <TableCell className="text-gray-600 font-medium">
+                      <TableCell className="text-muted-foreground font-medium">
                         {new Date(inv.issuedAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-center">
                         {getStatusBadge(inv.status)}
                       </TableCell>
-                      <TableCell className="text-right font-bold text-gray-900">{"\u20B9"}{inv.grandTotal.toFixed(2)}</TableCell>
-                      <TableCell className="text-right text-green-600 font-semibold">{"\u20B9"}{inv.amountPaid.toFixed(2)}</TableCell>
-                      <TableCell className="text-right text-rose-600 font-semibold">{"\u20B9"}{bal.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-bold text-foreground">{"\u20B9"}{inv.grandTotal.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-emerald-600 dark:text-emerald-400 font-semibold">{"\u20B9"}{inv.amountPaid.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-rose-600 dark:text-rose-400 font-semibold">{"\u20B9"}{bal.toFixed(2)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1.5 flex-wrap lg:flex-nowrap">
                           {bal > 0 && !inv.isDeleted && (
@@ -488,7 +488,7 @@ ${vendorShop.businessName}`;
                                 size="sm"
                                 variant="outline"
                                 onClick={() => openPaymentDialog(inv)}
-                                className="h-8 rounded-full border-gray-200 font-bold hover:bg-gray-100 flex items-center gap-1 text-xs"
+                                className="h-8 rounded-full border-border font-bold hover:bg-muted flex items-center gap-1 text-xs text-foreground"
                               >
                                 <DollarSign className="h-3 w-3" /> Record
                               </Button>
@@ -498,7 +498,7 @@ ${vendorShop.businessName}`;
                                 href={getReminderLink(inv)}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex h-8 items-center px-3 border border-amber-200 hover:bg-amber-50 text-amber-700 rounded-full font-bold text-xs gap-1"
+                                className="inline-flex h-8 items-center px-3 border border-amber-200 dark:border-amber-900 hover:bg-amber-50 dark:hover:bg-amber-950/50 text-amber-700 dark:text-amber-300 rounded-full font-bold text-xs gap-1"
                               >
                                 <Bell className="h-3 w-3" /> Alert
                               </a>
@@ -509,7 +509,7 @@ ${vendorShop.businessName}`;
                             href={getWhatsAppShareLink(inv)}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex h-8 items-center px-3 border border-green-200 hover:bg-green-50 text-green-700 rounded-full font-bold text-xs gap-1"
+                            className="inline-flex h-8 items-center px-3 border border-emerald-200 dark:border-emerald-900 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 rounded-full font-bold text-xs gap-1"
                           >
                             <MessageSquare className="h-3 w-3" /> Share
                           </a>
@@ -537,7 +537,7 @@ ${vendorShop.businessName}`;
                             variant="ghost"
                             size="icon"
                             onClick={() => handleDeleteInvoice(inv.id)}
-                            className="h-8 w-8 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-full"
+                            className="h-8 w-8 text-muted-foreground hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 rounded-full"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -591,34 +591,34 @@ ${vendorShop.businessName}`;
 
       {/* Record Payment Dialog */}
       <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-        <DialogContent className="rounded-2xl sm:max-w-100 bg-white">
+        <DialogContent className="rounded-2xl sm:max-w-100 bg-card text-card-foreground border border-border">
           <form onSubmit={handleRecordPayment}>
             <DialogHeader className="mb-4">
-              <DialogTitle className="text-xl font-bold text-gray-900">Record Payment</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-xl font-bold text-foreground">Record Payment</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
                 Add a payment transaction for invoice {selectedInvoice?.invoiceNum}.
               </DialogDescription>
             </DialogHeader>
 
             {selectedInvoice && (
               <div className="space-y-4 py-2">
-                <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs space-y-1.5">
+                <div className="bg-muted/50 p-3 rounded-xl border border-border text-xs space-y-1.5">
                   <div className="flex justify-between">
-                    <span className="text-gray-500 font-medium">Billed Grand Total:</span>
-                    <span className="font-bold text-gray-900">{"\u20B9"}{selectedInvoice.grandTotal.toFixed(2)}</span>
+                    <span className="text-muted-foreground font-medium">Billed Grand Total:</span>
+                    <span className="font-bold text-foreground">{"\u20B9"}{selectedInvoice.grandTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500 font-medium">Previously Paid:</span>
-                    <span className="font-bold text-green-600">{"\u20B9"}{selectedInvoice.amountPaid.toFixed(2)}</span>
+                    <span className="text-muted-foreground font-medium">Previously Paid:</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">{"\u20B9"}{selectedInvoice.amountPaid.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between border-t border-gray-200/60 pt-1.5 font-bold text-rose-600">
+                  <div className="flex justify-between border-t border-border pt-1.5 font-bold text-rose-600 dark:text-rose-400">
                     <span>Due Balance:</span>
                     <span>{"\u20B9"}{(selectedInvoice.grandTotal - selectedInvoice.amountPaid).toFixed(2)}</span>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="payAmount">Amount Collected ({"\u20B9"})</Label>
+                  <Label htmlFor="payAmount" className="text-foreground">Amount Collected ({"\u20B9"})</Label>
                   <Input
                     id="payAmount"
                     type="number"
@@ -628,17 +628,17 @@ ${vendorShop.businessName}`;
                     value={paymentForm.amount}
                     onChange={(e) => setPaymentForm(prev => ({ ...prev, amount: e.target.value }))}
                     required
-                    className="rounded-xl border-gray-200 font-bold"
+                    className="rounded-xl border-border bg-background text-foreground font-bold"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="payMethod">Payment Method</Label>
+                  <Label htmlFor="payMethod" className="text-foreground">Payment Method</Label>
                   <Select
                     value={paymentForm.paymentMethod}
                     onValueChange={(val) => setPaymentForm(prev => ({ ...prev, paymentMethod: val }))}
                   >
-                    <SelectTrigger id="payMethod" className="rounded-xl border-gray-200">
+                    <SelectTrigger id="payMethod" className="rounded-xl border-border bg-background text-foreground">
                       <SelectValue placeholder="Select Method" />
                     </SelectTrigger>
                     <SelectContent>
@@ -651,22 +651,22 @@ ${vendorShop.businessName}`;
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="payNotes">Transaction Notes</Label>
+                  <Label htmlFor="payNotes" className="text-foreground">Transaction Notes</Label>
                   <Input
                     id="payNotes"
                     value={paymentForm.notes}
                     onChange={(e) => setPaymentForm(prev => ({ ...prev, notes: e.target.value }))}
-                    className="rounded-xl border-gray-200"
+                    className="rounded-xl border-border bg-background text-foreground"
                   />
                 </div>
               </div>
             )}
 
-            <DialogFooter className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsPaymentDialogOpen(false)} className="rounded-lg border-gray-200 px-6 font-bold">
+            <DialogFooter className="mt-6 flex justify-end gap-2 border-t border-border pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsPaymentDialogOpen(false)} className="rounded-lg border-border px-6 font-bold text-foreground hover:bg-muted">
                 Cancel
               </Button>
-              <Button type="submit" disabled={recordingPayment} className="font-bold bg-black hover:bg-gray-900 text-white rounded-lg px-6 flex items-center gap-1">
+              <Button type="submit" disabled={recordingPayment} className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 flex items-center gap-1 shadow-sm">
                 {recordingPayment && <RefreshCw className="h-4 w-4 animate-spin" />}
                 Log Payment
               </Button>

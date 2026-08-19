@@ -6,8 +6,8 @@ import { ctaData } from "@/data/HeroData/heroData";
 
 export default function CTA() {
   return (
-    <section className="py-28 relative overflow-hidden bg-blue-600">
-      <div className="absolute inset-0 bg-linear-to-b from-transparent to-blue-900/40" />
+    <section className="py-28 relative overflow-hidden bg-primary dark:bg-blue-600 text-primary-foreground">
+      <div className="absolute inset-0 bg-linear-to-b from-transparent to-black/20" />
       
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4 }}
@@ -22,7 +22,7 @@ export default function CTA() {
         </p>
         
         <Link href={ctaData.buttonLink}>
-          <Button className="h-12 px-8 rounded-lg text-sm font-semibold bg-white text-blue-700 hover:bg-gray-50 hover:text-blue-800 shadow-lg transition-transform transform hover:-translate-y-0.5">
+          <Button className="h-12 px-8 rounded-lg text-sm font-bold bg-white text-blue-700 hover:bg-gray-100 shadow-lg transition-transform transform hover:-translate-y-0.5">
             {ctaData.buttonText}
           </Button>
         </Link>

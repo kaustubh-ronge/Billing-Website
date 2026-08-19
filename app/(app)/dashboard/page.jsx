@@ -16,9 +16,20 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useCan } from '@/lib/permissions/PermissionContext';
+import { useTheme } from 'next-themes';
 
 export default function DashboardPage() {
   const can = useCan();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
+  const chartTickColor = isDark ? "#ffffff" : "#475569";
+  const chartTooltipBg = isDark ? "#0f172a" : "#ffffff";
+  const chartTooltipBorder = isDark ? "#334155" : "#e2e8f0";
+  const chartTooltipText = isDark ? "#ffffff" : "#0f172a";
+  const chartAreaItemColor = isDark ? "#38bdf8" : "#2563eb";
+  const chartBarItemColor = isDark ? "#c084fc" : "#7c3aed";
+
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [showAllOutstanding, setShowAllOutstanding] = useState(false);
@@ -75,7 +86,7 @@ export default function DashboardPage() {
       value: `\u20B9${metrics.todaySales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
       sub: "Bills issued today",
       icon: IndianRupee,
-      gradient: "from-blue-500 via-blue-600 to-indigo-600",
+      gradient: "from-blue-500 via-blue-600 to-indigo-600 dark:from-blue-600 dark:via-blue-700 dark:to-indigo-800",
       iconBg: "bg-white/20",
       link: "/invoices",
       perm: "revenue:view",
@@ -85,7 +96,7 @@ export default function DashboardPage() {
       value: `\u20B9${metrics.monthlySales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
       sub: "Current calendar month",
       icon: BarChart2,
-      gradient: "from-violet-500 via-purple-600 to-purple-700",
+      gradient: "from-violet-500 via-purple-600 to-purple-700 dark:from-violet-600 dark:via-purple-700 dark:to-purple-900",
       iconBg: "bg-white/20",
       link: "/invoices",
       perm: "revenue:view",
@@ -95,7 +106,7 @@ export default function DashboardPage() {
       value: `\u20B9${metrics.pendingPayments.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
       sub: "Pending collections",
       icon: CircleDollarSign,
-      gradient: "from-rose-500 via-rose-600 to-red-600",
+      gradient: "from-rose-500 via-rose-600 to-red-600 dark:from-rose-600 dark:via-rose-700 dark:to-red-800",
       iconBg: "bg-white/20",
       link: "/customers",
       urgent: metrics.pendingPayments > 0,
@@ -106,7 +117,7 @@ export default function DashboardPage() {
       value: metrics.totalCustomers.toString(),
       sub: "Active customer accounts",
       icon: Users,
-      gradient: "from-emerald-500 via-green-600 to-teal-600",
+      gradient: "from-emerald-500 via-green-600 to-teal-600 dark:from-emerald-600 dark:via-green-700 dark:to-teal-800",
       iconBg: "bg-white/20",
       link: "/customers",
       perm: "customers:view",
@@ -129,7 +140,7 @@ export default function DashboardPage() {
           {can('invoices:create') && (
           <Link
             href="/invoices/new"
-            className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background font-bold px-5 py-2 text-sm hover:opacity-90 transition-opacity"
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground font-bold px-5 py-2 text-sm hover:opacity-90 transition-opacity shadow-sm"
           >
             <Plus className="h-3.5 w-3.5" /> New Bill
           </Link>
@@ -151,7 +162,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {metricCards.map(({ label, value, sub, icon: Icon, gradient, link, urgent }) => (
           <Link key={label} href={link} className="group block">
-            <div className={`relative overflow-hidden rounded-2xl bg-linear-to-br ${gradient} p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5`}>
+            <div className={`relative overflow-hidden rounded-2xl bg-linear-to-br ${gradient} p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 border border-white/10`}>
               <div className="flex items-start justify-between">
                 <div className="space-y-1 min-w-0 flex-1">
                   <p className="text-xs font-semibold text-white/70 uppercase tracking-wider">{label}</p>
@@ -179,7 +190,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Collection health */}
         {showRevenue && (
-        <div className="col-span-1 bg-linear-to-br from-slate-800 to-slate-900 rounded-2xl p-5 text-white">
+        <div className="col-span-1 bg-linear-to-br from-slate-900 to-slate-950 dark:from-slate-900 dark:to-slate-900 border border-slate-800 rounded-2xl p-5 text-white shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <BadgeCheck className="h-4 w-4 text-emerald-400" />
@@ -202,7 +213,7 @@ export default function DashboardPage() {
 
         {/* Projected revenue insight */}
         {showRevenue && (
-        <div className="col-span-1 bg-linear-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 text-white flex flex-col justify-between">
+        <div className="col-span-1 bg-linear-to-br from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-800 border border-blue-500/30 rounded-2xl p-5 text-white shadow-sm flex flex-col justify-between">
           <div className="flex items-center gap-2 mb-2">
             <Lightbulb className="h-4 w-4 text-yellow-300" />
             <span className="text-sm font-bold text-white/90">Revenue Forecast</span>
@@ -225,14 +236,14 @@ export default function DashboardPage() {
         {showProducts && (
         <div className={`col-span-1 rounded-2xl p-5 border ${
           reports.lowStockAlerts.length > 0
-            ? 'bg-rose-50 border-rose-200 dark:bg-rose-950/30 dark:border-rose-800'
-            : 'bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800'
+            ? 'bg-rose-50 border-rose-200 dark:bg-rose-950/40 dark:border-rose-900/60'
+            : 'bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-900/60'
         }`}>
           <div className="flex items-center gap-2 mb-3">
             {reports.lowStockAlerts.length > 0 ? (
-              <ShieldAlert className="h-4 w-4 text-rose-600" />
+              <ShieldAlert className="h-4 w-4 text-rose-600 dark:text-rose-400" />
             ) : (
-              <BadgeCheck className="h-4 w-4 text-emerald-600" />
+              <BadgeCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             )}
             <span className={`text-sm font-bold ${reports.lowStockAlerts.length > 0 ? 'text-rose-800 dark:text-rose-300' : 'text-emerald-800 dark:text-emerald-300'}`}>
               {reports.lowStockAlerts.length > 0 ? `${reports.lowStockAlerts.length} Low Stock Items` : 'Inventory Healthy'}
@@ -264,8 +275,8 @@ export default function DashboardPage() {
             <CardHeader className="border-b border-border py-4 px-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-base font-bold">30-Day Sales Performance</CardTitle>
-                  <CardDescription>Daily revenue trends</CardDescription>
+                  <CardTitle className="text-base font-bold text-foreground">30-Day Sales Performance</CardTitle>
+                  <CardDescription className="text-muted-foreground">Daily revenue trends</CardDescription>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground bg-muted rounded-full px-3 py-1">
                   <TrendingUp className="h-3.5 w-3.5" /> Last 30 days
@@ -278,16 +289,18 @@ export default function DashboardPage() {
                   <AreaChart data={charts.daily} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                     <defs>
                       <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.25} />
+                        <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.3} />
                         <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} interval={4} />
-                    <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
+                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: chartTickColor, fontWeight: 600 }} tickLine={false} axisLine={false} interval={4} />
+                    <YAxis tick={{ fontSize: 10, fill: chartTickColor, fontWeight: 600 }} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
                     <Tooltip
                       formatter={(value) => [`\u20B9${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 'Revenue']}
-                      contentStyle={{ borderRadius: '12px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--popover))', color: 'hsl(var(--popover-foreground))', fontSize: '12px' }}
+                      contentStyle={{ borderRadius: '12px', border: `1px solid ${chartTooltipBorder}`, backgroundColor: chartTooltipBg, color: chartTooltipText, fontSize: '12px', fontWeight: 'bold', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)' }}
+                      itemStyle={{ color: chartAreaItemColor, fontWeight: 'bold' }}
+                      labelStyle={{ color: chartTooltipText, fontWeight: 'bold' }}
                       cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
                     />
                     <Area type="monotone" dataKey="sales" stroke="#3b82f6" strokeWidth={2.5} fill="url(#salesGrad)" dot={false} activeDot={{ r: 5, fill: '#3b82f6', stroke: '#fff', strokeWidth: 2 }} />
@@ -302,19 +315,21 @@ export default function DashboardPage() {
         <div className="lg:col-span-4">
           <Card className="border-border rounded-2xl overflow-hidden">
             <CardHeader className="border-b border-border py-4 px-6">
-              <CardTitle className="text-base font-bold">Monthly Breakdown</CardTitle>
-              <CardDescription>12-month revenue history</CardDescription>
+              <CardTitle className="text-base font-bold text-foreground">Monthly Breakdown</CardTitle>
+              <CardDescription className="text-muted-foreground">12-month revenue history</CardDescription>
             </CardHeader>
             <CardContent className="p-6">
               <div className="h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={charts.monthly} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                    <XAxis dataKey="month" tick={{ fontSize: 8, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
+                    <XAxis dataKey="month" tick={{ fontSize: 9, fill: chartTickColor, fontWeight: 600 }} tickLine={false} axisLine={false} />
+                    <YAxis tick={{ fontSize: 9, fill: chartTickColor, fontWeight: 600 }} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
                     <Tooltip
                       formatter={(value) => [`\u20B9${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 'Revenue']}
-                      contentStyle={{ borderRadius: '12px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--popover))', color: 'hsl(var(--popover-foreground))', fontSize: '12px' }}
+                      contentStyle={{ borderRadius: '12px', border: `1px solid ${chartTooltipBorder}`, backgroundColor: chartTooltipBg, color: chartTooltipText, fontSize: '12px', fontWeight: 'bold', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)' }}
+                      itemStyle={{ color: chartBarItemColor, fontWeight: 'bold' }}
+                      labelStyle={{ color: chartTooltipText, fontWeight: 'bold' }}
                     />
                     <Bar dataKey="sales" fill="#8b5cf6" radius={[6, 6, 0, 0]} maxBarSize={32} />
                   </BarChart>
@@ -334,10 +349,10 @@ export default function DashboardPage() {
         <Card className="border-border rounded-2xl overflow-hidden">
           <CardHeader className="border-b border-border py-4 px-6 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-sm font-bold">Top Outstanding Accounts</CardTitle>
-              <CardDescription>Customers with unpaid balances</CardDescription>
+              <CardTitle className="text-sm font-bold text-foreground">Top Outstanding Accounts</CardTitle>
+              <CardDescription className="text-muted-foreground">Customers with unpaid balances</CardDescription>
             </div>
-            <Link href="/customers" className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">
+            <Link href="/customers" className="flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline transition-colors">
               View all <ArrowRight className="h-3 w-3" />
             </Link>
           </CardHeader>
@@ -352,7 +367,7 @@ export default function DashboardPage() {
                 {(showAllOutstanding ? reports.topPendingCustomers : reports.topPendingCustomers.slice(0, 5)).map((c, i) => (
                   <div key={c.id} className="px-5 py-3 flex items-center justify-between hover:bg-muted/40 transition-colors">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400 text-xs font-black">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-400 text-xs font-black">
                         {c.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -360,7 +375,7 @@ export default function DashboardPage() {
                         <p className="text-[11px] text-muted-foreground">{c.phone} · {c.invoiceCount} bill{c.invoiceCount > 1 ? 's' : ''}</p>
                       </div>
                     </div>
-                    <span className="text-sm font-black text-rose-600 bg-rose-50 dark:bg-rose-900/40 px-3 py-1 rounded-full border border-rose-200 dark:border-rose-800 shrink-0 ml-3">
+                    <span className="text-sm font-black text-rose-600 bg-rose-50 dark:bg-rose-950/80 dark:text-rose-400 px-3 py-1 rounded-full border border-rose-200 dark:border-rose-900 shrink-0 ml-3">
                       {"\u20B9"}{c.outstanding.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                     </span>
                   </div>
@@ -371,7 +386,7 @@ export default function DashboardPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowAllOutstanding(!showAllOutstanding)}
-                      className="text-xs font-bold text-blue-650 hover:text-blue-700 w-full rounded-xl py-1.5 h-auto hover:bg-muted/50 transition-colors"
+                      className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 w-full rounded-xl py-1.5 h-auto hover:bg-muted/50 transition-colors"
                     >
                       {showAllOutstanding ? 'Show Less' : `View All (${reports.topPendingCustomers.length})`}
                     </Button>
@@ -388,24 +403,24 @@ export default function DashboardPage() {
         <Card className="border-border rounded-2xl overflow-hidden">
           <CardHeader className="border-b border-border py-4 px-6 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-sm font-bold">Best Selling Items</CardTitle>
-              <CardDescription>Top revenue contributors</CardDescription>
+              <CardTitle className="text-sm font-bold text-foreground">Best Selling Items</CardTitle>
+              <CardDescription className="text-muted-foreground">Top revenue contributors</CardDescription>
             </div>
-            <Link href="/products" className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">
+            <Link href="/products" className="flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline transition-colors">
               Catalog <ArrowRight className="h-3 w-3" />
             </Link>
           </CardHeader>
           <div className="divide-y divide-border">
             {reports.topProducts.length === 0 ? (
               <div className="p-8 text-center">
-                <Package className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                <Package className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground font-medium">No sales data yet</p>
               </div>
             ) : (
               reports.topProducts.map((p, i) => (
                 <div key={p.id} className="px-5 py-3 flex items-center justify-between hover:bg-muted/40 transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400 text-xs font-black">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700 dark:bg-violet-950/80 dark:text-violet-400 text-xs font-black">
                       {i + 1}
                     </div>
                     <div className="min-w-0">
@@ -415,7 +430,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right shrink-0 ml-3">
                     <p className="text-sm font-bold text-foreground">{p.quantity} units</p>
-                    <p className="text-[11px] text-emerald-600 font-semibold">{"\u20B9"}{p.revenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">{"\u20B9"}{p.revenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
                   </div>
                 </div>
               ))

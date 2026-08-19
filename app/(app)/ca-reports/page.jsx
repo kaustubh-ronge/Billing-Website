@@ -297,9 +297,9 @@ export default function CaReportsPage() {
           <div className="space-y-1">
             {items.map((item, idx) => (
               <div key={idx} className="flex items-center gap-1 text-[11px]">
-                <span className="font-bold text-gray-800">{item.name}</span>
+                <span className="font-bold text-foreground">{item.name}</span>
                 {item.qty && (
-                  <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full font-bold">
+                  <span className="text-[10px] text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded-full font-bold">
                     {item.qty}
                   </span>
                 )}
@@ -316,7 +316,7 @@ export default function CaReportsPage() {
     } catch (e) {
       console.error(e);
     }
-    return <span className="text-gray-700">{text}</span>;
+    return <span className="text-foreground">{text}</span>;
   };
 
   return (
@@ -365,56 +365,56 @@ export default function CaReportsPage() {
 
       {/* Aggregate Metrics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="rounded-2xl border-gray-200/80 shadow-xs">
+        <Card className="rounded-2xl border-border bg-card text-card-foreground shadow-xs">
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
               <TrendingUp className="h-5 w-5" />
             </div>
             <div>
               <span className="block text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Outward Supplies</span>
-              <span className="text-base font-black text-gray-900 mt-0.5">
+              <span className="text-base font-black text-foreground mt-0.5">
                 ₹{data.summary.totalTaxableSales.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
               </span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border-gray-200/80 shadow-xs">
+        <Card className="rounded-2xl border-border bg-card text-card-foreground shadow-xs">
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <div className="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <CheckCircle className="h-5 w-5" />
             </div>
             <div>
               <span className="block text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Output Liability</span>
-              <span className="text-base font-black text-gray-900 mt-0.5">
+              <span className="text-base font-black text-foreground mt-0.5">
                 ₹{data.summary.totalTaxSales.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
               </span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border-gray-200/80 shadow-xs">
+        <Card className="rounded-2xl border-border bg-card text-card-foreground shadow-xs">
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+            <div className="h-10 w-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
               <Wallet className="h-5 w-5" />
             </div>
             <div>
               <span className="block text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Input credit (ITC)</span>
-              <span className="text-base font-black text-purple-700 mt-0.5">
+              <span className="text-base font-black text-purple-700 dark:text-purple-300 mt-0.5">
                 ₹{data.itcSummary.totalTaxPurchases.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
               </span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className={`rounded-2xl border-gray-200/80 shadow-xs ${data.netLiability.netTaxPayable >= 0 ? "bg-rose-50/50" : "bg-emerald-50/50"}`}>
+        <Card className={`rounded-2xl border ${data.netLiability.netTaxPayable >= 0 ? "bg-rose-50/50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900" : "bg-emerald-50/50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900"} shadow-xs`}>
           <CardContent className="p-5 flex items-center gap-4">
-            <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${data.netLiability.netTaxPayable >= 0 ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}>
+            <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${data.netLiability.netTaxPayable >= 0 ? "bg-rose-100 text-rose-700 dark:bg-rose-900/60 dark:text-rose-300" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300"}`}>
               <Scale className="h-5 w-5" />
             </div>
             <div>
               <span className="block text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Net Tax Payable</span>
-              <span className={`text-base font-black mt-0.5 ${data.netLiability.netTaxPayable >= 0 ? "text-rose-700" : "text-emerald-700"}`}>
+              <span className={`text-base font-black mt-0.5 ${data.netLiability.netTaxPayable >= 0 ? "text-rose-700 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300"}`}>
                 ₹{Math.abs(data.netLiability.netTaxPayable).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                 {data.netLiability.netTaxPayable < 0 && " (Credit)"}
               </span>
@@ -423,22 +423,22 @@ export default function CaReportsPage() {
         </Card>
       </div>
       <Tabs defaultValue="sales" className="space-y-4">
-        <div className="border-b border-gray-100 pb-2">
+        <div className="border-b border-border pb-2">
           <div className="w-full overflow-x-auto no-scrollbar">
-            <TabsList className="bg-gray-100 rounded-xl p-1 flex w-max gap-0.5 whitespace-nowrap">
-              <TabsTrigger value="sales" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-white data-[state=active]:shadow-2xs">
+            <TabsList className="bg-muted border border-border rounded-xl p-1 flex w-max gap-0.5 whitespace-nowrap">
+              <TabsTrigger value="sales" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-2xs">
                 Sales Register
               </TabsTrigger>
-              <TabsTrigger value="purchases" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-white data-[state=active]:shadow-2xs">
+              <TabsTrigger value="purchases" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-2xs">
                 Purchase Register
               </TabsTrigger>
-              <TabsTrigger value="gstr1" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-white data-[state=active]:shadow-2xs">
+              <TabsTrigger value="gstr1" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-2xs">
                 GSTR-1 Report
               </TabsTrigger>
-              <TabsTrigger value="gstr3b" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-white data-[state=active]:shadow-2xs">
+              <TabsTrigger value="gstr3b" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-2xs">
                 GSTR-3B Summary
               </TabsTrigger>
-              <TabsTrigger value="hsn" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-white data-[state=active]:shadow-2xs">
+              <TabsTrigger value="hsn" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-2xs">
                 HSN/SAC Summary
               </TabsTrigger>
             </TabsList>
@@ -447,65 +447,65 @@ export default function CaReportsPage() {
 
         {/* Tab 1: Sales Register */}
         <TabsContent value="sales" className="mt-0 space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-2xl border border-gray-200/80 shadow-3xs">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-card text-card-foreground p-4 rounded-2xl border border-border shadow-3xs">
             <div>
-              <span className="block text-xs font-bold text-gray-800">Sales Invoices Registry</span>
-              <span className="block text-[10px] text-gray-400">All outward billing invoices including tax breakouts</span>
+              <span className="block text-xs font-bold text-foreground">Sales Invoices Registry</span>
+              <span className="block text-[10px] text-muted-foreground">All outward billing invoices including tax breakouts</span>
             </div>
-            <Button onClick={handleExportSales} disabled={loading || data.sales.length === 0} className="w-full sm:w-auto rounded-full bg-slate-900 hover:bg-black text-white font-bold h-9">
+            <Button onClick={handleExportSales} disabled={loading || data.sales.length === 0} className="w-full sm:w-auto rounded-full bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-black dark:hover:bg-white font-bold h-9 shadow-sm">
               <FileDown className="h-4 w-4 mr-2" /> Export Sales Register
             </Button>
           </div>
 
-          <Card className="rounded-2xl border-gray-200/80 shadow-xs overflow-hidden bg-white">
+          <Card className="rounded-2xl border-border shadow-xs overflow-hidden bg-card text-card-foreground">
             <div className="overflow-x-auto w-full">
               <Table>
-                <TableHeader className="bg-gray-50/50">
+                <TableHeader className="bg-muted/50">
                   <TableRow>
-                    <TableHead className="font-bold">Invoice #</TableHead>
-                    <TableHead className="font-bold">Date</TableHead>
-                    <TableHead className="font-bold">Customer Name</TableHead>
-                    <TableHead className="font-bold">GSTIN</TableHead>
-                    <TableHead className="font-bold">POS (Place of Supply)</TableHead>
-                    <TableHead className="font-bold text-center">GST Rate (%)</TableHead>
-                    <TableHead className="font-bold text-right">Taxable Amt (₹)</TableHead>
-                    <TableHead className="font-bold text-right">CGST (₹)</TableHead>
-                    <TableHead className="font-bold text-right">SGST (₹)</TableHead>
-                    <TableHead className="font-bold text-right">IGST (₹)</TableHead>
-                    <TableHead className="font-bold text-right">Grand Total (₹)</TableHead>
+                    <TableHead className="font-bold text-muted-foreground">Invoice #</TableHead>
+                    <TableHead className="font-bold text-muted-foreground">Date</TableHead>
+                    <TableHead className="font-bold text-muted-foreground">Customer Name</TableHead>
+                    <TableHead className="font-bold text-muted-foreground">GSTIN</TableHead>
+                    <TableHead className="font-bold text-muted-foreground">POS (Place of Supply)</TableHead>
+                    <TableHead className="font-bold text-center text-muted-foreground">GST Rate (%)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">Taxable Amt (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">CGST (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">SGST (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">IGST (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">Grand Total (₹)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={11} className="text-center py-8">
-                        <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-gray-400" />
+                      <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
+                        <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-muted-foreground" />
                         Loading sales register...
                       </TableCell>
                     </TableRow>
                   ) : data.sales.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={11} className="text-center py-12 text-gray-400">
-                        <AlertCircle className="h-7 w-7 mx-auto mb-2 text-gray-300" />
+                      <TableCell colSpan={11} className="text-center py-12 text-muted-foreground">
+                        <AlertCircle className="h-7 w-7 mx-auto mb-2 opacity-50" />
                         No sales recorded for this month.
                       </TableCell>
                     </TableRow>
                   ) : (
                     data.sales.map((row) => (
-                      <TableRow key={row.id} className="hover:bg-gray-50/50 transition-colors">
-                        <TableCell className="font-bold text-gray-900">{row.invoiceNum}</TableCell>
-                        <TableCell className="text-gray-500 font-medium">
+                      <TableRow key={row.id} className="hover:bg-muted/40 transition-colors">
+                        <TableCell className="font-bold text-foreground">{row.invoiceNum}</TableCell>
+                        <TableCell className="text-muted-foreground font-medium">
                           {new Date(row.issuedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                         </TableCell>
-                        <TableCell className="font-medium text-gray-800">{row.customerName}</TableCell>
-                        <TableCell className="font-mono text-gray-600">{row.customerGst || "N/A"}</TableCell>
-                        <TableCell className="text-gray-500 truncate max-w-[120px]">{row.placeOfSupply}</TableCell>
-                        <TableCell className="text-center font-bold text-slate-700">{row.gstRate || "N/A"}</TableCell>
+                        <TableCell className="font-medium text-foreground">{row.customerName}</TableCell>
+                        <TableCell className="font-mono text-muted-foreground">{row.customerGst || "N/A"}</TableCell>
+                        <TableCell className="text-muted-foreground truncate max-w-[120px]">{row.placeOfSupply}</TableCell>
+                        <TableCell className="text-center font-bold text-foreground">{row.gstRate || "N/A"}</TableCell>
                         <TableCell className="text-right font-medium">₹{row.taxableValue.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-gray-500">₹{row.cgst.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-gray-500">₹{row.sgst.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-rose-600">₹{row.igst.toFixed(2)}</TableCell>
-                        <TableCell className="text-right font-black text-gray-955">₹{row.grandTotal.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">₹{row.cgst.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">₹{row.sgst.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-rose-600 dark:text-rose-400">₹{row.igst.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-black text-foreground">₹{row.grandTotal.toFixed(2)}</TableCell>
                       </TableRow>
                     ))
                   )}
@@ -517,67 +517,67 @@ export default function CaReportsPage() {
 
         {/* Tab 2: Purchase Register */}
         <TabsContent value="purchases" className="mt-0 space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-2xl border border-gray-200/80 shadow-3xs">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-card text-card-foreground p-4 rounded-2xl border border-border shadow-3xs">
             <div>
-              <span className="block text-xs font-bold text-gray-800">Purchases Input Registry</span>
-              <span className="block text-[10px] text-gray-400">Purchase ledger records with input tax credit estimates</span>
+              <span className="block text-xs font-bold text-foreground">Purchases Input Registry</span>
+              <span className="block text-[10px] text-muted-foreground">Purchase ledger records with input tax credit estimates</span>
             </div>
-            <Button onClick={handleExportPurchases} disabled={loading || data.purchases.length === 0} className="w-full sm:w-auto rounded-full bg-slate-900 hover:bg-black text-white font-bold h-9">
+            <Button onClick={handleExportPurchases} disabled={loading || data.purchases.length === 0} className="w-full sm:w-auto rounded-full bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-black dark:hover:bg-white font-bold h-9 shadow-sm">
               <FileDown className="h-4 w-4 mr-2" /> Export Purchase Register
             </Button>
           </div>
 
-          <Card className="rounded-2xl border-gray-200/80 shadow-xs overflow-hidden bg-white">
+          <Card className="rounded-2xl border-border shadow-xs overflow-hidden bg-card text-card-foreground">
             <div className="overflow-x-auto w-full">
               <Table>
-                <TableHeader className="bg-gray-50/50">
+                <TableHeader className="bg-muted/50">
                   <TableRow>
-                    <TableHead className="font-bold">Supplier Name</TableHead>
-                    <TableHead className="font-bold">Supplier GSTIN</TableHead>
-                    <TableHead className="font-bold">Product Name</TableHead>
-                    <TableHead className="font-bold text-center">Qty</TableHead>
-                    <TableHead className="font-bold text-center">GST Rate (%)</TableHead>
-                    <TableHead className="font-bold text-center">Date</TableHead>
-                    <TableHead className="font-bold text-right">Taxable Purchases (₹)</TableHead>
-                    <TableHead className="font-bold text-right">CGST (₹)</TableHead>
-                    <TableHead className="font-bold text-right">SGST (₹)</TableHead>
-                    <TableHead className="font-bold text-right">IGST (₹)</TableHead>
-                    <TableHead className="font-bold text-right">Total GST (₹)</TableHead>
-                    <TableHead className="font-bold text-right">Total Amount (₹)</TableHead>
+                    <TableHead className="font-bold text-muted-foreground">Supplier Name</TableHead>
+                    <TableHead className="font-bold text-muted-foreground">Supplier GSTIN</TableHead>
+                    <TableHead className="font-bold text-muted-foreground">Product Name</TableHead>
+                    <TableHead className="font-bold text-center text-muted-foreground">Qty</TableHead>
+                    <TableHead className="font-bold text-center text-muted-foreground">GST Rate (%)</TableHead>
+                    <TableHead className="font-bold text-center text-muted-foreground">Date</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">Taxable Purchases (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">CGST (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">SGST (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">IGST (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">Total GST (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">Total Amount (₹)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={12} className="text-center py-8">
-                        <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-gray-400" />
+                      <TableCell colSpan={12} className="text-center py-8 text-muted-foreground">
+                        <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-muted-foreground" />
                         Loading purchase register...
                       </TableCell>
                     </TableRow>
                   ) : data.purchases.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={12} className="text-center py-12 text-gray-400">
-                        <AlertCircle className="h-7 w-7 mx-auto mb-2 text-gray-300" />
+                      <TableCell colSpan={12} className="text-center py-12 text-muted-foreground">
+                        <AlertCircle className="h-7 w-7 mx-auto mb-2 opacity-50" />
                         No purchase entries recorded for this month.
                       </TableCell>
                     </TableRow>
                   ) : (
                     data.purchases.map((row) => (
-                      <TableRow key={row.id} className="hover:bg-gray-50/50 transition-colors">
-                        <TableCell className="font-bold text-gray-900">{row.companyName}</TableCell>
-                        <TableCell className="font-mono text-gray-600">{row.gstNumber || "N/A"}</TableCell>
-                        <TableCell className="font-medium text-gray-800">{row.productName || "Product Supply"}</TableCell>
-                        <TableCell className="text-center text-gray-500 font-medium">{row.productQty}</TableCell>
-                        <TableCell className="text-center font-bold text-slate-700">{row.gstRate || "N/A"}</TableCell>
-                        <TableCell className="text-center text-gray-500 font-medium">
+                      <TableRow key={row.id} className="hover:bg-muted/40 transition-colors">
+                        <TableCell className="font-bold text-foreground">{row.companyName}</TableCell>
+                        <TableCell className="font-mono text-muted-foreground">{row.gstNumber || "N/A"}</TableCell>
+                        <TableCell className="font-medium text-foreground">{row.productName || "Product Supply"}</TableCell>
+                        <TableCell className="text-center text-muted-foreground font-medium">{row.productQty}</TableCell>
+                        <TableCell className="text-center font-bold text-foreground">{row.gstRate || "N/A"}</TableCell>
+                        <TableCell className="text-center text-muted-foreground font-medium">
                           {new Date(row.noteDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                         </TableCell>
                         <TableCell className="text-right font-medium">₹{row.taxableValue.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-gray-500">₹{row.cgst.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-gray-500">₹{row.sgst.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-rose-600">₹{row.igst.toFixed(2)}</TableCell>
-                        <TableCell className="text-right font-medium text-purple-700">₹{row.totalTax.toFixed(2)}</TableCell>
-                        <TableCell className="text-right font-black text-gray-900">₹{row.totalAmount.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">₹{row.cgst.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">₹{row.sgst.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-rose-600 dark:text-rose-400">₹{row.igst.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-medium text-purple-600 dark:text-purple-400">₹{row.totalTax.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-black text-foreground">₹{row.totalAmount.toFixed(2)}</TableCell>
                       </TableRow>
                     ))
                   )}
@@ -590,20 +590,20 @@ export default function CaReportsPage() {
         {/* Tab 3: GSTR-1 Report */}
         <TabsContent value="gstr1" className="mt-0 space-y-4">
           <Tabs defaultValue="gstr1b2b" className="space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-white p-4 rounded-2xl border border-gray-200/80 shadow-3xs">
-              <TabsList className="bg-gray-100 rounded-lg p-0.5 self-start">
-                <TabsTrigger value="gstr1b2b" className="rounded-md px-4 py-1 text-[11px] font-bold data-[state=active]:bg-white data-[state=active]:shadow-2xs">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-card text-card-foreground p-4 rounded-2xl border border-border shadow-3xs">
+              <TabsList className="bg-muted border border-border rounded-lg p-0.5 self-start">
+                <TabsTrigger value="gstr1b2b" className="rounded-md px-4 py-1 text-[11px] font-bold data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-2xs">
                   B2B Supplies (Registered)
                 </TabsTrigger>
-                <TabsTrigger value="gstr1b2c" className="rounded-md px-4 py-1 text-[11px] font-bold data-[state=active]:bg-white data-[state=active]:shadow-2xs">
+                <TabsTrigger value="gstr1b2c" className="rounded-md px-4 py-1 text-[11px] font-bold data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-2xs">
                   B2C Supplies (Unregistered)
                 </TabsTrigger>
               </TabsList>
               <div className="flex flex-row gap-2">
-                <Button onClick={() => handleExportGSTR1("B2B")} disabled={loading || data.sales.length === 0} size="sm" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-9 text-xs flex-1 sm:flex-none">
+                <Button onClick={() => handleExportGSTR1("B2B")} disabled={loading || data.sales.length === 0} size="sm" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-9 text-xs flex-1 sm:flex-none shadow-sm">
                   <FileDown className="h-4 w-4 mr-2" /> B2B CSV
                 </Button>
-                <Button onClick={() => handleExportGSTR1("B2C")} disabled={loading || data.sales.length === 0} size="sm" className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-9 text-xs flex-1 sm:flex-none">
+                <Button onClick={() => handleExportGSTR1("B2C")} disabled={loading || data.sales.length === 0} size="sm" className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-9 text-xs flex-1 sm:flex-none shadow-sm">
                   <FileDown className="h-4 w-4 mr-2" /> B2C CSV
                 </Button>
               </div>
@@ -611,52 +611,52 @@ export default function CaReportsPage() {
 
             {/* B2B Table */}
             <TabsContent value="gstr1b2b" className="mt-0">
-              <Card className="rounded-2xl border-gray-200/80 shadow-xs overflow-hidden bg-white">
+              <Card className="rounded-2xl border-border shadow-xs overflow-hidden bg-card text-card-foreground">
                 <div className="overflow-x-auto w-full">
                   <Table>
-                    <TableHeader className="bg-gray-50/50">
+                    <TableHeader className="bg-muted/50">
                       <TableRow>
-                        <TableHead className="font-bold">Invoice #</TableHead>
-                        <TableHead className="font-bold">Date</TableHead>
-                        <TableHead className="font-bold">Customer Name</TableHead>
-                        <TableHead className="font-bold">Customer GSTIN</TableHead>
-                        <TableHead className="font-bold text-center">GST Rate (%)</TableHead>
-                        <TableHead className="font-bold text-right">Taxable Value (₹)</TableHead>
-                        <TableHead className="font-bold text-right">CGST (₹)</TableHead>
-                        <TableHead className="font-bold text-right">SGST (₹)</TableHead>
-                        <TableHead className="font-bold text-right">IGST (₹)</TableHead>
-                        <TableHead className="font-bold text-right">Grand Total (₹)</TableHead>
+                        <TableHead className="font-bold text-muted-foreground">Invoice #</TableHead>
+                        <TableHead className="font-bold text-muted-foreground">Date</TableHead>
+                        <TableHead className="font-bold text-muted-foreground">Customer Name</TableHead>
+                        <TableHead className="font-bold text-muted-foreground">Customer GSTIN</TableHead>
+                        <TableHead className="font-bold text-center text-muted-foreground">GST Rate (%)</TableHead>
+                        <TableHead className="font-bold text-right text-muted-foreground">Taxable Value (₹)</TableHead>
+                        <TableHead className="font-bold text-right text-muted-foreground">CGST (₹)</TableHead>
+                        <TableHead className="font-bold text-right text-muted-foreground">SGST (₹)</TableHead>
+                        <TableHead className="font-bold text-right text-muted-foreground">IGST (₹)</TableHead>
+                        <TableHead className="font-bold text-right text-muted-foreground">Grand Total (₹)</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {loading ? (
                         <TableRow>
-                          <TableCell colSpan={10} className="text-center py-8">
-                            <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-gray-400" />
+                          <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                            <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-muted-foreground" />
                             Loading GSTR-1 B2B data...
                           </TableCell>
                         </TableRow>
                       ) : data.sales.filter(i => i.customerGst).length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={10} className="text-center py-12 text-gray-400">
-                            <AlertCircle className="h-7 w-7 mx-auto mb-2 text-gray-300" />
+                          <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
+                            <AlertCircle className="h-7 w-7 mx-auto mb-2 opacity-50" />
                             No B2B sales registered for this month.
                           </TableCell>
                         </TableRow>
                       ) : (
                         data.sales.filter(i => i.customerGst).map((row) => 
                           row.gstRateDetails.map((slab, idx) => (
-                            <TableRow key={`${row.id}-${idx}`} className="hover:bg-gray-50/50 transition-colors">
-                              <TableCell className="font-bold text-gray-900">{slab.taxRate > 0 && idx > 0 ? "" : row.invoiceNum}</TableCell>
-                              <TableCell className="text-gray-500">{slab.taxRate > 0 && idx > 0 ? "" : new Date(row.issuedAt).toLocaleDateString("en-IN")}</TableCell>
-                              <TableCell className="font-medium text-gray-800">{slab.taxRate > 0 && idx > 0 ? "" : row.customerName}</TableCell>
-                              <TableCell className="font-mono text-gray-600">{slab.taxRate > 0 && idx > 0 ? "" : row.customerGst}</TableCell>
-                              <TableCell className="text-center font-bold text-slate-700">{slab.taxRate}%</TableCell>
-                              <TableCell className="text-right">₹{slab.taxableValue.toFixed(2)}</TableCell>
-                              <TableCell className="text-right text-gray-500">₹{slab.cgst.toFixed(2)}</TableCell>
-                              <TableCell className="text-right text-gray-500">₹{slab.sgst.toFixed(2)}</TableCell>
-                              <TableCell className="text-right text-rose-600">₹{slab.igst.toFixed(2)}</TableCell>
-                              <TableCell className="text-right font-bold text-gray-900">₹{slab.grandTotal.toFixed(2)}</TableCell>
+                            <TableRow key={`${row.id}-${idx}`} className="hover:bg-muted/40 transition-colors">
+                              <TableCell className="font-bold text-foreground">{slab.taxRate > 0 && idx > 0 ? "" : row.invoiceNum}</TableCell>
+                              <TableCell className="text-muted-foreground">{slab.taxRate > 0 && idx > 0 ? "" : new Date(row.issuedAt).toLocaleDateString("en-IN")}</TableCell>
+                              <TableCell className="font-medium text-foreground">{slab.taxRate > 0 && idx > 0 ? "" : row.customerName}</TableCell>
+                              <TableCell className="font-mono text-muted-foreground">{slab.taxRate > 0 && idx > 0 ? "" : row.customerGst}</TableCell>
+                              <TableCell className="text-center font-bold text-foreground">{slab.taxRate}%</TableCell>
+                              <TableCell className="text-right font-medium">₹{slab.taxableValue.toFixed(2)}</TableCell>
+                              <TableCell className="text-right text-muted-foreground">₹{slab.cgst.toFixed(2)}</TableCell>
+                              <TableCell className="text-right text-muted-foreground">₹{slab.sgst.toFixed(2)}</TableCell>
+                              <TableCell className="text-right text-rose-600 dark:text-rose-400">₹{slab.igst.toFixed(2)}</TableCell>
+                              <TableCell className="text-right font-bold text-foreground">₹{slab.grandTotal.toFixed(2)}</TableCell>
                             </TableRow>
                           ))
                         )
@@ -669,50 +669,50 @@ export default function CaReportsPage() {
 
             {/* B2C Table */}
             <TabsContent value="gstr1b2c" className="mt-0">
-              <Card className="rounded-2xl border-gray-200/80 shadow-xs overflow-hidden bg-white">
+              <Card className="rounded-2xl border-border shadow-xs overflow-hidden bg-card text-card-foreground">
                 <div className="overflow-x-auto w-full">
                   <Table>
-                    <TableHeader className="bg-gray-50/50">
+                    <TableHeader className="bg-muted/50">
                       <TableRow>
-                        <TableHead className="font-bold">Invoice #</TableHead>
-                        <TableHead className="font-bold">Date</TableHead>
-                        <TableHead className="font-bold">Customer Name</TableHead>
-                        <TableHead className="font-bold text-center">GST Rate (%)</TableHead>
-                        <TableHead className="font-bold text-right">Taxable Value (₹)</TableHead>
-                        <TableHead className="font-bold text-right">CGST (₹)</TableHead>
-                        <TableHead className="font-bold text-right">SGST (₹)</TableHead>
-                        <TableHead className="font-bold text-right">IGST (₹)</TableHead>
-                        <TableHead className="font-bold text-right">Grand Total (₹)</TableHead>
+                        <TableHead className="font-bold text-muted-foreground">Invoice #</TableHead>
+                        <TableHead className="font-bold text-muted-foreground">Date</TableHead>
+                        <TableHead className="font-bold text-muted-foreground">Customer Name</TableHead>
+                        <TableHead className="font-bold text-center text-muted-foreground">GST Rate (%)</TableHead>
+                        <TableHead className="font-bold text-right text-muted-foreground">Taxable Value (₹)</TableHead>
+                        <TableHead className="font-bold text-right text-muted-foreground">CGST (₹)</TableHead>
+                        <TableHead className="font-bold text-right text-muted-foreground">SGST (₹)</TableHead>
+                        <TableHead className="font-bold text-right text-muted-foreground">IGST (₹)</TableHead>
+                        <TableHead className="font-bold text-right text-muted-foreground">Grand Total (₹)</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {loading ? (
                         <TableRow>
-                          <TableCell colSpan={9} className="text-center py-8">
-                            <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-gray-400" />
+                          <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                            <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-muted-foreground" />
                             Loading GSTR-1 B2C data...
                           </TableCell>
                         </TableRow>
                       ) : data.sales.filter(i => !i.customerGst).length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={9} className="text-center py-12 text-gray-400">
-                            <AlertCircle className="h-7 w-7 mx-auto mb-2 text-gray-300" />
+                          <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
+                            <AlertCircle className="h-7 w-7 mx-auto mb-2 opacity-50" />
                             No B2C sales registered for this month.
                           </TableCell>
                         </TableRow>
                       ) : (
                         data.sales.filter(i => !i.customerGst).map((row) => 
                           row.gstRateDetails.map((slab, idx) => (
-                            <TableRow key={`${row.id}-${idx}`} className="hover:bg-gray-50/50 transition-colors">
-                              <TableCell className="font-bold text-gray-900">{slab.taxRate > 0 && idx > 0 ? "" : row.invoiceNum}</TableCell>
-                              <TableCell className="text-gray-500">{slab.taxRate > 0 && idx > 0 ? "" : new Date(row.issuedAt).toLocaleDateString("en-IN")}</TableCell>
-                              <TableCell className="font-medium text-gray-800">{slab.taxRate > 0 && idx > 0 ? "" : row.customerName}</TableCell>
-                              <TableCell className="text-center font-bold text-slate-700">{slab.taxRate}%</TableCell>
-                              <TableCell className="text-right">₹{slab.taxableValue.toFixed(2)}</TableCell>
-                              <TableCell className="text-right text-gray-500">₹{slab.cgst.toFixed(2)}</TableCell>
-                              <TableCell className="text-right text-gray-500">₹{slab.sgst.toFixed(2)}</TableCell>
-                              <TableCell className="text-right text-rose-600">₹{slab.igst.toFixed(2)}</TableCell>
-                              <TableCell className="text-right font-bold text-gray-900">₹{slab.grandTotal.toFixed(2)}</TableCell>
+                            <TableRow key={`${row.id}-${idx}`} className="hover:bg-muted/40 transition-colors">
+                              <TableCell className="font-bold text-foreground">{slab.taxRate > 0 && idx > 0 ? "" : row.invoiceNum}</TableCell>
+                              <TableCell className="text-muted-foreground">{slab.taxRate > 0 && idx > 0 ? "" : new Date(row.issuedAt).toLocaleDateString("en-IN")}</TableCell>
+                              <TableCell className="font-medium text-foreground">{slab.taxRate > 0 && idx > 0 ? "" : row.customerName}</TableCell>
+                              <TableCell className="text-center font-bold text-foreground">{slab.taxRate}%</TableCell>
+                              <TableCell className="text-right font-medium">₹{slab.taxableValue.toFixed(2)}</TableCell>
+                              <TableCell className="text-right text-muted-foreground">₹{slab.cgst.toFixed(2)}</TableCell>
+                              <TableCell className="text-right text-muted-foreground">₹{slab.sgst.toFixed(2)}</TableCell>
+                              <TableCell className="text-right text-rose-600 dark:text-rose-400">₹{slab.igst.toFixed(2)}</TableCell>
+                              <TableCell className="text-right font-bold text-foreground">₹{slab.grandTotal.toFixed(2)}</TableCell>
                             </TableRow>
                           ))
                         )
@@ -727,73 +727,73 @@ export default function CaReportsPage() {
 
         {/* Tab 4: GSTR-3B Summary */}
         <TabsContent value="gstr3b" className="mt-0 space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-2xl border border-gray-200/80 shadow-3xs">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-card text-card-foreground p-4 rounded-2xl border border-border shadow-3xs">
             <div>
-              <span className="block text-xs font-bold text-gray-800">GSTR-3B Summary Report</span>
-              <span className="block text-[10px] text-gray-400">Aggregated output tax liability against offset input credit (ITC)</span>
+              <span className="block text-xs font-bold text-foreground">GSTR-3B Summary Report</span>
+              <span className="block text-[10px] text-muted-foreground">Aggregated output tax liability against offset input credit (ITC)</span>
             </div>
-            <Button onClick={handleExportGSTR3B} disabled={loading} className="w-full sm:w-auto rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9">
+            <Button onClick={handleExportGSTR3B} disabled={loading} className="w-full sm:w-auto rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9 shadow-sm">
               <FileDown className="h-4 w-4 mr-2" /> Export GSTR-3B Summary
             </Button>
           </div>
 
-          <Card className="rounded-2xl border-gray-200/80 shadow-xs overflow-hidden bg-white">
+          <Card className="rounded-2xl border-border shadow-xs overflow-hidden bg-card text-card-foreground">
             <div className="overflow-x-auto w-full">
               <Table>
-                <TableHeader className="bg-gray-50/50">
+                <TableHeader className="bg-muted/50">
                   <TableRow>
-                    <TableHead className="font-extrabold text-[11px] text-gray-900">Category of Supplies</TableHead>
-                    <TableHead className="font-extrabold text-[11px] text-right">Taxable Value (₹)</TableHead>
-                    <TableHead className="font-extrabold text-[11px] text-right">CGST (₹)</TableHead>
-                    <TableHead className="font-extrabold text-[11px] text-right">SGST (₹)</TableHead>
-                    <TableHead className="font-extrabold text-[11px] text-right text-rose-600">IGST (₹)</TableHead>
-                    <TableHead className="font-extrabold text-[11px] text-right text-slate-900">Total GST Liability (₹)</TableHead>
+                    <TableHead className="font-extrabold text-[11px] text-foreground">Category of Supplies</TableHead>
+                    <TableHead className="font-extrabold text-[11px] text-right text-muted-foreground">Taxable Value (₹)</TableHead>
+                    <TableHead className="font-extrabold text-[11px] text-right text-muted-foreground">CGST (₹)</TableHead>
+                    <TableHead className="font-extrabold text-[11px] text-right text-muted-foreground">SGST (₹)</TableHead>
+                    <TableHead className="font-extrabold text-[11px] text-right text-rose-600 dark:text-rose-400">IGST (₹)</TableHead>
+                    <TableHead className="font-extrabold text-[11px] text-right text-foreground">Total GST Liability (₹)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="text-xs">
                   {/* Outward Taxable supplies */}
-                  <TableRow className="hover:bg-white font-medium text-gray-800">
+                  <TableRow className="hover:bg-muted/40 font-medium text-foreground">
                     <TableCell className="font-bold flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-emerald-600" />
+                      <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                       1. Outward Taxable Supplies (Sales Output)
                     </TableCell>
                     <TableCell className="text-right">₹{data.summary.totalTaxableSales.toFixed(2)}</TableCell>
                     <TableCell className="text-right">₹{data.summary.totalCgst.toFixed(2)}</TableCell>
                     <TableCell className="text-right">₹{data.summary.totalSgst.toFixed(2)}</TableCell>
-                    <TableCell className="text-right text-rose-600">₹{data.summary.totalIgst.toFixed(2)}</TableCell>
-                    <TableCell className="text-right font-bold text-emerald-600">₹{data.summary.totalTaxSales.toFixed(2)}</TableCell>
+                    <TableCell className="text-right text-rose-600 dark:text-rose-400">₹{data.summary.totalIgst.toFixed(2)}</TableCell>
+                    <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400">₹{data.summary.totalTaxSales.toFixed(2)}</TableCell>
                   </TableRow>
                   
                   {/* Inward Taxable supplies (ITC) */}
-                  <TableRow className="hover:bg-white font-medium text-gray-800">
+                  <TableRow className="hover:bg-muted/40 font-medium text-foreground">
                     <TableCell className="font-bold flex items-center gap-2">
-                      <Wallet className="h-4 w-4 text-purple-600" />
+                      <Wallet className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                       2. Eligible Input Tax Credit (Purchases ITC)
                     </TableCell>
                     <TableCell className="text-right">₹{data.itcSummary.totalPurchaseTaxable.toFixed(2)}</TableCell>
                     <TableCell className="text-right">₹{data.itcSummary.totalCgst.toFixed(2)}</TableCell>
                     <TableCell className="text-right">₹{data.itcSummary.totalSgst.toFixed(2)}</TableCell>
-                    <TableCell className="text-right text-rose-600">₹{data.itcSummary.totalIgst.toFixed(2)}</TableCell>
-                    <TableCell className="text-right font-bold text-purple-600">₹{data.itcSummary.totalTaxPurchases.toFixed(2)}</TableCell>
+                    <TableCell className="text-right text-rose-600 dark:text-rose-400">₹{data.itcSummary.totalIgst.toFixed(2)}</TableCell>
+                    <TableCell className="text-right font-bold text-purple-600 dark:text-purple-400">₹{data.itcSummary.totalTaxPurchases.toFixed(2)}</TableCell>
                   </TableRow>
 
                   {/* Net Payable / Net Liability summary */}
-                  <TableRow className="bg-slate-50/70 hover:bg-slate-50 font-black text-gray-900 border-t-2 border-slate-200">
+                  <TableRow className="bg-muted/70 hover:bg-muted font-black text-foreground border-t-2 border-border">
                     <TableCell className="flex items-center gap-2 font-black">
-                      <Scale className="h-4 w-4 text-slate-800" />
+                      <Scale className="h-4 w-4 text-foreground" />
                       3. Net GST Liability (Output liability minus Eligible ITC)
                     </TableCell>
-                    <TableCell className="text-right text-gray-400">—</TableCell>
-                    <TableCell className={`text-right ${data.netLiability.cgst >= 0 ? "text-rose-600" : "text-emerald-600"}`}>
+                    <TableCell className="text-right text-muted-foreground">—</TableCell>
+                    <TableCell className={`text-right ${data.netLiability.cgst >= 0 ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
                       ₹{Math.abs(data.netLiability.cgst).toFixed(2)} {data.netLiability.cgst < 0 && " (Cr)"}
                     </TableCell>
-                    <TableCell className={`text-right ${data.netLiability.sgst >= 0 ? "text-rose-600" : "text-emerald-600"}`}>
+                    <TableCell className={`text-right ${data.netLiability.sgst >= 0 ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
                       ₹{Math.abs(data.netLiability.sgst).toFixed(2)} {data.netLiability.sgst < 0 && " (Cr)"}
                     </TableCell>
-                    <TableCell className={`text-right ${data.netLiability.igst >= 0 ? "text-rose-600" : "text-emerald-600"}`}>
+                    <TableCell className={`text-right ${data.netLiability.igst >= 0 ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
                       ₹{Math.abs(data.netLiability.igst).toFixed(2)} {data.netLiability.igst < 0 && " (Cr)"}
                     </TableCell>
-                    <TableCell className={`text-right font-black text-[13px] ${data.netLiability.netTaxPayable >= 0 ? "text-rose-700 bg-rose-50" : "text-emerald-700 bg-emerald-50"}`}>
+                    <TableCell className={`text-right font-black text-[13px] ${data.netLiability.netTaxPayable >= 0 ? "text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60" : "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60"}`}>
                       ₹{Math.abs(data.netLiability.netTaxPayable).toFixed(2)} {data.netLiability.netTaxPayable < 0 ? "Refund (Cr)" : "Payable"}
                     </TableCell>
                   </TableRow>
@@ -805,63 +805,63 @@ export default function CaReportsPage() {
 
         {/* Tab 5: HSN/SAC Summary */}
         <TabsContent value="hsn" className="mt-0 space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-2xl border border-gray-200/80 shadow-3xs">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-card text-card-foreground p-4 rounded-2xl border border-border shadow-3xs">
             <div>
-              <span className="block text-xs font-bold text-gray-800">HSN/SAC Sales Aggregates</span>
-              <span className="block text-[10px] text-gray-400">Monthly outward supplies totals grouped by product HSN/SAC classification</span>
+              <span className="block text-xs font-bold text-foreground">HSN/SAC Sales Aggregates</span>
+              <span className="block text-[10px] text-muted-foreground">Monthly outward supplies totals grouped by product HSN/SAC classification</span>
             </div>
-            <Button onClick={handleExportHSN} disabled={loading || data.hsnSummary.length === 0} className="w-full sm:w-auto rounded-full bg-purple-600 hover:bg-purple-700 text-white font-bold h-9">
+            <Button onClick={handleExportHSN} disabled={loading || data.hsnSummary.length === 0} className="w-full sm:w-auto rounded-full bg-purple-600 hover:bg-purple-700 text-white font-bold h-9 shadow-sm">
               <FileDown className="h-4 w-4 mr-2" /> Export HSN/SAC Summary
             </Button>
           </div>
 
-          <Card className="rounded-2xl border-gray-200/80 shadow-xs overflow-hidden bg-white">
+          <Card className="rounded-2xl border-border shadow-xs overflow-hidden bg-card text-card-foreground">
             <div className="overflow-x-auto w-full">
               <Table>
-                <TableHeader className="bg-gray-50/50">
+                <TableHeader className="bg-muted/50">
                   <TableRow>
-                    <TableHead className="font-bold">HSN/SAC Code</TableHead>
-                    <TableHead className="font-bold">Description</TableHead>
-                    <TableHead className="font-bold text-center">UQC (Unit)</TableHead>
-                    <TableHead className="font-bold text-center">GST Rate (%)</TableHead>
-                    <TableHead className="font-bold text-center">Total Quantity</TableHead>
-                    <TableHead className="font-bold text-right">Total Value (₹)</TableHead>
-                    <TableHead className="font-bold text-right">Taxable Value (₹)</TableHead>
-                    <TableHead className="font-bold text-right">CGST (₹)</TableHead>
-                    <TableHead className="font-bold text-right">SGST (₹)</TableHead>
-                    <TableHead className="font-bold text-right text-rose-600">IGST (₹)</TableHead>
-                    <TableHead className="font-bold text-right">Total GST Tax (₹)</TableHead>
+                    <TableHead className="font-bold text-muted-foreground">HSN/SAC Code</TableHead>
+                    <TableHead className="font-bold text-muted-foreground">Description</TableHead>
+                    <TableHead className="font-bold text-center text-muted-foreground">UQC (Unit)</TableHead>
+                    <TableHead className="font-bold text-center text-muted-foreground">GST Rate (%)</TableHead>
+                    <TableHead className="font-bold text-center text-muted-foreground">Total Quantity</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">Total Value (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">Taxable Value (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">CGST (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">SGST (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-rose-600 dark:text-rose-400">IGST (₹)</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">Total GST Tax (₹)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={11} className="text-center py-8">
-                        <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-gray-400" />
+                      <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
+                        <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-muted-foreground" />
                         Loading HSN summary...
                       </TableCell>
                     </TableRow>
                   ) : data.hsnSummary.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={11} className="text-center py-12 text-gray-400">
-                        <AlertCircle className="h-7 w-7 mx-auto mb-2 text-gray-300" />
+                      <TableCell colSpan={11} className="text-center py-12 text-muted-foreground">
+                        <AlertCircle className="h-7 w-7 mx-auto mb-2 opacity-50" />
                         No sales invoices recorded with HSN/SAC information.
                       </TableCell>
                     </TableRow>
                   ) : (
                     data.hsnSummary.map((row) => (
-                      <TableRow key={`${row.hsnSac}-${row.gstRate}`} className="hover:bg-gray-50/50 transition-colors">
-                        <TableCell className="font-bold text-slate-800 font-mono">{row.hsnSac}</TableCell>
-                        <TableCell className="font-medium text-gray-800 max-w-[180px] truncate">{row.description}</TableCell>
-                        <TableCell className="text-center font-bold text-gray-500">{row.unit}</TableCell>
-                        <TableCell className="text-center font-bold text-slate-700">{row.gstRate || "N/A"}</TableCell>
-                        <TableCell className="text-center font-bold text-gray-900">{row.quantity}</TableCell>
+                      <TableRow key={`${row.hsnSac}-${row.gstRate}`} className="hover:bg-muted/40 transition-colors">
+                        <TableCell className="font-bold text-foreground font-mono">{row.hsnSac}</TableCell>
+                        <TableCell className="font-medium text-foreground max-w-[180px] truncate">{row.description}</TableCell>
+                        <TableCell className="text-center font-bold text-muted-foreground">{row.unit}</TableCell>
+                        <TableCell className="text-center font-bold text-foreground">{row.gstRate || "N/A"}</TableCell>
+                        <TableCell className="text-center font-bold text-foreground">{row.quantity}</TableCell>
                         <TableCell className="text-right font-medium">₹{row.totalValue.toFixed(2)}</TableCell>
                         <TableCell className="text-right font-medium">₹{row.taxableValue.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-gray-500">₹{row.cgst.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-gray-500">₹{row.sgst.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-rose-600">₹{row.igst.toFixed(2)}</TableCell>
-                        <TableCell className="text-right font-black text-gray-955">₹{row.totalTax.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">₹{row.cgst.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">₹{row.sgst.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-rose-600 dark:text-rose-400">₹{row.igst.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-black text-foreground">₹{row.totalTax.toFixed(2)}</TableCell>
                       </TableRow>
                     ))
                   )}
