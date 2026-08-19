@@ -32,6 +32,7 @@ export async function POST(req, { params }) {
       where: {
         customerId: id,
         shopId: user.shopId,
+        isDeleted: false,
         status: { in: ['PENDING', 'PARTIAL'] },
       },
       orderBy: { issuedAt: 'asc' },

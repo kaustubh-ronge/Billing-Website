@@ -472,6 +472,7 @@ model PurchaseNote {
   amountRemaining Float    @default(0)
   noteDate        DateTime @default(now())
   remarks         String?  @db.Text
+  gstNumber       String?
 
   // Toggle between General note and Purchase ledger note
   isPurchase      Boolean  @default(true)

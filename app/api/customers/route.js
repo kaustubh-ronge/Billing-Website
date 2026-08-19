@@ -1,4 +1,4 @@
-﻿export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server';
 import { requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
@@ -24,6 +24,7 @@ export async function GET(req) {
       },
       include: {
         invoices: {
+          where: { isDeleted: false },
           select: {
             grandTotal: true,
             amountPaid: true,

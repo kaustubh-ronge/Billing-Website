@@ -15,6 +15,8 @@ export default function SubscriptionPlansPage() {
   const [name, setName] = useState('');
   const [durationDays, setDurationDays] = useState('');
   const [price, setPrice] = useState('');
+  const [editingPriceId, setEditingPriceId] = useState(null);
+  const [editPriceValue, setEditPriceValue] = useState('');
 
   useEffect(() => {
     fetchPlans();
@@ -82,6 +84,25 @@ export default function SubscriptionPlansPage() {
       }
     } catch {
       toast.error('Error toggling plan status');
+    }
+  };
+
+  const handleSavePrice = async (id) => {
+    try {
+      const res = await fetch('/api/admin/plans', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, price: parseFloat(editPriceValue || "0") }),
+      });
+      if (res.ok) {
+        toast.success('Subscription plan price updated successfully');
+        setEditingPriceId(null);
+        fetchPlans();
+      } else {
+        toast.error('Failed to update plan price');
+      }
+    } catch {
+      toast.error('Error updating plan price');
     }
   };
 
@@ -192,15 +213,54 @@ export default function SubscriptionPlansPage() {
                         </p>
                       </div>
                       <div className="flex items-center justify-between pt-2 border-t border-border">
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-lg font-black text-foreground">₹{p.price}</span>
-                          <span className="text-[10px] text-muted-foreground">one-time</span>
-                        </div>
+                        {editingPriceId === p.id ? (
+                          <div className="flex items-center gap-1.5 flex-1 mr-2">
+                            <span className="text-xs text-muted-foreground font-bold">₹</span>
+                            <Input 
+                              type="number" 
+                              value={editPriceValue} 
+                              onChange={(e) => setEditPriceValue(e.target.value)} 
+                              className="h-7 w-20 text-xs px-2 rounded-lg border-border font-bold text-gray-900"
+                              min="0"
+                            />
+                            <Button 
+                              size="xs" 
+                              onClick={() => handleSavePrice(p.id)} 
+                              className="rounded-lg h-7 px-2 text-[10px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
+                            >
+                              Save
+                            </Button>
+                            <Button 
+                              size="xs" 
+                              variant="outline" 
+                              onClick={() => setEditingPriceId(null)} 
+                              className="rounded-lg h-7 px-2 text-[10px]"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-lg font-black text-foreground">₹{p.price}</span>
+                              <span className="text-[10px] text-muted-foreground font-semibold">one-time</span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setEditingPriceId(p.id);
+                                setEditPriceValue(p.price.toString());
+                              }}
+                              className="text-blue-600 hover:text-blue-700 text-[10px] font-bold hover:underline"
+                            >
+                              Edit Price
+                            </button>
+                          </div>
+                        )}
                         <Button 
                           size="xs" 
                           variant={p.isActive ? "destructive" : "default"} 
                           onClick={() => togglePlanActive(p.id, p.isActive)}
-                          className="rounded-xl text-[10px] font-bold h-7 px-2.5"
+                          className="rounded-xl text-[10px] font-bold h-7 px-2.5 shrink-0"
                         >
                           {p.isActive ? "Deactivate" : "Activate"}
                         </Button>

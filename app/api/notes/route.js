@@ -64,7 +64,7 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { companyName, productsBought, quantityBought, totalAmount, amountPaid, amountRemaining, noteDate, remarks, isPurchase, title } = body;
+    const { companyName, productsBought, quantityBought, totalAmount, amountPaid, amountRemaining, noteDate, remarks, isPurchase, title, gstNumber } = body;
 
     if (isPurchase) {
       if (!companyName || !productsBought) {
@@ -89,6 +89,7 @@ export async function POST(req) {
         isPurchase: isPurchase === true,
         title: title || '',
         shopId: user.shopId,
+        gstNumber: gstNumber || null,
       }
     });
 

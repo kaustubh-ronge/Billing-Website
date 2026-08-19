@@ -36,6 +36,11 @@ const renderProductsBought = (text) => {
                   {item.qty}
                 </span>
               )}
+              {item.gstRate && (
+                <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold">
+                  {item.gstRate}% GST
+                </span>
+              )}
               {item.amount && (
                 <span className="text-[10px] text-muted-foreground">
                   (₹{parseFloat(item.amount).toFixed(2)})
@@ -74,11 +79,12 @@ const renderProductsBought = (text) => {
     noteDate: new Date().toISOString().split('T')[0],
     remarks: "",
     isPurchase: true,
-    title: ""
+    title: "",
+    gstNumber: ""
   });
 
   const [formProducts, setFormProducts] = useState([
-    { name: "", qty: "", amount: "" }
+    { name: "", qty: "", amount: "", gstRate: "" }
   ]);
 
   // Calculate stats
@@ -147,9 +153,10 @@ const renderProductsBought = (text) => {
       noteDate: new Date().toISOString().split('T')[0],
       remarks: "",
       isPurchase: activeTab === "purchase",
-      title: ""
+      title: "",
+      gstNumber: ""
     });
-    setFormProducts([{ name: "", qty: "", amount: "" }]);
+    setFormProducts([{ name: "", qty: "", amount: "", gstRate: "" }]);
     setEditingItem(null);
     setOriginalPaid(0);
     setSettleAmount("");
@@ -172,23 +179,29 @@ const renderProductsBought = (text) => {
       noteDate: new Date(item.noteDate).toISOString().split('T')[0],
       remarks: item.remarks || "",
       isPurchase: item.isPurchase,
-      title: item.title || ""
+      title: item.title || "",
+      gstNumber: item.gstNumber || ""
     });
     setOriginalPaid(item.amountPaid || 0);
     setSettleAmount("");
 
-    let parsed = [{ name: "", qty: "", amount: "" }];
+    let parsed = [{ name: "", qty: "", amount: "", gstRate: "" }];
     try {
-      if (item.productsBought && item.productsBought.startsWith('[')) {
-        parsed = JSON.parse(item.productsBought);
-      } else if (item.productsBought) {
-        parsed = [{ name: item.productsBought, qty: item.quantityBought || "", amount: item.totalAmount || "" }];
-      }
+       if (item.productsBought && item.productsBought.startsWith('[')) {
+         parsed = JSON.parse(item.productsBought).map(p => ({
+           name: p.name || "",
+           qty: p.qty || "",
+           amount: p.amount !== undefined ? p.amount.toString() : "",
+           gstRate: p.gstRate !== undefined ? p.gstRate.toString() : ""
+         }));
+       } else if (item.productsBought) {
+         parsed = [{ name: item.productsBought, qty: item.quantityBought || "", amount: item.totalAmount || "", gstRate: "" }];
+       }
     } catch (e) {
-      console.error(e);
-      if (item.productsBought) {
-        parsed = [{ name: item.productsBought, qty: item.quantityBought || "", amount: item.totalAmount || "" }];
-      }
+       console.error(e);
+       if (item.productsBought) {
+         parsed = [{ name: item.productsBought, qty: item.quantityBought || "", amount: item.totalAmount || "", gstRate: "" }];
+       }
     }
     setFormProducts(parsed);
     setIsOpen(true);
@@ -244,7 +257,7 @@ const renderProductsBought = (text) => {
   };
 
   const addProductRow = () => {
-    setFormProducts(prev => [...prev, { name: "", qty: "", amount: "" }]);
+    setFormProducts(prev => [...prev, { name: "", qty: "", amount: "", gstRate: "" }]);
   };
 
   const removeProductRow = (index) => {
@@ -284,7 +297,7 @@ const renderProductsBought = (text) => {
           if (prodDetails && prodDetails.startsWith('[')) {
             try {
               const parsed = JSON.parse(prodDetails);
-              prodDetails = parsed.map(p => `${p.name} (Qty: ${p.qty || '-'}, Price: ${p.amount || '-'})`).join(" | ");
+              prodDetails = parsed.map(p => `${p.name} (Qty: ${p.qty || '-'}, GST: ${p.gstRate ? p.gstRate + '%' : '-'}, Price: ${p.amount || '-'})`).join(" | ");
             } catch (e) {}
           }
           const company = `"${(item.companyName || '').replace(/"/g, '""')}"`;
@@ -487,8 +500,9 @@ const renderProductsBought = (text) => {
 
         {/* Tab 1: Purchase Ledger */}
         <TabsContent value="purchase">
-          <Card className="rounded-2xl border-gray-200/80 shadow-xs overflow-hidden">
-            <Table>
+          <Card className="rounded-2xl border-gray-200/80 shadow-xs overflow-hidden bg-white">
+            <div className="overflow-x-auto w-full">
+              <Table>
               <TableHeader className="bg-gray-50/50">
                 <TableRow>
                   <TableHead className="font-bold">Supplier / Company</TableHead>
@@ -544,7 +558,8 @@ const renderProductsBought = (text) => {
                   ))
                 )}
               </TableBody>
-            </Table>
+              </Table>
+            </div>
           </Card>
         </TabsContent>
 
@@ -593,38 +608,42 @@ const renderProductsBought = (text) => {
       </Tabs>
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between p-4 border-t border-gray-150">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border border-gray-200/80 bg-white rounded-2xl shadow-3xs mt-4">
+        <div className="flex items-center gap-2">
           <span className="text-[11px] text-muted-foreground font-sans">
-            Showing Page {page} of {totalPages} ({totalCount} records)
+            Showing Page {page} of {totalPages || 1} ({totalCount} records)
           </span>
-          <div className="flex gap-1.5">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              className="rounded-full px-4 text-xs font-bold border-gray-200"
-            >
-              <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Prev
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages}
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              className="rounded-full px-4 text-xs font-bold border-gray-200"
-            >
-              Next <ArrowRight className="h-3.5 w-3.5 ml-1" />
-            </Button>
-          </div>
+          <span className="text-[11px] text-gray-300">•</span>
+          <span className="text-[11px] text-muted-foreground font-sans font-bold">
+            10 rows per page
+          </span>
         </div>
-      )}
+        <div className="flex gap-1.5 w-full sm:w-auto justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            className="rounded-full px-4 text-xs font-bold border-gray-200 h-8"
+          >
+            <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Prev
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages || totalPages <= 1}
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            className="rounded-full px-4 text-xs font-bold border-gray-200 h-8"
+          >
+            Next <ArrowRight className="h-3.5 w-3.5 ml-1" />
+          </Button>
+        </div>
+      </div>
 
       {/* Dialog overlay for Add / Edit */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="rounded-2xl max-w-2xl bg-white font-sans">
-          <form onSubmit={handleSave}>
+        <DialogContent style={{ maxWidth: "672px", width: "95vw" }} className="rounded-2xl bg-white font-sans p-6">
+          <form onSubmit={handleSave} className="w-full flex flex-col">
             <DialogHeader>
               <DialogTitle className="text-sm font-black text-gray-900">
                 {editingItem ? "Edit Note / Record" : "Add New Note / Record"}
@@ -674,16 +693,28 @@ const renderProductsBought = (text) => {
               {/* Conditional Inputs: Purchase Ledger fields */}
               {formData.isPurchase ? (
                 <>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="companyName" className="text-gray-600 font-bold">Company / Supplier Name *</Label>
-                    <Input
-                      id="companyName"
-                      value={formData.companyName}
-                      onChange={(e) => setFormData(p => ({ ...p, companyName: e.target.value }))}
-                      placeholder="e.g. ADVIKS Software Solutions"
-                      className="rounded-xl border-gray-200 h-10 shadow-3xs"
-                      required
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="companyName" className="text-gray-600 font-bold">Company / Supplier Name *</Label>
+                      <Input
+                        id="companyName"
+                        value={formData.companyName}
+                        onChange={(e) => setFormData(p => ({ ...p, companyName: e.target.value }))}
+                        placeholder="e.g. ADVIKS Software Solutions"
+                        className="rounded-xl border-gray-200 h-10 shadow-3xs"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="gstNumber" className="text-gray-600 font-bold">Supplier GSTIN (Optional)</Label>
+                      <Input
+                        id="gstNumber"
+                        value={formData.gstNumber || ""}
+                        onChange={(e) => setFormData(p => ({ ...p, gstNumber: e.target.value }))}
+                        placeholder="e.g. 27AAAAA1111A1Z1"
+                        className="rounded-xl border-gray-200 h-10 shadow-3xs font-mono uppercase"
+                      />
+                    </div>
                   </div>
 
                   {/* Multi-product bought row list */}
@@ -704,69 +735,84 @@ const renderProductsBought = (text) => {
                       </Button>
                     </div>
 
-                    <div className="space-y-2 mt-3">
-                      {/* Column Header Labels */}
-                      <div className="grid grid-cols-[1fr_110px_100px_36px] gap-2 items-center text-[10px] uppercase font-bold text-gray-400 px-2 tracking-wider">
-                        <div>Product Name</div>
-                        <div>Quantity</div>
-                        <div className="text-right">Price (₹)</div>
-                        <div></div>
-                      </div>
-
-                      {formProducts.map((prod, idx) => (
-                        <div key={idx} className="grid grid-cols-[1fr_110px_100px_36px] gap-2 items-center bg-white p-1.5 rounded-xl border border-gray-200/70 shadow-3xs">
-                          <div>
-                            <Input
-                              placeholder="Product Name *"
-                              value={prod.name}
-                              onChange={(e) => handleProductChange(idx, 'name', e.target.value)}
-                              className="rounded-lg border-gray-200 text-[11px] h-9"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Input
-                              placeholder="e.g. 50 bags"
-                              value={prod.qty}
-                              onChange={(e) => handleProductChange(idx, 'qty', e.target.value)}
-                              className="rounded-lg border-gray-200 text-[11px] h-9"
-                            />
-                          </div>
-                          <div>
-                            <Input
-                              type="number"
-                              step="any"
-                              min="0"
-                              placeholder="0.00"
-                              value={prod.amount}
-                              onChange={(e) => handleProductChange(idx, 'amount', e.target.value)}
-                              className="rounded-lg border-gray-200 text-[11px] h-9 text-right font-medium"
-                              required
-                            />
-                          </div>
-                          <div className="flex justify-center">
-                            {formProducts.length > 1 ? (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removeProductRow(idx)}
-                                className="h-8 w-8 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-full shrink-0"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            ) : (
-                              <div className="w-8 h-8" />
-                            )}
-                          </div>
+                    <div className="overflow-x-auto w-full pb-1">
+                      <div className="min-w-[550px] space-y-2 mt-3">
+                        {/* Column Header Labels */}
+                        <div className="grid grid-cols-[1fr_110px_90px_90px_36px] gap-2 items-center text-[10px] uppercase font-bold text-gray-400 px-2 tracking-wider">
+                          <div>Product Name</div>
+                          <div>Quantity</div>
+                          <div className="text-center">GST Rate (%)</div>
+                          <div className="text-right">Price (₹)</div>
+                          <div></div>
                         </div>
-                      ))}
+
+                        {formProducts.map((prod, idx) => (
+                          <div key={idx} className="grid grid-cols-[1fr_110px_90px_90px_36px] gap-2 items-center bg-white p-1.5 rounded-xl border border-gray-200/70 shadow-3xs">
+                            <div>
+                              <Input
+                                placeholder="Product Name *"
+                                value={prod.name}
+                                onChange={(e) => handleProductChange(idx, 'name', e.target.value)}
+                                className="rounded-lg border-gray-200 text-[11px] h-9"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Input
+                                placeholder="e.g. 50 bags"
+                                value={prod.qty}
+                                onChange={(e) => handleProductChange(idx, 'qty', e.target.value)}
+                                className="rounded-lg border-gray-200 text-[11px] h-9"
+                              />
+                            </div>
+                            <div>
+                              <Input
+                                type="number"
+                                step="any"
+                                min="0"
+                                max="100"
+                                placeholder="18%"
+                                value={prod.gstRate || ""}
+                                onChange={(e) => handleProductChange(idx, 'gstRate', e.target.value)}
+                                className="rounded-lg border-gray-200 text-[11px] h-9 text-center font-medium"
+                              />
+                            </div>
+                            <div>
+                              <Input
+                                type="number"
+                                step="any"
+                                min="0"
+                                placeholder="0.00"
+                                value={prod.amount}
+                                onChange={(e) => handleProductChange(idx, 'amount', e.target.value)}
+                                className="rounded-lg border-gray-200 text-[11px] h-9 text-right font-medium"
+                                required
+                              />
+                            </div>
+                            <div className="flex justify-center">
+                              {formProducts.length > 1 ? (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeProductRow(idx)}
+                                  className="h-8 w-8 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-full shrink-0"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              ) : (
+                                <div className="w-8 h-8" />
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
                   {/* Financial calculation details */}
                   <div className="border border-gray-200/70 rounded-2xl p-4 bg-white space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="space-y-1.5">
                         <Label htmlFor="totalAmount" className="text-gray-500 font-bold">Total Purchase Amt (₹)</Label>
                         <div className="relative">
@@ -885,14 +931,14 @@ const renderProductsBought = (text) => {
 
             </div>
 
-            <DialogFooter className="mt-4 flex justify-end gap-2 border-t border-gray-100 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="rounded-full border-gray-200 px-6 font-bold">
+            <div className="flex flex-row items-center justify-end gap-3 pt-4 border-t border-gray-100 mt-4 px-1">
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="rounded-full border-gray-200 px-6 font-bold h-10 text-xs">
                 Cancel
               </Button>
-              <Button type="submit" className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6">
+              <Button type="submit" className="font-bold bg-black hover:bg-gray-900 text-white rounded-full px-6 h-10 text-xs">
                 Save Record
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

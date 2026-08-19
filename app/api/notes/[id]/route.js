@@ -20,7 +20,7 @@ export async function PUT(req, { params }) {
     }
 
     const body = await req.json();
-    const { companyName, productsBought, quantityBought, totalAmount, amountPaid, amountRemaining, noteDate, remarks, isPurchase, title } = body;
+    const { companyName, productsBought, quantityBought, totalAmount, amountPaid, amountRemaining, noteDate, remarks, isPurchase, title, gstNumber } = body;
 
     const note = await db.purchaseNote.update({
       where: { id },
@@ -35,6 +35,7 @@ export async function PUT(req, { params }) {
         remarks: remarks !== undefined ? remarks : existing.remarks,
         isPurchase: isPurchase !== undefined ? isPurchase === true : existing.isPurchase,
         title: title !== undefined ? title : existing.title,
+        gstNumber: gstNumber !== undefined ? gstNumber : existing.gstNumber,
       }
     });
 

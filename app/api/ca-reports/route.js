@@ -3,6 +3,47 @@ import { NextResponse } from 'next/server';
 import { requirePermission } from '@/lib/permissions/guard';
 import { db } from '@/lib/prisma';
 
+const GST_STATES = {
+  "01": "Jammu & Kashmir",
+  "02": "Himachal Pradesh",
+  "03": "Punjab",
+  "04": "Chandigarh",
+  "05": "Uttarakhand",
+  "06": "Haryana",
+  "07": "Delhi",
+  "08": "Rajasthan",
+  "09": "Uttar Pradesh",
+  "10": "Bihar",
+  "11": "Sikkim",
+  "12": "Arunachal Pradesh",
+  "13": "Nagaland",
+  "14": "Manipur",
+  "15": "Mizoram",
+  "16": "Tripura",
+  "17": "Meghalaya",
+  "18": "Assam",
+  "19": "West Bengal",
+  "20": "Jharkhand",
+  "21": "Odisha",
+  "22": "Chhattisgarh",
+  "23": "Madhya Pradesh",
+  "24": "Gujarat",
+  "25": "Daman & Diu",
+  "26": "Dadra & Nagar Haveli",
+  "27": "Maharashtra",
+  "28": "Andhra Pradesh",
+  "29": "Karnataka",
+  "30": "Goa",
+  "31": "Lakshadweep",
+  "32": "Kerala",
+  "33": "Tamil Nadu",
+  "34": "Puducherry",
+  "35": "Andaman & Nicobar Islands",
+  "36": "Telangana",
+  "37": "Andhra Pradesh (New)",
+  "38": "Ladakh"
+};
+
 export async function GET(req) {
   const ctx = await requirePermission('dashboard:view');
   if (ctx instanceof NextResponse) return ctx;
@@ -85,23 +126,40 @@ export async function GET(req) {
     // HSN/SAC group aggregates map
     const hsnSummaryMap = {};
 
+    const salesRegister = [];
+
     // Process Sales Register with precise Indian GST splits (CGST + SGST vs IGST)
-    const salesRegister = invoices.map((inv) => {
+    invoices.forEach((inv) => {
       const discountPercentage = inv.discountPercentage || 0;
-      let totalTaxableValue = 0;
-      let calculatedCgst = 0;
-      let calculatedSgst = 0;
-      let calculatedIgst = 0;
-      let calculatedGst = 0;
 
       // Determine Inter-state (IGST) vs Intra-state (CGST + SGST)
       const customerGst = inv.customer?.gstNumber?.trim() || "";
-      const customerStateCode = customerGst.substring(0, 2);
-      
+      let customerStateCode = "";
+      let customerStateName = "";
+
+      if (customerGst && customerGst.length >= 2) {
+        customerStateCode = customerGst.substring(0, 2);
+        customerStateName = GST_STATES[customerStateCode] || "";
+      } else {
+        // Resolve state from address to support automatic B2C interstate detection
+        const addressLower = (inv.customer?.address || "").toLowerCase();
+        for (const [code, name] of Object.entries(GST_STATES)) {
+          if (addressLower.includes(name.toLowerCase())) {
+            customerStateCode = code;
+            customerStateName = name;
+            break;
+          }
+        }
+      }
+
       let isInterstate = false;
-      if (shopGst && customerGst && shopStateCode.length === 2 && customerStateCode.length === 2) {
+      if (shopStateCode && customerStateCode) {
         isInterstate = shopStateCode !== customerStateCode;
       }
+
+      const placeOfSupply = customerStateName 
+        ? `${customerStateName} (${customerStateCode})` 
+        : (inv.customer?.address || "Local");
 
       // Group items by tax rate slab
       const taxRateGroups = {};
@@ -116,9 +174,6 @@ export async function GET(req) {
         const itemDiscounted = itemSubtotal * (1 - discountPercentage / 100);
         const taxableVal = itemDiscounted / (1 + (taxRate / 100));
         const taxAmt = itemDiscounted - taxableVal;
-
-        totalTaxableValue += taxableVal;
-        calculatedGst += taxAmt;
 
         // Group by tax slab (for GSTR-1 rate slab reporting)
         if (!taxRateGroups[taxRate]) {
@@ -144,20 +199,18 @@ export async function GET(req) {
 
         if (isInterstate) {
           taxRateGroups[taxRate].igst += taxAmt;
-          calculatedIgst += taxAmt;
           igst = taxAmt;
         } else {
           taxRateGroups[taxRate].cgst += taxAmt / 2;
           taxRateGroups[taxRate].sgst += taxAmt / 2;
-          calculatedCgst += taxAmt / 2;
-          calculatedSgst += taxAmt / 2;
           cgst = taxAmt / 2;
           sgst = taxAmt / 2;
         }
 
-        // Add to HSN summary map
-        if (!hsnSummaryMap[hsn]) {
-          hsnSummaryMap[hsn] = {
+        // Add to HSN summary map (group by HSN + taxRate)
+        const hsnKey = `${hsn}-${taxRate}`;
+        if (!hsnSummaryMap[hsnKey]) {
+          hsnSummaryMap[hsnKey] = {
             hsnSac: hsn,
             description: item.product?.description || item.product?.name || "Product Supply",
             unit: item.product?.unit || "PCS",
@@ -168,43 +221,46 @@ export async function GET(req) {
             sgst: 0,
             igst: 0,
             totalTax: 0,
+            gstRate: `${taxRate}%`
           };
         }
-        hsnSummaryMap[hsn].quantity += qty;
-        hsnSummaryMap[hsn].totalValue += itemDiscounted;
-        hsnSummaryMap[hsn].taxableValue += taxableVal;
-        hsnSummaryMap[hsn].cgst += cgst;
-        hsnSummaryMap[hsn].sgst += sgst;
-        hsnSummaryMap[hsn].igst += igst;
-        hsnSummaryMap[hsn].totalTax += taxAmt;
+        hsnSummaryMap[hsnKey].quantity += qty;
+        hsnSummaryMap[hsnKey].totalValue += itemDiscounted;
+        hsnSummaryMap[hsnKey].taxableValue += taxableVal;
+        hsnSummaryMap[hsnKey].cgst += cgst;
+        hsnSummaryMap[hsnKey].sgst += sgst;
+        hsnSummaryMap[hsnKey].igst += igst;
+        hsnSummaryMap[hsnKey].totalTax += taxAmt;
       });
 
-      const gstRateDetails = Object.values(taxRateGroups).map((g) => ({
-        taxRate: g.taxRate,
-        taxableValue: Math.round(g.taxableValue * 100) / 100,
-        cgst: Math.round(g.cgst * 100) / 100,
-        sgst: Math.round(g.sgst * 100) / 100,
-        igst: Math.round(g.igst * 100) / 100,
-        totalTax: Math.round(g.totalTax * 100) / 100,
-        grandTotal: Math.round(g.grandTotal * 100) / 100,
-      }));
-
-      return {
-        id: inv.id,
-        invoiceNum: inv.invoiceNum,
-        issuedAt: inv.issuedAt,
-        customerName: inv.customer?.name || "Cash Customer",
-        customerGst: customerGst || "",
-        placeOfSupply: inv.customer?.address || "Local",
-        isInterstate,
-        taxableValue: Math.round(totalTaxableValue * 100) / 100,
-        cgst: Math.round(calculatedCgst * 100) / 100,
-        sgst: Math.round(calculatedSgst * 100) / 100,
-        igst: Math.round(calculatedIgst * 100) / 100,
-        totalTax: Math.round(calculatedGst * 100) / 100,
-        grandTotal: inv.grandTotal,
-        gstRateDetails,
-      };
+      // Split invoice into multiple salesRegister entries (one for each tax slab)
+      Object.values(taxRateGroups).forEach((g) => {
+        salesRegister.push({
+          id: `${inv.id}-${g.taxRate}`,
+          invoiceNum: inv.invoiceNum,
+          issuedAt: inv.issuedAt,
+          customerName: inv.customer?.name || "Cash Customer",
+          customerGst: customerGst || "",
+          placeOfSupply,
+          isInterstate,
+          taxableValue: Math.round(g.taxableValue * 100) / 100,
+          cgst: Math.round(g.cgst * 100) / 100,
+          sgst: Math.round(g.sgst * 100) / 100,
+          igst: Math.round(g.igst * 100) / 100,
+          totalTax: Math.round(g.totalTax * 100) / 100,
+          grandTotal: Math.round(g.grandTotal * 100) / 100,
+          gstRate: `${g.taxRate}%`,
+          gstRateDetails: [{
+            taxRate: g.taxRate,
+            taxableValue: Math.round(g.taxableValue * 100) / 100,
+            cgst: Math.round(g.cgst * 100) / 100,
+            sgst: Math.round(g.sgst * 100) / 100,
+            igst: Math.round(g.igst * 100) / 100,
+            totalTax: Math.round(g.totalTax * 100) / 100,
+            grandTotal: Math.round(g.grandTotal * 100) / 100,
+          }]
+        });
+      });
     });
 
     // Fetch all purchase ledger notes in that month
@@ -217,7 +273,7 @@ export async function GET(req) {
       orderBy: { noteDate: 'asc' },
     });
 
-    // Process Purchases with estimated ITC calculation splits
+    // Process Purchases with estimated ITC calculation splits (splitting by individual product row)
     let totalPurchaseValue = 0;
     let totalPurchaseTaxable = 0;
     let totalPurchaseCgst = 0;
@@ -225,77 +281,137 @@ export async function GET(req) {
     let totalPurchaseIgst = 0;
     let totalPurchaseTax = 0;
 
-    const purchaseRegister = purchaseNotes.map((note) => {
-      let calcTaxable = 0;
-      let calcCgst = 0;
-      let calcSgst = 0;
-      let calcIgst = 0;
-      let calcTax = 0;
+    const purchaseRegister = [];
 
-      // Check if supplier has GSTIN to evaluate interstate ITC
-      // We can inspect remarks or name, but default to local ITC (CGST + SGST)
-      const isInterstate = false; 
+    purchaseNotes.forEach((note) => {
+      const supplierGst = note.gstNumber?.trim() || "";
+      const supplierStateCode = supplierGst.substring(0, 2);
+
+      let isInterstate = false;
+      if (shopStateCode && supplierStateCode && supplierStateCode.length === 2) {
+        isInterstate = shopStateCode !== supplierStateCode;
+      }
 
       try {
         if (note.productsBought && note.productsBought.startsWith("[")) {
           const products = JSON.parse(note.productsBought);
-          products.forEach((prod) => {
+          products.forEach((prod, index) => {
             const amt = parseFloat(prod.amount || 0);
             const nameKey = (prod.name || "").toLowerCase().trim();
-            const rate = nameToTaxRateMap.get(nameKey) ?? shop?.taxRate ?? 18;
+            const rate = prod.gstRate ? parseFloat(prod.gstRate) : (nameToTaxRateMap.get(nameKey) ?? shop?.taxRate ?? 18);
 
             const taxable = amt / (1 + (rate / 100));
             const tax = amt - taxable;
 
-            calcTaxable += taxable;
-            calcTax += tax;
+            let cgst = 0;
+            let sgst = 0;
+            let igst = 0;
 
             if (isInterstate) {
-              calcIgst += tax;
+              igst = tax;
             } else {
-              calcCgst += tax / 2;
-              calcSgst += tax / 2;
+              cgst = tax / 2;
+              sgst = tax / 2;
             }
+
+            totalPurchaseValue += amt;
+            totalPurchaseTaxable += taxable;
+            totalPurchaseCgst += cgst;
+            totalPurchaseSgst += sgst;
+            totalPurchaseIgst += igst;
+            totalPurchaseTax += tax;
+
+            purchaseRegister.push({
+              id: `${note.id}-${index}`,
+              companyName: note.companyName,
+              gstNumber: supplierGst || "N/A",
+              productName: prod.name || "Product Supply",
+              productQty: prod.qty || "-",
+              totalAmount: amt,
+              noteDate: note.noteDate,
+              remarks: note.remarks,
+              taxableValue: Math.round(taxable * 100) / 100,
+              cgst: Math.round(cgst * 100) / 100,
+              sgst: Math.round(sgst * 100) / 100,
+              igst: Math.round(igst * 100) / 100,
+              totalTax: Math.round(tax * 100) / 100,
+              gstRate: `${rate}%`,
+            });
           });
         } else {
           // Fallback: entire amount at shop default tax rate
           const rate = shop?.taxRate ?? 18;
-          calcTaxable = note.totalAmount / (1 + (rate / 100));
-          calcTax = note.totalAmount - calcTaxable;
-          calcCgst = calcTax / 2;
-          calcSgst = calcTax / 2;
+          const taxable = note.totalAmount / (1 + (rate / 100));
+          const tax = note.totalAmount - taxable;
+          let cgst = 0, sgst = 0, igst = 0;
+          if (isInterstate) {
+            igst = tax;
+          } else {
+            cgst = tax / 2;
+            sgst = tax / 2;
+          }
+
+          totalPurchaseValue += note.totalAmount;
+          totalPurchaseTaxable += taxable;
+          totalPurchaseCgst += cgst;
+          totalPurchaseSgst += sgst;
+          totalPurchaseIgst += igst;
+          totalPurchaseTax += tax;
+
+          purchaseRegister.push({
+            id: note.id,
+            companyName: note.companyName,
+            gstNumber: supplierGst || "N/A",
+            productName: note.productsBought || "Product Supply",
+            productQty: note.quantityBought || "-",
+            totalAmount: note.totalAmount,
+            noteDate: note.noteDate,
+            remarks: note.remarks,
+            taxableValue: Math.round(taxable * 100) / 100,
+            cgst: Math.round(cgst * 100) / 100,
+            sgst: Math.round(sgst * 100) / 100,
+            igst: Math.round(igst * 100) / 100,
+            totalTax: Math.round(tax * 100) / 100,
+            gstRate: `${rate}%`,
+          });
         }
       } catch (e) {
         // Fallback
         const rate = shop?.taxRate ?? 18;
-        calcTaxable = note.totalAmount / (1 + (rate / 100));
-        calcTax = note.totalAmount - calcTaxable;
-        calcCgst = calcTax / 2;
-        calcSgst = calcTax / 2;
+        const taxable = note.totalAmount / (1 + (rate / 100));
+        const tax = note.totalAmount - taxable;
+        let cgst = 0, sgst = 0, igst = 0;
+        if (isInterstate) {
+          igst = tax;
+        } else {
+          cgst = tax / 2;
+          sgst = tax / 2;
+        }
+
+        totalPurchaseValue += note.totalAmount;
+        totalPurchaseTaxable += taxable;
+        totalPurchaseCgst += cgst;
+        totalPurchaseSgst += sgst;
+        totalPurchaseIgst += igst;
+        totalPurchaseTax += tax;
+
+        purchaseRegister.push({
+          id: note.id,
+          companyName: note.companyName,
+          gstNumber: supplierGst || "N/A",
+          productName: note.productsBought || "Product Supply",
+          productQty: note.quantityBought || "-",
+          totalAmount: note.totalAmount,
+          noteDate: note.noteDate,
+          remarks: note.remarks,
+          taxableValue: Math.round(taxable * 100) / 100,
+          cgst: Math.round(cgst * 100) / 100,
+          sgst: Math.round(sgst * 100) / 100,
+          igst: Math.round(igst * 100) / 100,
+          totalTax: Math.round(tax * 100) / 100,
+          gstRate: `${rate}%`,
+        });
       }
-
-      totalPurchaseValue += note.totalAmount;
-      totalPurchaseTaxable += calcTaxable;
-      totalPurchaseCgst += calcCgst;
-      totalPurchaseSgst += calcSgst;
-      totalPurchaseIgst += calcIgst;
-      totalPurchaseTax += calcTax;
-
-      return {
-        id: note.id,
-        companyName: note.companyName,
-        productsBought: note.productsBought,
-        totalAmount: note.totalAmount,
-        amountPaid: note.amountPaid,
-        amountRemaining: note.amountRemaining,
-        noteDate: note.noteDate,
-        remarks: note.remarks,
-        taxableValue: Math.round(calcTaxable * 100) / 100,
-        cgst: Math.round(calcCgst * 100) / 100,
-        sgst: Math.round(calcSgst * 100) / 100,
-        igst: Math.round(calcIgst * 100) / 100,
-        totalTax: Math.round(calcTax * 100) / 100,
-      };
     });
 
     // Format HSN Summary array
@@ -310,6 +426,7 @@ export async function GET(req) {
       sgst: Math.round(h.sgst * 100) / 100,
       igst: Math.round(h.igst * 100) / 100,
       totalTax: Math.round(h.totalTax * 100) / 100,
+      gstRate: h.gstRate,
     }));
 
     // Aggregates for Sales output summary

@@ -110,7 +110,7 @@ export default function CaReportsPage() {
       toast.error("No sales records available.");
       return;
     }
-    const headers = ["Invoice Number", "Invoice Date", "Customer Name", "Customer GSTIN", "Place of Supply", "Taxable Value (₹)", "CGST (₹)", "SGST (₹)", "IGST (₹)", "Total GST (₹)", "Grand Total (₹)"];
+    const headers = ["Invoice Number", "Invoice Date", "Customer Name", "Customer GSTIN", "Place of Supply", "GST Rate (%)", "Taxable Value (INR)", "CGST (INR)", "SGST (INR)", "IGST (INR)", "Total GST (INR)", "Grand Total (INR)"];
     const rows = [headers.join(",")];
     data.sales.forEach(inv => {
       rows.push([
@@ -119,6 +119,7 @@ export default function CaReportsPage() {
         escapeCSV(inv.customerName),
         escapeCSV(inv.customerGst || "N/A"),
         escapeCSV(inv.placeOfSupply),
+        escapeCSV(inv.gstRate || "N/A"),
         inv.taxableValue.toFixed(2),
         inv.cgst.toFixed(2),
         inv.sgst.toFixed(2),
@@ -138,31 +139,22 @@ export default function CaReportsPage() {
       toast.error("No purchase records available.");
       return;
     }
-    const headers = ["Date", "Supplier Name", "Products Bought", "Taxable Value (₹)", "CGST (₹)", "SGST (₹)", "IGST (₹)", "Total GST (₹)", "Total Amount (₹)", "Amount Paid (₹)", "Outstanding Balance (₹)", "Remarks"];
+    const headers = ["Date", "Supplier Name", "Supplier GSTIN", "Product Name", "Quantity", "GST Rate (%)", "Taxable Value (INR)", "CGST (INR)", "SGST (INR)", "IGST (INR)", "Total GST (INR)", "Total Amount (INR)", "Remarks"];
     const rows = [headers.join(",")];
     data.purchases.forEach(item => {
-      let productsStr = "";
-      try {
-        if (item.productsBought && item.productsBought.startsWith("[")) {
-          productsStr = JSON.parse(item.productsBought).map(p => `${p.name} (${p.qty || "1"})`).join(" | ");
-        } else {
-          productsStr = item.productsBought;
-        }
-      } catch (e) {
-        productsStr = item.productsBought;
-      }
       rows.push([
         escapeCSV(new Date(item.noteDate).toLocaleDateString("en-IN")),
         escapeCSV(item.companyName),
-        escapeCSV(productsStr),
+        escapeCSV(item.gstNumber || "N/A"),
+        escapeCSV(item.productName || "Product Supply"),
+        escapeCSV(item.productQty || "-"),
+        escapeCSV(item.gstRate || "N/A"),
         item.taxableValue.toFixed(2),
         item.cgst.toFixed(2),
         item.sgst.toFixed(2),
         item.igst.toFixed(2),
         item.totalTax.toFixed(2),
         item.totalAmount.toFixed(2),
-        item.amountPaid.toFixed(2),
-        item.amountRemaining.toFixed(2),
         escapeCSV(item.remarks || "")
       ].join(","));
     });
@@ -275,13 +267,14 @@ export default function CaReportsPage() {
       toast.error("No HSN/SAC summary records available.");
       return;
     }
-    const headers = ["HSN/SAC Code", "Description", "Unit", "Total Quantity", "Total Value (INR)", "Taxable Value (INR)", "CGST (INR)", "SGST (INR)", "IGST (INR)", "Total GST (INR)"];
+    const headers = ["HSN/SAC Code", "Description", "Unit", "GST Rate (%)", "Total Quantity", "Total Value (INR)", "Taxable Value (INR)", "CGST (INR)", "SGST (INR)", "IGST (INR)", "Total GST (INR)"];
     const rows = [headers.join(",")];
     data.hsnSummary.forEach(h => {
       rows.push([
         escapeCSV(h.hsnSac),
         escapeCSV(h.description),
         escapeCSV(h.unit),
+        escapeCSV(h.gstRate || "N/A"),
         h.quantity,
         h.totalValue.toFixed(2),
         h.taxableValue.toFixed(2),
@@ -474,6 +467,7 @@ export default function CaReportsPage() {
                     <TableHead className="font-bold">Customer Name</TableHead>
                     <TableHead className="font-bold">GSTIN</TableHead>
                     <TableHead className="font-bold">POS (Place of Supply)</TableHead>
+                    <TableHead className="font-bold text-center">GST Rate (%)</TableHead>
                     <TableHead className="font-bold text-right">Taxable Amt (₹)</TableHead>
                     <TableHead className="font-bold text-right">CGST (₹)</TableHead>
                     <TableHead className="font-bold text-right">SGST (₹)</TableHead>
@@ -484,14 +478,14 @@ export default function CaReportsPage() {
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="text-center py-8">
+                      <TableCell colSpan={11} className="text-center py-8">
                         <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-gray-400" />
                         Loading sales register...
                       </TableCell>
                     </TableRow>
                   ) : data.sales.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="text-center py-12 text-gray-400">
+                      <TableCell colSpan={11} className="text-center py-12 text-gray-400">
                         <AlertCircle className="h-7 w-7 mx-auto mb-2 text-gray-300" />
                         No sales recorded for this month.
                       </TableCell>
@@ -506,6 +500,7 @@ export default function CaReportsPage() {
                         <TableCell className="font-medium text-gray-800">{row.customerName}</TableCell>
                         <TableCell className="font-mono text-gray-600">{row.customerGst || "N/A"}</TableCell>
                         <TableCell className="text-gray-500 truncate max-w-[120px]">{row.placeOfSupply}</TableCell>
+                        <TableCell className="text-center font-bold text-slate-700">{row.gstRate || "N/A"}</TableCell>
                         <TableCell className="text-right font-medium">₹{row.taxableValue.toFixed(2)}</TableCell>
                         <TableCell className="text-right text-gray-500">₹{row.cgst.toFixed(2)}</TableCell>
                         <TableCell className="text-right text-gray-500">₹{row.sgst.toFixed(2)}</TableCell>
@@ -538,7 +533,10 @@ export default function CaReportsPage() {
                 <TableHeader className="bg-gray-50/50">
                   <TableRow>
                     <TableHead className="font-bold">Supplier Name</TableHead>
-                    <TableHead className="font-bold">Products Bought</TableHead>
+                    <TableHead className="font-bold">Supplier GSTIN</TableHead>
+                    <TableHead className="font-bold">Product Name</TableHead>
+                    <TableHead className="font-bold text-center">Qty</TableHead>
+                    <TableHead className="font-bold text-center">GST Rate (%)</TableHead>
                     <TableHead className="font-bold text-center">Date</TableHead>
                     <TableHead className="font-bold text-right">Taxable Purchases (₹)</TableHead>
                     <TableHead className="font-bold text-right">CGST (₹)</TableHead>
@@ -546,20 +544,19 @@ export default function CaReportsPage() {
                     <TableHead className="font-bold text-right">IGST (₹)</TableHead>
                     <TableHead className="font-bold text-right">Total GST (₹)</TableHead>
                     <TableHead className="font-bold text-right">Total Amount (₹)</TableHead>
-                    <TableHead className="font-bold text-right text-rose-600">Balance Remaining (₹)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="text-center py-8">
+                      <TableCell colSpan={12} className="text-center py-8">
                         <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-gray-400" />
                         Loading purchase register...
                       </TableCell>
                     </TableRow>
                   ) : data.purchases.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="text-center py-12 text-gray-400">
+                      <TableCell colSpan={12} className="text-center py-12 text-gray-400">
                         <AlertCircle className="h-7 w-7 mx-auto mb-2 text-gray-300" />
                         No purchase entries recorded for this month.
                       </TableCell>
@@ -568,7 +565,10 @@ export default function CaReportsPage() {
                     data.purchases.map((row) => (
                       <TableRow key={row.id} className="hover:bg-gray-50/50 transition-colors">
                         <TableCell className="font-bold text-gray-900">{row.companyName}</TableCell>
-                        <TableCell className="py-3 max-w-[240px]">{renderProductsBought(row.productsBought)}</TableCell>
+                        <TableCell className="font-mono text-gray-600">{row.gstNumber || "N/A"}</TableCell>
+                        <TableCell className="font-medium text-gray-800">{row.productName || "Product Supply"}</TableCell>
+                        <TableCell className="text-center text-gray-500 font-medium">{row.productQty}</TableCell>
+                        <TableCell className="text-center font-bold text-slate-700">{row.gstRate || "N/A"}</TableCell>
                         <TableCell className="text-center text-gray-500 font-medium">
                           {new Date(row.noteDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                         </TableCell>
@@ -578,9 +578,6 @@ export default function CaReportsPage() {
                         <TableCell className="text-right text-rose-600">₹{row.igst.toFixed(2)}</TableCell>
                         <TableCell className="text-right font-medium text-purple-700">₹{row.totalTax.toFixed(2)}</TableCell>
                         <TableCell className="text-right font-black text-gray-900">₹{row.totalAmount.toFixed(2)}</TableCell>
-                        <TableCell className={`text-right font-bold ${row.amountRemaining > 0 ? "text-rose-600 bg-rose-50/30" : "text-gray-400"}`}>
-                          ₹{row.amountRemaining.toFixed(2)}
-                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -826,6 +823,7 @@ export default function CaReportsPage() {
                     <TableHead className="font-bold">HSN/SAC Code</TableHead>
                     <TableHead className="font-bold">Description</TableHead>
                     <TableHead className="font-bold text-center">UQC (Unit)</TableHead>
+                    <TableHead className="font-bold text-center">GST Rate (%)</TableHead>
                     <TableHead className="font-bold text-center">Total Quantity</TableHead>
                     <TableHead className="font-bold text-right">Total Value (₹)</TableHead>
                     <TableHead className="font-bold text-right">Taxable Value (₹)</TableHead>
@@ -838,24 +836,25 @@ export default function CaReportsPage() {
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="text-center py-8">
+                      <TableCell colSpan={11} className="text-center py-8">
                         <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-gray-400" />
                         Loading HSN summary...
                       </TableCell>
                     </TableRow>
                   ) : data.hsnSummary.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="text-center py-12 text-gray-400">
+                      <TableCell colSpan={11} className="text-center py-12 text-gray-400">
                         <AlertCircle className="h-7 w-7 mx-auto mb-2 text-gray-300" />
                         No sales invoices recorded with HSN/SAC information.
                       </TableCell>
                     </TableRow>
                   ) : (
                     data.hsnSummary.map((row) => (
-                      <TableRow key={row.hsnSac} className="hover:bg-gray-50/50 transition-colors">
+                      <TableRow key={`${row.hsnSac}-${row.gstRate}`} className="hover:bg-gray-50/50 transition-colors">
                         <TableCell className="font-bold text-slate-800 font-mono">{row.hsnSac}</TableCell>
                         <TableCell className="font-medium text-gray-800 max-w-[180px] truncate">{row.description}</TableCell>
                         <TableCell className="text-center font-bold text-gray-500">{row.unit}</TableCell>
+                        <TableCell className="text-center font-bold text-slate-700">{row.gstRate || "N/A"}</TableCell>
                         <TableCell className="text-center font-bold text-gray-900">{row.quantity}</TableCell>
                         <TableCell className="text-right font-medium">₹{row.totalValue.toFixed(2)}</TableCell>
                         <TableCell className="text-right font-medium">₹{row.taxableValue.toFixed(2)}</TableCell>
