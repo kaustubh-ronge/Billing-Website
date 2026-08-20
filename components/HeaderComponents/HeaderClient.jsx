@@ -49,7 +49,8 @@ export default function HeaderClient({ user }) {
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group relative">
           <div className="absolute -inset-2 bg-linear-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-0 group-hover:opacity-40 transition duration-500"></div>
-          <img src="/logo.png" alt="Logo" className="relative h-10 w-10 object-cover rounded-xl shadow-lg border border-border" />
+          <img src="/logo.png" alt="VyaparStock Logo" className="relative h-10 w-10 object-cover rounded-xl shadow-lg border border-border dark:hidden" />
+          <img src="/dark_logo.jpeg" alt="VyaparStock Logo" className="relative h-10 w-10 object-cover rounded-xl shadow-lg border border-border hidden dark:block" />
           <span className="text-xl font-black tracking-tight text-foreground">
             VyaparStock
           </span>

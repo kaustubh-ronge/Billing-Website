@@ -14,12 +14,13 @@ export default function AppSidebar() {
   return (
     <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-border bg-sidebar h-screen sticky top-0 overflow-y-auto">
       {/* Brand */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-border">
-        <img src="/logo.png" alt="Logo" className="h-8 w-8 object-cover rounded-lg shrink-0 border border-slate-200/50 shadow-3xs" />
+      <Link href="/" className="flex items-center gap-3 px-5 py-5 border-b border-border hover:opacity-90 transition-opacity">
+        <img src="/logo.png" alt="VyaparStock Logo" className="h-8 w-8 object-cover rounded-lg shrink-0 border border-slate-200/50 shadow-3xs dark:hidden" />
+        <img src="/dark_logo.jpeg" alt="VyaparStock Logo" className="h-8 w-8 object-cover rounded-lg shrink-0 border border-slate-200/50 shadow-3xs hidden dark:block" />
         <span className="text-base font-black tracking-tight text-sidebar-foreground">
           VyaparStock
         </span>
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">

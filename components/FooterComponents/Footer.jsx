@@ -10,7 +10,8 @@ export default function Footer() {
           {/* Brand Info */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-3 group">
-              <img src="/logo.png" alt="Logo" className="h-10 w-10 object-cover rounded-xl shadow-lg bg-white p-0.5 border border-slate-800" />
+              <img src="/logo.png" alt="VyaparStock Logo" className="h-10 w-10 object-cover rounded-xl shadow-lg bg-white p-0.5 border border-slate-800 dark:hidden" />
+              <img src="/dark_logo.jpeg" alt="VyaparStock Logo" className="h-10 w-10 object-cover rounded-xl shadow-lg border border-slate-800 hidden dark:block" />
               <span className="text-xl font-black tracking-tight text-white">
                 VyaparStock
               </span>

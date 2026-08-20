@@ -39,12 +39,13 @@ export default function MobileSidebar({ open, onClose }) {
       <aside className="relative flex flex-col w-64 max-w-[80vw] h-full bg-sidebar border-r border-border shadow-xl animate-in slide-in-from-left-5 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Logo" className="h-8 w-8 object-cover rounded-lg border border-slate-200/50 shadow-3xs" />
+          <Link href="/" onClick={onClose} className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <img src="/logo.png" alt="VyaparStock Logo" className="h-8 w-8 object-cover rounded-lg border border-slate-200/50 shadow-3xs dark:hidden" />
+            <img src="/dark_logo.jpeg" alt="VyaparStock Logo" className="h-8 w-8 object-cover rounded-lg border border-slate-200/50 shadow-3xs hidden dark:block" />
             <span className="text-base font-black tracking-tight text-sidebar-foreground">
               VyaparStock
             </span>
-          </div>
+          </Link>
           <button
             onClick={onClose}
             className="rounded-md p-1 text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
