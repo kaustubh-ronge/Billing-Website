@@ -149,6 +149,12 @@ export default function NewInvoicePage() {
   const addItemToInvoice = (product) => {
     // Check if item is already added
     const existing = invoiceItems.find(item => item.product.id === product.id);
+    const newQty = existing ? (parseInt(existing.quantity || 0) + 1) : 1;
+
+    if (product.trackInventory && product.stockCount !== null && newQty > product.stockCount) {
+      toast.warning(`Warning: Requested quantity (${newQty}) exceeds available stock (${product.stockCount}) for ${product.name}.`);
+    }
+
     if (existing) {
       setInvoiceItems(invoiceItems.map(item =>
         item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
@@ -167,6 +173,10 @@ export default function NewInvoicePage() {
       ));
     } else {
       const parsed = parseInt(qty);
+      const item = invoiceItems.find(i => i.product.id === prodId);
+      if (item && item.product.trackInventory && item.product.stockCount !== null && parsed > item.product.stockCount) {
+        toast.warning(`Warning: Requested quantity (${parsed}) exceeds available stock (${item.product.stockCount}) for ${item.product.name}.`);
+      }
       setInvoiceItems(invoiceItems.map(item =>
         item.product.id === prodId ? { ...item, quantity: isNaN(parsed) ? '' : parsed } : item
       ));

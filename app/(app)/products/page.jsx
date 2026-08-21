@@ -362,6 +362,7 @@ export default function ProductsPage() {
         <div>
           <h1 className="text-3xl font-black tracking-tight text-foreground">Inventory & Catalog</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage physical products and service charges sold to customers.</p>
+          <p className="text-[10px] text-blue-600 dark:text-blue-400 font-medium mt-1">💡 <strong>Backup Tip:</strong> Periodically download and save your product records locally using the Export CSV button.</p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-center">
           <Button

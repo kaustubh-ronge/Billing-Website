@@ -257,6 +257,7 @@ ${vendorShop.businessName}`;
         <div>
           <h1 className="text-3xl font-black tracking-tight text-foreground">Invoices</h1>
           <p className="text-sm text-muted-foreground mt-1">Review all sales transactions, record payments, and send customer reminders.</p>
+          <p className="text-[10px] text-blue-600 dark:text-blue-400 font-medium mt-1">💡 <strong>Backup Tip:</strong> Periodically download and save your invoice records locally using the Export CSV button.</p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-center">
           <Button
@@ -286,7 +287,7 @@ ${vendorShop.businessName}`;
                   'Grand Total': inv.grandTotal.toFixed(2),
                   'Amount Paid': inv.amountPaid.toFixed(2),
                   Outstanding: (inv.grandTotal - inv.amountPaid).toFixed(2),
-                  Status: inv.status,
+                  Status: inv.isDeleted ? 'CANCELED' : inv.status,
                 }));
                 downloadCSV(rows, 'invoices');
               } catch (err) {

@@ -37,6 +37,13 @@ export default function CaReportsPage() {
       totalIgst: 0,
       totalTaxPurchases: 0,
     },
+    docSummary: {
+      totalInvoices: 0,
+      cancelledInvoices: 0,
+      fromSerial: "—",
+      toSerial: "—",
+      netIssued: 0
+    },
     netLiability: {
       cgst: 0,
       sgst: 0,
@@ -289,6 +296,28 @@ export default function CaReportsPage() {
     toast.success("HSN/SAC Summary exported!");
   };
 
+  // 6. Document Summary CSV
+  const handleExportDocSummary = () => {
+    if (!data.docSummary) {
+      toast.error("No Document Summary records available.");
+      return;
+    }
+    const headers = ["Nature of Document", "Sr. No. From", "Sr. No. To", "Total Number", "Cancelled", "Net Issued"];
+    const rows = [headers.join(",")];
+    const doc = data.docSummary;
+    rows.push([
+      escapeCSV("Invoices for outward supply"),
+      escapeCSV(doc.fromSerial || "—"),
+      escapeCSV(doc.toSerial || "—"),
+      doc.totalInvoices,
+      doc.cancelledInvoices,
+      doc.netIssued
+    ].join(","));
+    const monthLabel = months.find(m => m.value === month)?.label || month;
+    downloadCSV(rows.join("\n"), `Document_Summary_${monthLabel}_${year}.csv`);
+    toast.success("Document Summary exported!");
+  };
+
   const renderProductsBought = (text) => {
     try {
       if (text && text.startsWith('[')) {
@@ -361,6 +390,12 @@ export default function CaReportsPage() {
             ))}
           </select>
         </div>
+      </div>
+
+      {/* CA Verification Disclaimer */}
+      <div className="flex items-center gap-2.5 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 rounded-xl p-3.5 text-[11px] text-blue-700 dark:text-blue-300 font-medium shadow-3xs">
+        <AlertCircle className="h-4.5 w-4.5 text-blue-500 shrink-0" />
+        <span><strong>Disclaimer Note:</strong> Please cross-verify all report data and calculated liabilities with your chartered accountant (CA) before filing.</span>
       </div>
 
       {/* Aggregate Metrics Cards */}
@@ -440,6 +475,9 @@ export default function CaReportsPage() {
               </TabsTrigger>
               <TabsTrigger value="hsn" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-2xs">
                 HSN/SAC Summary
+              </TabsTrigger>
+              <TabsTrigger value="docsummary" className="rounded-lg px-4 py-1.5 text-xs font-bold data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-2xs">
+                Doc Summary
               </TabsTrigger>
             </TabsList>
           </div>
@@ -864,6 +902,62 @@ export default function CaReportsPage() {
                         <TableCell className="text-right font-black text-foreground">₹{row.totalTax.toFixed(2)}</TableCell>
                       </TableRow>
                     ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Tab 6: Document Summary */}
+        <TabsContent value="docsummary" className="mt-0 space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-card text-card-foreground p-4 rounded-2xl border border-border shadow-3xs">
+            <div>
+              <span className="block text-xs font-bold text-foreground">GSTR-1 Document Summary</span>
+              <span className="block text-[10px] text-muted-foreground">Summary of invoice serial numbers and document sequences generated in this month</span>
+            </div>
+            <Button onClick={handleExportDocSummary} disabled={loading || !data.docSummary} className="w-full sm:w-auto rounded-full bg-purple-600 hover:bg-purple-700 text-white font-bold h-9 shadow-sm">
+              <FileDown className="h-4 w-4 mr-2" /> Export Document Summary
+            </Button>
+          </div>
+
+          <Card className="rounded-2xl border-border shadow-xs overflow-hidden bg-card text-card-foreground">
+            <div className="overflow-x-auto w-full">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow>
+                    <TableHead className="font-bold text-muted-foreground">Nature of Document</TableHead>
+                    <TableHead className="font-bold text-center text-muted-foreground">Sr. No. From</TableHead>
+                    <TableHead className="font-bold text-center text-muted-foreground">Sr. No. To</TableHead>
+                    <TableHead className="font-bold text-center text-muted-foreground">Total Number</TableHead>
+                    <TableHead className="font-bold text-center text-muted-foreground">Cancelled / Deleted</TableHead>
+                    <TableHead className="font-bold text-right text-muted-foreground">Net Issued</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-muted-foreground" />
+                        Loading Document Summary...
+                      </TableCell>
+                    </TableRow>
+                  ) : !data.docSummary ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                        <AlertCircle className="h-7 w-7 mx-auto mb-2 opacity-50" />
+                        No Document Summary data recorded.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    <TableRow className="hover:bg-muted/40 transition-colors">
+                      <TableCell className="font-bold text-foreground">Invoices for outward supply</TableCell>
+                      <TableCell className="text-center font-bold text-foreground font-mono">{data.docSummary.fromSerial}</TableCell>
+                      <TableCell className="text-center font-bold text-foreground font-mono">{data.docSummary.toSerial}</TableCell>
+                      <TableCell className="text-center font-bold text-foreground">{data.docSummary.totalInvoices}</TableCell>
+                      <TableCell className="text-center font-bold text-rose-600 dark:text-rose-400">{data.docSummary.cancelledInvoices}</TableCell>
+                      <TableCell className="text-right font-black text-foreground">{data.docSummary.netIssued}</TableCell>
+                    </TableRow>
                   )}
                 </TableBody>
               </Table>

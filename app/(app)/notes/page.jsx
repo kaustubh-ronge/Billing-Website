@@ -416,6 +416,7 @@ const renderProductsBought = (text) => {
           <p className="text-xs text-muted-foreground mt-1">
             Keep secure records of general business notes and product purchasing accounts.
           </p>
+          <p className="text-[10px] text-blue-600 dark:text-blue-400 font-medium mt-1">💡 <strong>Backup Tip:</strong> Periodically download and save your ledger notes locally using the Export CSV button.</p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <Button onClick={exportToCSV} variant="outline" className="rounded-full border-border text-foreground hover:bg-muted font-bold gap-1.5 shadow-sm text-xs px-5 h-9 bg-background">

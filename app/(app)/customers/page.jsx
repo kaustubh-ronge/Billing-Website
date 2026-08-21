@@ -289,6 +289,7 @@ ${vendorShop.businessName}`;
         <div>
           <h1 className="text-3xl font-black tracking-tight text-foreground">Customer Directory</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage customer registry, view financial ledgers, and track bills.</p>
+          <p className="text-[10px] text-blue-600 dark:text-blue-400 font-medium mt-1">💡 <strong>Backup Tip:</strong> Periodically download and save your customer records locally using the Export CSV button.</p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-center">
           <Button

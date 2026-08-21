@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Shield, CheckCircle2 } from "lucide-react";
+import { Mail, Phone, Shield, CheckCircle2 } from "lucide-react";
 
 export default function AboutAndContact() {
   return (
@@ -87,21 +87,22 @@ export default function AboutAndContact() {
               </a>
             </motion.div>
 
-            {/* Address Card */}
+            {/* Phone Card */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
               className="bg-card border border-border hover:border-purple-500/50 rounded-xl p-6 transition-all flex flex-col items-center gap-3.5 shadow-sm"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/10 text-purple-500">
-                <MapPin className="h-5 w-5" />
+                <Phone className="h-5 w-5" />
               </div>
               <div>
-                <h4 className="font-bold text-foreground text-sm">Office Location</h4>
+                <h4 className="font-bold text-foreground text-sm">Phone Support</h4>
                 <p className="text-xs text-muted-foreground mt-1">ADVIKS Software Solutions</p>
               </div>
-              <span className="text-sm font-bold text-foreground capitalize">
-                pandharpur
-              </span>
+              <div className="flex flex-col gap-1 text-sm font-bold text-foreground">
+                <a href="tel:+918600570542" className="hover:text-blue-500 transition-colors">+91 8600570542</a>
+                <a href="tel:+917498444684" className="hover:text-blue-500 transition-colors">+91 7498444684</a>
+              </div>
             </motion.div>
           </div>
 

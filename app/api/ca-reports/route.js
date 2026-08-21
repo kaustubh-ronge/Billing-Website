@@ -105,11 +105,10 @@ export async function GET(req) {
       nameToDescMap.set(key, p.description || "");
     });
 
-    // Fetch all invoices for this month
-    const invoices = await db.invoice.findMany({
+    // Fetch all invoices for this month (including deleted ones for Document Summary)
+    const allInvoices = await db.invoice.findMany({
       where: {
         shopId,
-        isDeleted: false,
         issuedAt: { gte: startDate, lte: endDate },
       },
       include: {
@@ -123,13 +122,16 @@ export async function GET(req) {
       orderBy: { issuedAt: 'asc' },
     });
 
+    const activeInvoices = allInvoices.filter(inv => !inv.isDeleted);
+    const deletedInvoices = allInvoices.filter(inv => inv.isDeleted);
+
     // HSN/SAC group aggregates map
     const hsnSummaryMap = {};
 
     const salesRegister = [];
 
     // Process Sales Register with precise Indian GST splits (CGST + SGST vs IGST)
-    invoices.forEach((inv) => {
+    activeInvoices.forEach((inv) => {
       const discountPercentage = inv.discountPercentage || 0;
 
       // Determine Inter-state (IGST) vs Intra-state (CGST + SGST)
@@ -447,6 +449,22 @@ export async function GET(req) {
       totalTaxSales: 0,
     });
 
+    // Document Summary Calculations
+    const totalInvoices = allInvoices.length;
+    const cancelledInvoices = deletedInvoices.length;
+    
+    const sortedInvoices = [...allInvoices].sort((a, b) => a.invoiceNum.localeCompare(b.invoiceNum, undefined, { numeric: true }));
+    const fromSerial = sortedInvoices.length > 0 ? sortedInvoices[0].invoiceNum : "—";
+    const toSerial = sortedInvoices.length > 0 ? sortedInvoices[sortedInvoices.length - 1].invoiceNum : "—";
+
+    const docSummary = {
+      totalInvoices,
+      cancelledInvoices,
+      fromSerial,
+      toSerial,
+      netIssued: totalInvoices - cancelledInvoices
+    };
+
     return NextResponse.json({
       shopName: shop?.businessName || "My Shop",
       shopGst,
@@ -455,6 +473,7 @@ export async function GET(req) {
       sales: salesRegister,
       purchases: purchaseRegister,
       hsnSummary,
+      docSummary,
       summary: {
         totalSalesValue: Math.round(salesSummary.totalSalesValue * 100) / 100,
         totalTaxableSales: Math.round(salesSummary.totalTaxableSales * 100) / 100,
